@@ -1,0 +1,9 @@
+# IDE files
+*.sublime-project
+*.sublime-workspace
+.vs/
+# .idea/
+
+# Compilation artifacts 
+**/bin/
+**/obj/
