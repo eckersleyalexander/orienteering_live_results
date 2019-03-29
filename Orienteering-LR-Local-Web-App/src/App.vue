@@ -2,7 +2,8 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Home</router-link> |
-      <router-link to="/videooverlay">Video Overlays</router-link> |
+      <router-link to="/live-results">Live Results</router-link> |
+      <router-link to="/video-overlay">Video Overlays</router-link> |
       <router-link to="/commentary">Commentator's View</router-link>
     </div>
     <router-view />
