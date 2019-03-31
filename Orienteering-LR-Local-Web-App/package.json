@@ -7,19 +7,20 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
+  "description": "Orienteering-LR-Local-Web-App",
+  "author": {
+    "name": ""
+  },
   "dependencies": {
-    "vue": "^2.6.6",
-    "vue-router": "^3.0.1"
+    "vue": "2.5.17"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.5.0",
-    "@vue/cli-plugin-eslint": "^3.5.0",
-    "@vue/cli-service": "^3.5.2",
-    "@vue/eslint-config-prettier": "^4.0.1",
-    "babel-eslint": "^10.0.1",
-    "eslint": "^5.8.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.5.21"
+    "@vue/cli-plugin-babel": "3.0.4",
+    "@vue/cli-plugin-eslint": "3.0.4",
+    "@vue/cli-service": "3.0.4",
+    "eslint": "5.6.0",
+    "eslint-plugin-vue": "4.7.1",
+    "vue-template-compiler": "2.5.17"
   },
   "eslintConfig": {
     "root": true,
@@ -28,7 +29,7 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "@vue/prettier"
+      "eslint:recommended"
     ],
     "rules": {},
     "parserOptions": {
