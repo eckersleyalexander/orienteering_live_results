@@ -26,9 +26,7 @@ namespace Orienteering_LR_Desktop
 
             server.RegisterModule(new WebApiModule());
             server.Module<WebApiModule>().RegisterController<ApiController>();
-            #pragma warning disable 4014
             server.RunAsync();
-            #pragma warning restore 4014
         }
     }
 
@@ -38,7 +36,7 @@ namespace Orienteering_LR_Desktop
         {
         }
         [WebApiHandler(HttpVerbs.Get, "/api/hello/")]
-        public async Task<bool> GetPersonById(int id)
+        public async Task<bool> SayHello(int id)
         {
             try
             {
