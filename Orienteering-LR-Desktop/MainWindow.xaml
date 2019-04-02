@@ -7,6 +7,17 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <TabControl HorizontalAlignment="Left" Height="422" VerticalAlignment="Top" Width="795">
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5">
+                    <Button Content="Button" HorizontalAlignment="Left" Margin="69,106,0,0" VerticalAlignment="Top" Width="75"/>
+                    <TextBox HorizontalAlignment="Left" Height="23" Margin="391,145,0,0" TextWrapping="Wrap" Text="test" VerticalAlignment="Top" Width="120" TextChanged="TextBox_TextChanged"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+        </TabControl>
+
     </Grid>
 </Window>
