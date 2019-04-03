@@ -27,7 +27,7 @@ namespace Orienteering_LR_Desktop
             InitializeComponent();
             runners.Add(new Runner()
             {
-                ID = 00001,
+                id = "1",
                 firstName = "John",
                 lastName = "Smith"
             });
@@ -37,7 +37,7 @@ namespace Orienteering_LR_Desktop
     }
     public class Runner
     {
-        public int ID { get; set; }
+        public string id { get; set; }
         public string firstName { get; set; }
         public string lastName { get; set; }
     }
