@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using Unosquare.Labs.EmbedIO;
 using Unosquare.Labs.EmbedIO.Constants;
@@ -45,7 +46,7 @@ namespace Orienteering_LR_Desktop
                 // 
                 Application.Current.Dispatcher.Invoke((Action)(() =>
                {
-                   text = ((MainWindow)Application.Current.MainWindow).txtForm1TextBox.Text;
+                   text = ((MainWindow)Application.Current.MainWindow).runners[0].firstName;
                }));
                 // This is fake call to a Repository
                 // var person = await PeopleRepository.GetById(id);

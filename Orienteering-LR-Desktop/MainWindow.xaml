@@ -10,12 +10,11 @@
         <TabControl HorizontalAlignment="Left" Height="422" VerticalAlignment="Top" Width="795">
             <TabItem Header="TabItem">
                 <Grid Background="#FFE5E5E5">
-                    <Button Content="Button" HorizontalAlignment="Left" Margin="69,106,0,0" VerticalAlignment="Top" Width="75"/>
-                    <TextBox x:Name="txtForm1TextBox" HorizontalAlignment="Left" Height="23" Margin="391,145,0,0" TextWrapping="Wrap" Text="test" VerticalAlignment="Top" Width="120" TextChanged="TextBox_TextChanged"/>
+                    <DataGrid x:Name="testGrid" HorizontalAlignment="Left" Height="211" Margin="47,29,0,0" VerticalAlignment="Top" Width="220"/>
                 </Grid>
             </TabItem>
             <TabItem Header="TabItem">
-                <Grid Background="#FFE5E5E5"/>
+                <Border BorderBrush="Black" BorderThickness="1" Height="100" Width="100"/>
             </TabItem>
         </TabControl>
 
