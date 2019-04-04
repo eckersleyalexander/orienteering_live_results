@@ -1,23 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
 using Unosquare.Labs.EmbedIO;
 using Unosquare.Labs.EmbedIO.Constants;
 using Unosquare.Labs.EmbedIO.Modules;
 using RoutingStrategy = Unosquare.Labs.EmbedIO.Constants.RoutingStrategy;
 namespace Orienteering_LR_Desktop
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
+	/// <summary>
+	/// Interaction logic for App.xaml
+	/// </summary>
+	public partial class App : Application
     {
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -27,13 +21,14 @@ namespace Orienteering_LR_Desktop
 
             server.RegisterModule(new WebApiModule());
             server.Module<WebApiModule>().RegisterController<ApiController>();
-            server.RunAsync();
 
-			server.RegisterModule(new StaticFilesModule("C:/Users/drc/uni/2019/sem1/COMP4500/repository/orienteering_live_results/Orienteering-LR-Local-Web-App/dist"));
+			server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
 			server.Module<StaticFilesModule>().UseRamCache = true;
 			server.Module<StaticFilesModule>().DefaultExtension = ".html";
+
+			server.RunAsync();
 		}
-    }
+	}
 
     public class ApiController: WebApiController 
     {
