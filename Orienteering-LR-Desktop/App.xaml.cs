@@ -28,7 +28,11 @@ namespace Orienteering_LR_Desktop
             server.RegisterModule(new WebApiModule());
             server.Module<WebApiModule>().RegisterController<ApiController>();
             server.RunAsync();
-        }
+
+			server.RegisterModule(new StaticFilesModule("C:/Users/drc/uni/2019/sem1/COMP4500/repository/orienteering_live_results/Orienteering-LR-Local-Web-App/dist"));
+			server.Module<StaticFilesModule>().UseRamCache = true;
+			server.Module<StaticFilesModule>().DefaultExtension = ".html";
+		}
     }
 
     public class ApiController: WebApiController 
