@@ -1,4 +1,6 @@
 ﻿using ConsoleApp.NewDb;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -37,10 +39,14 @@ namespace Orienteering_LR_Desktop
                 lastName = "Smith"
             });
             testGrid.ItemsSource = runners;
-            
+
             using (var db = new BloggingContext())
             {
+
+                db.GetService<IMigrator>().Migrate();
+
                 db.Blogs.Add(new Blog { Url = "http://blogs.msdn.com/adonet" });
+               
                 var count = db.SaveChanges();
                 Console.WriteLine("{0} records saved to database", count);
 

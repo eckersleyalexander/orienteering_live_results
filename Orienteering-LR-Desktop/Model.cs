@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System.Collections.Generic;
 using System.IO;
 
@@ -8,10 +10,11 @@ namespace ConsoleApp.NewDb
     {
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<Post> Posts { get; set; }
-            
+
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=" + Path.Combine("Z:\\Documents\\Uni\\Comp4500\\orienteering_live_results\\Orienteering-LR-Desktop", "testdb.db"));
+            optionsBuilder.UseSqlite("Data Source= testdb.db");
         }
     }
 
