@@ -50,7 +50,7 @@ namespace Orienteering_LR_Desktop
                    text = ((MainWindow)Application.Current.MainWindow).runners[0].id;
                    text2 = ((MainWindow)Application.Current.MainWindow).runners[0].firstName;
                    text3 = ((MainWindow)Application.Current.MainWindow).runners[0].lastName;
-
+                   
                }));
                 // This is fake call to a Repository
                 // var person = await PeopleRepository.GetById(id);

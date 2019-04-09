@@ -10,7 +10,7 @@
         <TabControl HorizontalAlignment="Left" Height="422" VerticalAlignment="Top" Width="795">
             <TabItem Header="TabItem">
                 <Grid Background="#FFE5E5E5">
-                    <DataGrid x:Name="testGrid" HorizontalAlignment="Left" Height="211" Margin="47,29,0,0" VerticalAlignment="Top" Width="220"/>
+                    <DataGrid x:Name="testGrid" HorizontalAlignment="Left" Height="211" Margin="47,29,0,0" VerticalAlignment="Top" Width="220" IsSynchronizedWithCurrentItem="True"/>
                 </Grid>
             </TabItem>
             <TabItem Header="TabItem">
