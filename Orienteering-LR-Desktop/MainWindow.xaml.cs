@@ -1,5 +1,9 @@
-﻿using System;
+﻿using ConsoleApp.NewDb;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,11 +24,14 @@ namespace Orienteering_LR_Desktop
     /// </summary>
     public partial class MainWindow : Window
     {
-        public List<Runner> runners = new List<Runner>();
 
+        public List<Runner> runners = new List<Runner>();
+        
         public MainWindow()
         {
             InitializeComponent();
+            testGrid.CellEditEnding += Datagrid_CellEditEnding;
+
             runners.Add(new Runner()
             {
                 id = "1",
@@ -32,6 +39,41 @@ namespace Orienteering_LR_Desktop
                 lastName = "Smith"
             });
             testGrid.ItemsSource = runners;
+
+            using (var db = new BloggingContext())
+            {
+
+                db.GetService<IMigrator>().Migrate();
+
+                db.Blogs.Add(new Blog { Url = "http://blogs.msdn.com/adonet" });
+               
+                var count = db.SaveChanges();
+                Debug.WriteLine("{0} records saved to database", count);
+
+                Debug.WriteLine("");
+                Debug.WriteLine("All blogs in database:");
+                foreach (var blog in db.Blogs)
+                {
+                    Debug.WriteLine(" - {0}", blog.Url);
+                }
+            }
+        }
+
+        void Datagrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (e.EditAction == DataGridEditAction.Commit)
+            {
+                var column = e.Column as DataGridBoundColumn;
+                if (column != null)
+                {
+                    var bindingPath = (column.Binding as Binding).Path.Path;
+                    var row = e.Row;
+                    var el = e.EditingElement as TextBox;
+                    int rowIndex = row.GetIndex();
+                    Runner runnerRow = runners[rowIndex];
+                    Debug.WriteLine("Row: " + rowIndex + ", column changed: " + bindingPath + ", new value: " + el.Text + ", ID = " + runnerRow.id);
+                }
+            }
         }
 
     }
