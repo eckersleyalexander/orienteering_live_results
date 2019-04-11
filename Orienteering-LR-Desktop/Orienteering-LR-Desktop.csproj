@@ -160,4 +160,10 @@
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
+  <Target Name="AfterClean" AfterTargets="Clean">
+     <!-- Remove bin folder -->
+     <RemoveDir Directories="$(TargetDir)" />
+     <!-- Remove obj folder -->
+     <RemoveDir Directories="$(ProjectDir)$(BaseIntermediateOutputPath)" />  
+</Target>
 </Project>

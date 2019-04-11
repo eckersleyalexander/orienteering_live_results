@@ -39,7 +39,6 @@
     <Content Include="src\components\ApiTest.vue" />
     <Content Include="src\components\Home.vue" />
     <Content Include="package.json" />
-    <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
@@ -55,7 +54,12 @@
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
   <PropertyGroup>
-    <PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Configuration)' == 'Debug' ">
+      set NODE_ENV=dev
+      npm run build
+    </PostBuildEvent>
+    <PostBuildEvent Condition=" '$(Configuration)' == 'Release' ">
+      set NODE_ENV=production
       npm run build
     </PostBuildEvent>
   </PropertyGroup>
