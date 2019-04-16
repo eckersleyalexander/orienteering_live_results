@@ -19,10 +19,10 @@ using System.Windows.Shapes;
 
 namespace Orienteering_LR_Desktop
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+	/// <summary>
+	/// Interaction logic for MainWindow.xaml
+	/// </summary>
+	public partial class MainWindow : Window
     {
 
         public List<Runner> runners = new List<Runner>();
