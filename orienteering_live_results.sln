@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.28307.539
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orienteering-LR-Desktop", "Orienteering-LR-Desktop\Orienteering-LR-Desktop.csproj", "{0B1F8086-7756-4B18-90EE-B0657B3BB1BF}"
-	ProjectSection(ProjectDependencies) = postProject
-		{CC2AB670-5D51-4795-9D49-9F428198F82B} = {CC2AB670-5D51-4795-9D49-9F428198F82B}
-	EndProjectSection
 EndProject
 Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "Orienteering-LR-Local-Web-App", "Orienteering-LR-Local-Web-App\Orienteering-LR-Local-Web-App.njsproj", "{CC2AB670-5D51-4795-9D49-9F428198F82B}"
 EndProject
