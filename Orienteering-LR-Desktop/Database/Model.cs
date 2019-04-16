@@ -1,17 +1,33 @@
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Orienteering_LR_Desktop.Database
 {
     [NotMapped]
-    class ClassContext : DbContext
+    class CompetitorContext : DbContext
     {
-        public DbSet<ClassCourse> ClassCourses { get; set; }
+        public DbSet<Competitor> Competitors { get; set; }
+        public DbSet<Club> Clubs { get; set; }
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<CompTimes> CompTimes { get; set; }
+        public DbSet<RaceClass> RaceClasses { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<Punch> Punches { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ClassCourse>()
                 .HasKey(c => new { c.RaceClassId, c.CourseId });
+            modelBuilder.Entity<CompTimes>()
+                .HasKey(c => new { c.CompetitorId, c.Stage });
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite("Data Source= testdb.db");
         }
     }
 
@@ -26,9 +42,6 @@ namespace Orienteering_LR_Desktop.Database
         public int ClassId { get; set; } // fk -> Class
         public int ClubId { get; set; } // fk -> Club
         public int RaceClassId { get; set; } // fk -> RaceClass
-
-
-
 	}	
 
     public class Club {
@@ -97,8 +110,9 @@ namespace Orienteering_LR_Desktop.Database
     }
 
     public class Punch {
+        public int PunchId { get; set; }
         public int ChipId { get; set; }
-        public string stage { get; set; }
+        public string Stage { get; set; }
         public int CheckId { get; set; }
         public int Timestamp { get; set; }
     }
