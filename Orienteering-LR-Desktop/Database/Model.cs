@@ -27,7 +27,7 @@ namespace Orienteering_LR_Desktop.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source= testdb.db");
+            optionsBuilder.UseSqlite("Data Source=testdb.db");
         }
     }
 
@@ -39,9 +39,11 @@ namespace Orienteering_LR_Desktop.Database
         public int Age { get; set; }
         public int StartNo { get; set; }
         public string Gender { get; set; }
-        public int ClassId { get; set; } // fk -> Class
+
         public int ClubId { get; set; } // fk -> Club
+        public Club Club { get; set; }
         public int RaceClassId { get; set; } // fk -> RaceClass
+        public RaceClass RaceClass { get; set; }
 	}	
 
     public class Club {
@@ -53,10 +55,12 @@ namespace Orienteering_LR_Desktop.Database
         public int TeamId { get; set; }
         public int CompetitorPos { get; set; }
         public int CompetitorId { get; set; }
+        public Competitor Competitor { get; set; }
     }
 
     public class CompTimes {
         public int CompetitorId { get; set; }
+        public Competitor Competitor { get; set; }
         public string Stage { get; set; }
         public int ChipId { get; set; }
         public string Times { get; set; }
@@ -107,13 +111,14 @@ namespace Orienteering_LR_Desktop.Database
 
         public int RaceClassId { get; set; }
         public int CourseId { get; set; }
+        public Course Course { get; set; }
     }
 
     public class Punch {
         public int PunchId { get; set; }
         public int ChipId { get; set; }
         public string Stage { get; set; }
-        public int CheckId { get; set; }
+        public int CheckpointId { get; set; }
         public int Timestamp { get; set; }
     }
 
