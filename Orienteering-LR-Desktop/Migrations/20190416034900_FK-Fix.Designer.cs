@@ -8,8 +8,8 @@ using Orienteering_LR_Desktop.Database;
 namespace Orienteering_LR_Desktop.Migrations
 {
     [DbContext(typeof(CompetitorContext))]
-    [Migration("20190416032751_Initial")]
-    partial class Initial
+    [Migration("20190416034900_FK-Fix")]
+    partial class FKFix
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -28,6 +28,8 @@ namespace Orienteering_LR_Desktop.Migrations
                     b.Property<string>("Stage");
 
                     b.HasKey("RaceClassId", "CourseId");
+
+                    b.HasIndex("CourseId");
 
                     b.ToTable("ClassCourse");
                 });
@@ -66,8 +68,6 @@ namespace Orienteering_LR_Desktop.Migrations
 
                     b.Property<int>("Age");
 
-                    b.Property<int>("ClassId");
-
                     b.Property<int>("ClubId");
 
                     b.Property<string>("FirstName");
@@ -81,6 +81,10 @@ namespace Orienteering_LR_Desktop.Migrations
                     b.Property<int>("StartNo");
 
                     b.HasKey("CompetitorId");
+
+                    b.HasIndex("ClubId");
+
+                    b.HasIndex("RaceClassId");
 
                     b.ToTable("Competitors");
                 });
@@ -110,7 +114,7 @@ namespace Orienteering_LR_Desktop.Migrations
                     b.Property<int>("PunchId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("CheckId");
+                    b.Property<int>("CheckpointId");
 
                     b.Property<int>("ChipId");
 
@@ -158,7 +162,46 @@ namespace Orienteering_LR_Desktop.Migrations
 
                     b.HasKey("TeamId");
 
+                    b.HasIndex("CompetitorId");
+
                     b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("Orienteering_LR_Desktop.Database.ClassCourse", b =>
+                {
+                    b.HasOne("Orienteering_LR_Desktop.Database.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Orienteering_LR_Desktop.Database.CompTimes", b =>
+                {
+                    b.HasOne("Orienteering_LR_Desktop.Database.Competitor", "Competitor")
+                        .WithMany()
+                        .HasForeignKey("CompetitorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Orienteering_LR_Desktop.Database.Competitor", b =>
+                {
+                    b.HasOne("Orienteering_LR_Desktop.Database.Club", "Club")
+                        .WithMany()
+                        .HasForeignKey("ClubId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Orienteering_LR_Desktop.Database.RaceClass", "RaceClass")
+                        .WithMany()
+                        .HasForeignKey("RaceClassId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Orienteering_LR_Desktop.Database.Team", b =>
+                {
+                    b.HasOne("Orienteering_LR_Desktop.Database.Competitor", "Competitor")
+                        .WithMany()
+                        .HasForeignKey("CompetitorId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

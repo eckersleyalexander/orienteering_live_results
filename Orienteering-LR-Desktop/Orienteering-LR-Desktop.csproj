@@ -210,9 +210,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Migrations\20190416032751_Initial.cs" />
-    <Compile Include="Migrations\20190416032751_Initial.designer.cs">
-      <DependentUpon>20190416032751_Initial.cs</DependentUpon>
+    <Compile Include="Migrations\20190416034900_FK-Fix.cs" />
+    <Compile Include="Migrations\20190416034900_FK-Fix.designer.cs">
+      <DependentUpon>20190416034900_FK-Fix.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\CompetitorContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
