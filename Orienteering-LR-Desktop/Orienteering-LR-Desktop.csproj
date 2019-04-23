@@ -203,22 +203,18 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Database\Model.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Migrations\20190409035013_InitialCreate.cs" />
-    <Compile Include="Migrations\20190409035013_InitialCreate.designer.cs">
-      <DependentUpon>20190409035013_InitialCreate.cs</DependentUpon>
+    <Compile Include="Migrations\20190416034900_FK-Fix.cs" />
+    <Compile Include="Migrations\20190416034900_FK-Fix.designer.cs">
+      <DependentUpon>20190416034900_FK-Fix.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\20190409044940_Initial.cs" />
-    <Compile Include="Migrations\20190409044940_Initial.designer.cs">
-      <DependentUpon>20190409044940_Initial.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\BloggingContextModelSnapshot.cs" />
-    <Compile Include="Model.cs" />
+    <Compile Include="Migrations\CompetitorContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

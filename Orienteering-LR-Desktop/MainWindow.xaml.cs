@@ -1,5 +1,4 @@
-﻿using ConsoleApp.NewDb;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
@@ -16,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Orienteering_LR_Desktop.Database;
 
 namespace Orienteering_LR_Desktop
 {
@@ -39,7 +39,11 @@ namespace Orienteering_LR_Desktop
                 lastName = "Smith"
             });
             testGrid.ItemsSource = runners;
-
+            using (var db = new CompetitorContext())
+            {
+                db.GetService<IMigrator>().Migrate();
+            }
+            /*
             using (var db = new BloggingContext())
             {
 
@@ -57,6 +61,7 @@ namespace Orienteering_LR_Desktop
                     Debug.WriteLine(" - {0}", blog.Url);
                 }
             }
+            */
         }
 
         void Datagrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
