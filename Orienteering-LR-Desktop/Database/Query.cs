@@ -40,5 +40,52 @@ namespace Orienteering_LR_Desktop.Database
                 return competitors;
             }
         }
+
+        public List<CompetitorPunches> GetLeaderBoardClass(int classId)
+        {
+            using (var context = new CompetitorContext())
+            {
+//                var competitors = context.Competitors.Where(c => c.RaceClassId == classId).ToList();
+//                List<CompetitorPunches> leaderBoard = new List<CompetitorPunches>();
+//                foreach (var competitor in competitors)
+//                {
+//                    CompetitorPunches compPunches = (CompetitorPunches) competitor;
+//                    List<Punch> punches = context.Punches.Where(p => p.ChipId == competitor.ChipId).ToList();
+//                    compPunches.Punches = punches;
+//                    leaderBoard.Add(compPunches);
+//                }
+//                return leaderBoard;
+            }
+        }
+
+        public List<CompetitorPunches> GetLeaderBoardCourse(int courseId)
+        {
+//            using (var context = new CompetitorContext())
+//            {
+//                var competitors = context.Competitors.Where(c => c.<> == courseId).ToList();
+//                List<CompetitorPunches> leaderBoard = new List<CompetitorPunches>();
+//                foreach (var competitor in competitors)
+//                {
+//                    CompetitorPunches compPunches = (CompetitorPunches) competitor;
+//                    List<Punch> punches = context.Punches.Where(p => p.ChipId == competitor.ChipId).ToList();
+//                    compPunches.Punches = punches;
+//                    leaderBoard.Add(compPunches);
+//                }
+//                return leaderBoard;
+//            }
+        }
+
+        public string CurrentStage()
+        {
+            using (var context = new CompetitorContext())
+            {
+                return context.Stages.Single(s => s.Current).Name;
+            }
+        }
+    }
+
+    public class CompetitorPunches : Competitor
+    {
+        public List<Punch> Punches { get; set; }
     }
 }
