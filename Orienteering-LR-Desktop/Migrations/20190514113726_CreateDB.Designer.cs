@@ -8,8 +8,8 @@ using Orienteering_LR_Desktop.Database;
 namespace Orienteering_LR_Desktop.Migrations
 {
     [DbContext(typeof(CompetitorContext))]
-    [Migration("20190416034900_FK-Fix")]
-    partial class FKFix
+    [Migration("20190514113726_CreateDB")]
+    partial class CreateDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -39,7 +39,7 @@ namespace Orienteering_LR_Desktop.Migrations
                     b.Property<int>("ClubId")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("name");
+                    b.Property<string>("Name");
 
                     b.HasKey("ClubId");
 
@@ -67,6 +67,8 @@ namespace Orienteering_LR_Desktop.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("Age");
+
+                    b.Property<int>("ChipId");
 
                     b.Property<int>("ClubId");
 
@@ -149,6 +151,18 @@ namespace Orienteering_LR_Desktop.Migrations
                     b.HasKey("RaceClassId");
 
                     b.ToTable("RaceClasses");
+                });
+
+            modelBuilder.Entity("Orienteering_LR_Desktop.Database.Stage", b =>
+                {
+                    b.Property<string>("Name")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("Current");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("Stages");
                 });
 
             modelBuilder.Entity("Orienteering_LR_Desktop.Database.Team", b =>

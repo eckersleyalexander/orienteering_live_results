@@ -41,27 +41,10 @@ namespace Orienteering_LR_Desktop
             testGrid.ItemsSource = runners;
             using (var db = new CompetitorContext())
             {
-                db.GetService<IMigrator>().Migrate();
+                db.GetService<IMigrator>().Migrate();                
             }
-            /*
-            using (var db = new BloggingContext())
-            {
+           
 
-                db.GetService<IMigrator>().Migrate();
-
-                db.Blogs.Add(new Blog { Url = "http://blogs.msdn.com/adonet" });
-               
-                var count = db.SaveChanges();
-                Debug.WriteLine("{0} records saved to database", count);
-
-                Debug.WriteLine("");
-                Debug.WriteLine("All blogs in database:");
-                foreach (var blog in db.Blogs)
-                {
-                    Debug.WriteLine(" - {0}", blog.Url);
-                }
-            }
-            */
         }
 
         void Datagrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
