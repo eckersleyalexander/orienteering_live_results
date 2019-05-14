@@ -102,6 +102,12 @@
     <Reference Include="Remotion.Linq, Version=2.2.0.0, Culture=neutral, PublicKeyToken=fee00910d6e5f53b, processorArchitecture=MSIL">
       <HintPath>..\packages\Remotion.Linq.2.2.0\lib\net45\Remotion.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="SPORTident.Communication">
+      <HintPath>.\SPORTident.Communication.dll</HintPath>
+    </Reference>
+    <Reference Include="SPORTident.Reader">
+      <HintPath>.\SPORTident.Reader.dll</HintPath>
+    </Reference>
     <Reference Include="SQLitePCLRaw.batteries_green, Version=1.1.12.351, Culture=neutral, PublicKeyToken=a84b7dcfb1391f7f, processorArchitecture=MSIL">
       <HintPath>..\packages\SQLitePCLRaw.bundle_green.1.1.12\lib\net45\SQLitePCLRaw.batteries_green.dll</HintPath>
     </Reference>
@@ -265,11 +271,11 @@
     </PostBuildEvent>
   </PropertyGroup>
   <Target Name="AfterClean" AfterTargets="Clean">
-     <!-- Remove bin folder -->
-     <RemoveDir Directories="$(TargetDir)" />
-     <!-- Remove obj folder -->
-     <RemoveDir Directories="$(ProjectDir)$(BaseIntermediateOutputPath)" />  
-</Target>
+    <!-- Remove bin folder -->
+    <RemoveDir Directories="$(TargetDir)" />
+    <!-- Remove obj folder -->
+    <RemoveDir Directories="$(ProjectDir)$(BaseIntermediateOutputPath)" />
+  </Target>
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.12\build\net35\SQLitePCLRaw.lib.e_sqlite3.linux.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.linux.1.1.12\build\net35\SQLitePCLRaw.lib.e_sqlite3.linux.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

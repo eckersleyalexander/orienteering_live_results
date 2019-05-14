@@ -16,6 +16,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Orienteering_LR_Desktop.Database;
+using SPORTident;
+using SPORTident.Communication.UsbDevice;
 
 namespace Orienteering_LR_Desktop
 {
@@ -26,7 +28,8 @@ namespace Orienteering_LR_Desktop
     {
 
         public List<Runner> runners = new List<Runner>();
-        
+        private readonly Reader _reader;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -43,6 +46,18 @@ namespace Orienteering_LR_Desktop
             {
                 db.GetService<IMigrator>().Migrate();
             }
+
+            _reader = new Reader
+            {
+                WriteBackupFile = false,
+                WriteLogFile = false
+            };
+
+            _reader.OnlineStampRead += _reader_OnlineStampRead;
+
+            _reader.OutputDevice = new ReaderDeviceInfo(ReaderDeviceType.None);
+            _reader.OpenOutputDevice();
+            
             /*
             using (var db = new BloggingContext())
             {
@@ -64,6 +79,11 @@ namespace Orienteering_LR_Desktop
             */
         }
 
+        private void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
+        {
+            MessageBox.Show(e.PunchData.ToString());
+        }
+
         void Datagrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Commit)
@@ -81,6 +101,32 @@ namespace Orienteering_LR_Desktop
             }
         }
 
+        private void ConnectRadio(object sender, RoutedEventArgs e)
+        {
+            
+            List<DeviceInfo> devList = DeviceInfo.GetAvailableDeviceList(true, (int)DeviceType.Serial);
+            if (devList.Count != 1)
+            {
+                MessageBox.Show("No devices detected");
+            }
+            else
+            {
+                ReaderDeviceInfo device = new ReaderDeviceInfo(devList[0], ReaderDeviceType.SiDevice);
+                try
+                {
+                    if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
+                    _reader.InputDevice = device;
+                    _reader.OpenInputDevice();
+                    MessageBox.Show("radio connected");
+                }
+                catch (Exception ex)
+                {
+                    if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
+                    MessageBox.Show(ex.Message);
+                }
+            }
+
+        }
     }
     public class Runner
     {
