@@ -18,6 +18,7 @@ using System.Windows.Shapes;
 using Orienteering_LR_Desktop.Database;
 using SPORTident;
 using SPORTident.Communication.UsbDevice;
+using Unosquare.Labs.EmbedIO.Modules;
 
 namespace Orienteering_LR_Desktop
 {
@@ -81,7 +82,21 @@ namespace Orienteering_LR_Desktop
 
         private void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
         {
-            MessageBox.Show(e.PunchData.ToString());
+            // Siid = chipId
+            int chipId = (int)e.PunchData[0].SiidValue;
+            // CodeNumber = checkpointId
+            int checkpointId = (int)e.PunchData[0].CodeNumber;
+            // TimeSi = punch time w/ correct date
+            // PunchDateTime = punch time w/ date as 1/1/2000
+            int punchTime = (int)((e.PunchData[0].PunchDateTime - new DateTime(2000, 1, 1)).TotalSeconds * 100.0);
+            MessageBox.Show("ChipId: " + chipId.ToString() + ", CheckpointId: " + chipId.ToString() + ", Punch: " + punchTime.ToString());
+
+            // save to db
+            var s = new Database.Store();
+            s.CreatePunch(chipId, checkpointId, punchTime);
+
+            // push to front end
+            ((App)Application.Current).leaderboard.SendUpdates();
         }
 
         void Datagrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -103,11 +118,10 @@ namespace Orienteering_LR_Desktop
 
         private void ConnectRadio(object sender, RoutedEventArgs e)
         {
-            
             List<DeviceInfo> devList = DeviceInfo.GetAvailableDeviceList(true, (int)DeviceType.Serial);
             if (devList.Count != 1)
             {
-                MessageBox.Show("No devices detected");
+                MessageBox.Show("No devices detected (or more than 1)");
             }
             else
             {
@@ -125,16 +139,14 @@ namespace Orienteering_LR_Desktop
                     MessageBox.Show(ex.Message);
                 }
             }
-
         }
     }
+
     public class Runner
     {
         public string id { get; set; }
         public string firstName { get; set; }
         public string lastName { get; set; }
     }
-
-
 
 }
