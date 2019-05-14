@@ -25,7 +25,6 @@ namespace Orienteering_LR_Desktop
 
             server.RegisterModule(new WebApiModule());
             server.Module<WebApiModule>().RegisterController<ApiController>();
-
 			server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
 			server.Module<StaticFilesModule>().UseRamCache = true;
 			server.Module<StaticFilesModule>().DefaultExtension = ".html";
@@ -105,6 +104,7 @@ namespace Orienteering_LR_Desktop
                     timez.Add(p.Timestamp);
                 }
                 temp.Times = timez;
+                things.Add(temp);
             }
             String jsoned = JsonConvert.SerializeObject(things);
             Broadcast(jsoned);
