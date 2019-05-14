@@ -6,6 +6,10 @@ using Unosquare.Labs.EmbedIO;
 using Unosquare.Labs.EmbedIO.Constants;
 using Unosquare.Labs.EmbedIO.Modules;
 using RoutingStrategy = Unosquare.Labs.EmbedIO.Constants.RoutingStrategy;
+using System.Collections.Generic;
+using Orienteering_LR_Desktop.Database;
+using Newtonsoft.Json;
+
 namespace Orienteering_LR_Desktop
 {
 	/// <summary>
@@ -25,9 +29,10 @@ namespace Orienteering_LR_Desktop
 			server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
 			server.Module<StaticFilesModule>().UseRamCache = true;
 			server.Module<StaticFilesModule>().DefaultExtension = ".html";
-
-			server.RunAsync();
-		}
+            server.RegisterModule(new WebSocketsModule());
+            server.Module<WebSocketsModule>().RegisterWebSocketsServer<LeaderboardSocket>("/leaderboard");
+            server.RunAsync();
+        }
 	}
 
     public class ApiController: WebApiController 
@@ -63,5 +68,48 @@ namespace Orienteering_LR_Desktop
     
         // You can override the default headers and add custom headers to each API Response.
         public override void SetDefaultHeaders() => this.NoCache();
+    }
+
+    public class LeaderboardSocket : WebSocketsServer
+    {
+        public LeaderboardSocket()
+        : base(true)
+        {
+            // placeholder
+        }
+
+        public override string ServerName => "Leaderboard Socket";
+        //public List<String> clients;
+    
+        protected override void OnClientConnected(
+        IWebSocketContext context,
+        System.Net.IPEndPoint localEndPoint,
+        System.Net.IPEndPoint remoteEndPoint)
+        {
+            Console.WriteLine("connected");
+        }
+
+        public void SendUpdates()
+        {
+            var q = new Database.Query();
+            List<Database.CompetitorPunches> punches = q.GetCompetitorPunches();
+            String jsoned = JsonConvert.SerializeObject(punches);
+            Broadcast(jsoned);
+        }
+
+        protected override void OnClientDisconnected(IWebSocketContext context)
+        {
+            Console.WriteLine("disconnected");
+        }
+
+        protected override void OnFrameReceived(IWebSocketContext context, byte[] rxBuffer, IWebSocketReceiveResult rxResult)
+        {
+            // placeholder
+        }
+
+        protected override void OnMessageReceived(IWebSocketContext context, byte[] rxBuffer, IWebSocketReceiveResult rxResult)
+        {
+
+        }
     }
 }
