@@ -80,7 +80,7 @@ namespace Orienteering_LR_Desktop
 
         public override string ServerName => "Leaderboard Socket";
         //public List<String> clients;
-    
+
         protected override void OnClientConnected(
         IWebSocketContext context,
         System.Net.IPEndPoint localEndPoint,
@@ -92,11 +92,24 @@ namespace Orienteering_LR_Desktop
         public void SendUpdates()
         {
             var q = new Database.Query();
-            List<Database.CompetitorPunches> punches = q.GetCompetitorPunches();
-            String jsoned = JsonConvert.SerializeObject(punches);
+            List<Database.CompetitorPunches> CompPunches = q.GetCompetitorPunches();
+            List<BoardDemoClass> things = new List<BoardDemoClass>();
+            foreach (Database.CompetitorPunches c in CompPunches)
+            {
+                BoardDemoClass temp = new BoardDemoClass();
+                temp.FirstName = c.FirstName;
+                temp.LastName = c.LastName;
+                List<int> timez = new List<int>();
+                foreach (Database.Punch p in c.Punches)
+                {
+                    timez.Add(p.Timestamp);
+                }
+                temp.Times = timez;
+            }
+            String jsoned = JsonConvert.SerializeObject(things);
             Broadcast(jsoned);
         }
-
+       
         protected override void OnClientDisconnected(IWebSocketContext context)
         {
             Console.WriteLine("disconnected");
@@ -111,5 +124,13 @@ namespace Orienteering_LR_Desktop
         {
 
         }
+
+        
+    }
+    public class BoardDemoClass
+    {
+        public String FirstName { get; set; }
+        public String LastName { get; set; }
+        public List<int> Times { get; set; }
     }
 }
