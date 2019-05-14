@@ -17,19 +17,23 @@ namespace Orienteering_LR_Desktop
 	/// </summary>
 	public partial class App : Application
     {
+        public WebServer server;
+        public LeaderboardSocket leaderboard;
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
             
-            var server =  new WebServer("http://localhost:9696/", RoutingStrategy.Regex);
+            server =  new WebServer("http://localhost:9696/", RoutingStrategy.Regex);
+            leaderboard = new LeaderboardSocket();
 
             server.RegisterModule(new WebApiModule());
             server.Module<WebApiModule>().RegisterController<ApiController>();
-			server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
-			server.Module<StaticFilesModule>().UseRamCache = true;
-			server.Module<StaticFilesModule>().DefaultExtension = ".html";
+			//server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
+			//server.Module<StaticFilesModule>().UseRamCache = true;
+			//server.Module<StaticFilesModule>().DefaultExtension = ".html";
             server.RegisterModule(new WebSocketsModule());
-            server.Module<WebSocketsModule>().RegisterWebSocketsServer<LeaderboardSocket>("/leaderboard");
+            server.Module<WebSocketsModule>().RegisterWebSocketsServer<LeaderboardSocket>("/leaderboard", leaderboard);
             server.RunAsync();
         }
 	}

@@ -8,8 +8,8 @@ using Orienteering_LR_Desktop.Database;
 namespace Orienteering_LR_Desktop.Migrations
 {
     [DbContext(typeof(CompetitorContext))]
-    [Migration("20190514113726_CreateDB")]
-    partial class CreateDB
+    [Migration("20190514124920_mig")]
+    partial class mig
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

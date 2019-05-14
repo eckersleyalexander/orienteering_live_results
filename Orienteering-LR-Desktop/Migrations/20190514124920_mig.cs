@@ -2,7 +2,7 @@
 
 namespace Orienteering_LR_Desktop.Migrations
 {
-    public partial class CreateDB : Migration
+    public partial class mig : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

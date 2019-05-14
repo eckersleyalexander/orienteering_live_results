@@ -14,7 +14,9 @@
                 </Grid>
             </TabItem>
             <TabItem Header="TabItem">
-                <Border BorderBrush="Black" BorderThickness="1" Height="100" Width="100"/>
+                <Border BorderBrush="Black" BorderThickness="1" Height="100" Width="100">
+                    <Button x:Name="Button1" Content="Button" Click="ConnectRadio"/>
+                </Border>
             </TabItem>
         </TabControl>
 
