@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Orienteering_LR_Desktop.Database
 {
@@ -14,6 +15,7 @@ namespace Orienteering_LR_Desktop.Database
         public DbSet<RaceClass> RaceClasses { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Punch> Punches { get; set; }
+        public DbSet<Stage> Stages { get; set; }
 
 
 
@@ -23,6 +25,8 @@ namespace Orienteering_LR_Desktop.Database
                 .HasKey(c => new { c.RaceClassId, c.CourseId });
             modelBuilder.Entity<CompTimes>()
                 .HasKey(c => new { c.CompetitorId, c.Stage });
+            modelBuilder.Entity<Stage>()
+                .HasKey(c => new {c.Name});
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -39,7 +43,8 @@ namespace Orienteering_LR_Desktop.Database
         public int Age { get; set; }
         public int StartNo { get; set; }
         public string Gender { get; set; }
-
+        public int ChipId { get; set; }
+        
         public int ClubId { get; set; } // fk -> Club
         public Club Club { get; set; }
         public int RaceClassId { get; set; } // fk -> RaceClass
@@ -48,7 +53,7 @@ namespace Orienteering_LR_Desktop.Database
 
     public class Club {
         public int ClubId { get; set; }
-        public string name { get; set; }
+        public string Name { get; set; }
     }
 
     public class Team {
@@ -120,6 +125,12 @@ namespace Orienteering_LR_Desktop.Database
         public string Stage { get; set; }
         public int CheckpointId { get; set; }
         public int Timestamp { get; set; }
+    }
+
+    public class Stage
+    {
+        public string Name { get; set; } // pk
+        public bool Current { get; set; }
     }
 
 
