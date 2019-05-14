@@ -218,6 +218,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Migrations\20190514124920_mig.cs" />
+    <Compile Include="Migrations\20190514124920_mig.designer.cs">
+      <DependentUpon>20190514124920_mig.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\CompetitorContextModelSnapshot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -256,9 +261,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
