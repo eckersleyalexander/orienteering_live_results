@@ -43,7 +43,8 @@ namespace Orienteering_LR_Desktop.Database
         public int Age { get; set; }
         public int StartNo { get; set; }
         public string Gender { get; set; }
-
+        public int ChipId { get; set; }
+        
         public int ClubId { get; set; } // fk -> Club
         public Club Club { get; set; }
         public int RaceClassId { get; set; } // fk -> RaceClass

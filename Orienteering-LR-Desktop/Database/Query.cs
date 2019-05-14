@@ -41,10 +41,10 @@ namespace Orienteering_LR_Desktop.Database
             }
         }
 
-        public List<CompetitorPunches> GetLeaderBoardClass(int classId)
-        {
-            using (var context = new CompetitorContext())
-            {
+//        public List<CompetitorPunches> GetLeaderBoardClass(int classId)
+//        {
+//            using (var context = new CompetitorContext())
+//            {
 //                var competitors = context.Competitors.Where(c => c.RaceClassId == classId).ToList();
 //                List<CompetitorPunches> leaderBoard = new List<CompetitorPunches>();
 //                foreach (var competitor in competitors)
@@ -55,24 +55,24 @@ namespace Orienteering_LR_Desktop.Database
 //                    leaderBoard.Add(compPunches);
 //                }
 //                return leaderBoard;
-            }
-        }
-
-        public List<CompetitorPunches> GetLeaderBoardCourse(int courseId)
-        {
-//            using (var context = new CompetitorContext())
-//            {
-//                var competitors = context.Competitors.Where(c => c.<> == courseId).ToList();
-//                List<CompetitorPunches> leaderBoard = new List<CompetitorPunches>();
-//                foreach (var competitor in competitors)
-//                {
-//                    CompetitorPunches compPunches = (CompetitorPunches) competitor;
-//                    List<Punch> punches = context.Punches.Where(p => p.ChipId == competitor.ChipId).ToList();
-//                    compPunches.Punches = punches;
-//                    leaderBoard.Add(compPunches);
-//                }
-//                return leaderBoard;
 //            }
+//        }
+
+        public List<CompetitorPunches> GetCompetitorPunches()
+        {
+            using (var context = new CompetitorContext())
+            {
+                var competitors = context.Competitors.ToList();
+                List<CompetitorPunches> things = new List<CompetitorPunches>();
+                foreach (var competitor in competitors)
+                {
+                    CompetitorPunches compPunches = (CompetitorPunches) competitor;
+                    List<Punch> punches = context.Punches.Where(p => p.ChipId == competitor.ChipId).ToList();
+                    compPunches.Punches = punches;
+                    things.Add(compPunches);
+                }
+                return things;
+            }
         }
 
         public string CurrentStage()
@@ -83,7 +83,7 @@ namespace Orienteering_LR_Desktop.Database
             }
         }
     }
-
+    
     public class CompetitorPunches : Competitor
     {
         public List<Punch> Punches { get; set; }
