@@ -2,7 +2,7 @@
 
 namespace Orienteering_LR_Desktop.Migrations
 {
-    public partial class FKFix : Migration
+    public partial class CreateDB : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,7 +12,7 @@ namespace Orienteering_LR_Desktop.Migrations
                 {
                     ClubId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    name = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -72,6 +72,18 @@ namespace Orienteering_LR_Desktop.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Stages",
+                columns: table => new
+                {
+                    Name = table.Column<string>(nullable: false),
+                    Current = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Stages", x => x.Name);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ClassCourse",
                 columns: table => new
                 {
@@ -102,6 +114,7 @@ namespace Orienteering_LR_Desktop.Migrations
                     Age = table.Column<int>(nullable: false),
                     StartNo = table.Column<int>(nullable: false),
                     Gender = table.Column<string>(nullable: true),
+                    ChipId = table.Column<int>(nullable: false),
                     ClubId = table.Column<int>(nullable: false),
                     RaceClassId = table.Column<int>(nullable: false)
                 },
@@ -193,6 +206,9 @@ namespace Orienteering_LR_Desktop.Migrations
 
             migrationBuilder.DropTable(
                 name: "Punches");
+
+            migrationBuilder.DropTable(
+                name: "Stages");
 
             migrationBuilder.DropTable(
                 name: "Teams");

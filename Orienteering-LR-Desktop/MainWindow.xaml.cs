@@ -45,7 +45,7 @@ namespace Orienteering_LR_Desktop
             testGrid.ItemsSource = runners;
             using (var db = new CompetitorContext())
             {
-                db.GetService<IMigrator>().Migrate();
+                db.GetService<IMigrator>().Migrate();                
             }
 
             _reader = new Reader
@@ -148,5 +148,7 @@ namespace Orienteering_LR_Desktop
         public string firstName { get; set; }
         public string lastName { get; set; }
     }
+
+
 
 }
