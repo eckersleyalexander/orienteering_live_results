@@ -25,6 +25,14 @@ namespace Orienteering_LR_Desktop.Database
                 context.SaveChanges();
             }
         }
-        
+
+        public void CreateCompetitor(Competitor comp)
+        {
+            using (var context = new CompetitorContext())
+            {
+                context.Competitors.Add(comp);
+                context.SaveChanges();
+            }
+        }
     }
 }
