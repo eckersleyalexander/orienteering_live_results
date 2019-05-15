@@ -122,7 +122,7 @@ namespace Orienteering_LR_Desktop
             int checkpointId = (int)e.PunchData[0].CodeNumber;
             // TimeSi = punch time w/ correct date
             // PunchDateTime = punch time w/ date as 1/1/2000
-            int punchTime = (int)((e.PunchData[0].PunchDateTime - new DateTime(2000, 1, 1)).TotalSeconds * 100.0);
+            int punchTime = (int)((e.PunchData[0].PunchDateTime - new DateTime(2000, 1, 1)).TotalSeconds * 1000.0);
             //MessageBox.Show("ChipId: " + chipId.ToString() + ", CheckpointId: " + chipId.ToString() + ", Punch: " + punchTime.ToString());
 
             // save to db

@@ -9,6 +9,7 @@ using RoutingStrategy = Unosquare.Labs.EmbedIO.Constants.RoutingStrategy;
 using System.Collections.Generic;
 using Orienteering_LR_Desktop.Database;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace Orienteering_LR_Desktop
 {
@@ -76,7 +77,7 @@ namespace Orienteering_LR_Desktop
     public class LeaderboardSocket : WebSocketsServer
     {
         public LeaderboardSocket()
-        : base(true)
+            : base(true)
         {
             // placeholder
         }
@@ -85,11 +86,12 @@ namespace Orienteering_LR_Desktop
         //public List<String> clients;
 
         protected override void OnClientConnected(
-        IWebSocketContext context,
-        System.Net.IPEndPoint localEndPoint,
-        System.Net.IPEndPoint remoteEndPoint)
+            IWebSocketContext context,
+            System.Net.IPEndPoint localEndPoint,
+            System.Net.IPEndPoint remoteEndPoint)
         {
             Console.WriteLine("connected");
+            SendUpdates();
         }
 
         public void SendUpdates()
@@ -102,14 +104,22 @@ namespace Orienteering_LR_Desktop
                 BoardDemoClass temp = new BoardDemoClass();
                 temp.FirstName = c.FirstName;
                 temp.LastName = c.LastName;
+
                 List<int> timez = new List<int>();
-                foreach (Database.Punch p in c.Punches)
+                if (c.Punches.Count > 0)
                 {
-                    timez.Add(p.Timestamp);
+                    c.Punches.Sort((a, b) => a.Timestamp - b.Timestamp);
+                    int startTime = c.Punches[0].Timestamp;
+                    foreach (Database.Punch p in c.Punches)
+                    {
+                        p.Timestamp -= startTime;
+                        timez.Add(p.Timestamp);
+                    }
                 }
                 temp.Times = timez;
                 things.Add(temp);
             }
+            things.Sort();
             String jsoned = JsonConvert.SerializeObject(things);
             Broadcast(jsoned);
         }
@@ -126,15 +136,27 @@ namespace Orienteering_LR_Desktop
 
         protected override void OnMessageReceived(IWebSocketContext context, byte[] rxBuffer, IWebSocketReceiveResult rxResult)
         {
-            ((App)Application.Current).leaderboard.SendUpdates();
+            SendUpdates();
         }
 
 
     }
-    public class BoardDemoClass
+    public class BoardDemoClass : IComparable<BoardDemoClass>
     {
         public String FirstName { get; set; }
         public String LastName { get; set; }
         public List<int> Times { get; set; }
+
+        public int CompareTo(BoardDemoClass obj)
+        {
+            if (Times.Count == obj.Times.Count && Times.Count > 0)
+            {
+                return Times[Times.Count - 1] - obj.Times[obj.Times.Count - 1];
+            }
+            else
+            {
+                return obj.Times.Count - Times.Count;
+            }
+        }
     }
 }
