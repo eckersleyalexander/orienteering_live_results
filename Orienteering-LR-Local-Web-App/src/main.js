@@ -1,11 +1,10 @@
 import Vue from "vue";
 import App from "./App.vue";
 
-import VueSocketIO from "vue-socket.io";
-
 Vue.config.productionTip = true;
 
-Vue.use(VueSocketIO, "http://localhost:9696/leaderboard");
+import VueNativeSock from "vue-native-websocket";
+Vue.use(VueNativeSock, "ws://localhost:9696/leaderboard", { format: "json" });
 
 new Vue({
     render: h => h(App)

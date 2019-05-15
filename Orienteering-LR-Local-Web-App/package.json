@@ -14,7 +14,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "vue": "2.5.17",
-    "vue-socket.io": "^3.0.7"
+    "vue-native-websocket": "^2.0.13"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.5.5",
