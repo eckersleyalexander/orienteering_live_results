@@ -39,6 +39,7 @@
     <Content Include="src\components\ApiTest.vue" />
     <Content Include="src\components\Home.vue" />
     <Content Include="package.json" />
+    <Content Include="src\components\Leaderboard.vue" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />

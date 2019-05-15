@@ -7,6 +7,7 @@
                     <tr>
                         <th>Position</th>
                         <th>Name</th>
+                        <th>Status</th>
                         <!-- Need to have as many headers as radio controls -->
                         <th v-for="(item, index) in data[0].Times.slice(1)" :key="index">
                            Leg {{ index + 1 }}
@@ -17,6 +18,8 @@
                     <tr v-for="(item, index) in data" :key="index">
                         <td>{{ index + 1 }}</td>
                         <td>{{ item.FirstName }} {{ item.LastName }}</td>
+                        <td v-if="!item.Times.length">Ready</td>
+                        <td v-else>Started</td>
                         <td v-for="(time, index) in item.Times.slice(1)" :key="index">
                             {{ new Date(time).toISOString().slice(11, -2) }}
                         </td>
