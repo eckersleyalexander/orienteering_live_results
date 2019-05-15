@@ -111,6 +111,7 @@ namespace Orienteering_LR_Desktop
                 things.Add(temp);
             }
             String jsoned = JsonConvert.SerializeObject(things);
+            Broadcast("test");
             Broadcast(jsoned);
         }
        
@@ -126,10 +127,10 @@ namespace Orienteering_LR_Desktop
 
         protected override void OnMessageReceived(IWebSocketContext context, byte[] rxBuffer, IWebSocketReceiveResult rxResult)
         {
-
+            ((App)Application.Current).leaderboard.SendUpdates();
         }
 
-        
+
     }
     public class BoardDemoClass
     {

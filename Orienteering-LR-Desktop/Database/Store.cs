@@ -34,5 +34,23 @@ namespace Orienteering_LR_Desktop.Database
                 context.SaveChanges();
             }
         }
+
+        public void CreateClub(Club club)
+        {
+            using (var context = new CompetitorContext())
+            {
+                context.Clubs.Add(club);
+                context.SaveChanges();
+            }
+        }
+
+        public void CreateRaceClass(RaceClass race)
+        {
+            using (var context = new CompetitorContext())
+            {
+                context.RaceClasses.Add(race);
+                context.SaveChanges();
+            }
+        }
     }
 }

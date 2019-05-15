@@ -19,6 +19,7 @@ using Orienteering_LR_Desktop.Database;
 using SPORTident;
 using SPORTident.Communication.UsbDevice;
 using Unosquare.Labs.EmbedIO.Modules;
+using System.IO;
 
 namespace Orienteering_LR_Desktop
 {
@@ -43,10 +44,43 @@ namespace Orienteering_LR_Desktop
                 lastName = "Smith"
             });
             testGrid.ItemsSource = runners;
+            if (File.Exists("testdb.db"))
+            {
+                File.Delete("testdb.db");
+            }
             using (var db = new CompetitorContext())
             {
                 db.GetService<IMigrator>().Migrate();                
             }
+
+            var s = new Database.Store();
+            s.CreateClub(new Club()
+            {
+                ClubId = 1
+            });
+
+            s.CreateRaceClass(new RaceClass()
+            {
+                RaceClassId = 1
+            });
+
+            s.CreateCompetitor(new Competitor()
+            {
+                FirstName = "Person",
+                LastName = "A",
+                ChipId = 2087837,
+                ClubId = 1,
+                RaceClassId = 1
+            });
+        
+            s.CreateCompetitor(new Competitor()
+            {
+                FirstName = "Person",
+                LastName = "B",
+                ChipId = 2128274,
+                ClubId = 1,
+                RaceClassId = 1
+            });
 
             _reader = new Reader
             {

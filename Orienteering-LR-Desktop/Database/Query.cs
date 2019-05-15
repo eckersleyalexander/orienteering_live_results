@@ -66,7 +66,10 @@ namespace Orienteering_LR_Desktop.Database
                 List<CompetitorPunches> things = new List<CompetitorPunches>();
                 foreach (var competitor in competitors)
                 {
-                    CompetitorPunches compPunches = (CompetitorPunches) competitor;
+                    CompetitorPunches compPunches = new CompetitorPunches(){
+                        FirstName = competitor.FirstName,
+                        LastName = competitor.LastName
+                    };
                     List<Punch> punches = context.Punches.Where(p => p.ChipId == competitor.ChipId).ToList();
                     compPunches.Punches = punches;
                     things.Add(compPunches);
