@@ -92,7 +92,10 @@ namespace Orienteering_LR_Desktop
         {
             Console.WriteLine("connected");
             SendUpdates();
-            Broadcast("{\"msg\": \"yeey\"}");
+
+
+            // Test string I was using
+            // Broadcast("[{\"FirstName\": \"Bob\",\"LastName\": \"Johnson\",\"Times\": [0, 17387]},{\"FirstName\": \"Bill\",\"LastName\": \"Ginseng\",\"Times\": [0, 19435]}]");
         }
 
         public void SendUpdates()
