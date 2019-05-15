@@ -111,7 +111,6 @@ namespace Orienteering_LR_Desktop
                 things.Add(temp);
             }
             String jsoned = JsonConvert.SerializeObject(things);
-            Broadcast("test");
             Broadcast(jsoned);
         }
        
