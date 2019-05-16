@@ -1,27 +1,25 @@
 <template>
-    <div id="app">
-        <Home/>
+    <div id="app" class="bg-dark text-white">
+        <Home />
         <!-- <ApiTest query="hello" /> -->
-        <Leaderboard/>
+        <Leaderboard />
     </div>
 </template>
 
 <script>
-    import Home from './components/Home.vue';
-    // import ApiTest from './components/ApiTest.vue';
-    import Leaderboard from './components/Leaderboard.vue';
+import Home from "./components/Home.vue";
+// import ApiTest from './components/ApiTest.vue';
+import Leaderboard from "./components/Leaderboard.vue";
 
-    export default {
-        name: 'app',
-        components: {
-            Home,
-            // ApiTest,
-            Leaderboard
-        },
-        mounted () {
-        }
-    };
+export default {
+    name: "app",
+    components: {
+        Home,
+        // ApiTest,
+        Leaderboard
+    },
+    mounted() {}
+};
 </script>
 
-<style>
-</style>
+<style></style>

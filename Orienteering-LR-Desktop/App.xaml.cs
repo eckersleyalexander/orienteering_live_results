@@ -95,7 +95,9 @@ namespace Orienteering_LR_Desktop
 
 
             // Test string I was using
-            // Broadcast("[{\"FirstName\": \"Bob\",\"LastName\": \"Johnson\",\"Times\": [0, 17387]},{\"FirstName\": \"Bill\",\"LastName\": \"Ginseng\",\"Times\": [0, 19435]}]");
+            // Broadcast("[{\"FirstName\": \"Gary\",\"LastName\": \"Jam\",\"Times\": []},{\"FirstName\": \"Bob\",\"LastName\": \"Johnson\",\"Times\": [0, 17387]},{\"FirstName\": \"Bill\",\"LastName\": \"Ginseng\",\"Times\": [0, 19435]}]");
+            Broadcast("[{\"FirstName\": \"Bob\",\"LastName\": \"Johnson\",\"Times\": [0, 17387]},{\"FirstName\": \"Bill\",\"LastName\": \"Ginseng\",\"Times\": [0, 19435]},{\"FirstName\": \"Gary\",\"LastName\": \"Jam\",\"Times\": []}]");
+
         }
 
         public void SendUpdates()

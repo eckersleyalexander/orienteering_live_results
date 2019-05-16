@@ -1,32 +1,13 @@
 <template>
     <div class="leaderboard">
-        <div v-if="loading">Loading...</div>
-        <div v-else>
-            <table v-if="data">
-                <thead>
-                    <tr>
-                        <th>Position</th>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <!-- Need to have as many headers as radio controls -->
-                        <th v-for="(item, index) in data[0].Times.slice(1)" :key="index">
-                           Leg {{ index + 1 }}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(item, index) in data" :key="index">
-                        <td>{{ index + 1 }}</td>
-                        <td>{{ item.FirstName }} {{ item.LastName }}</td>
-                        <td v-if="!item.Times.length">Ready</td>
-                        <td v-else>Started</td>
-                        <td v-for="(time, index) in item.Times.slice(1)" :key="index">
-                            {{ new Date(time).toISOString().slice(11, -2) }}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <b-table
+            :items="data"
+            :fields="tableFields"
+            :busy.sync="loading"
+            dark
+            borderless
+        >
+        </b-table>
     </div>
 </template>
 
@@ -36,7 +17,10 @@ export default {
     data() {
         return {
             loading: true,
-            data: null
+            data: null,
+            tableFields: null,
+            staticFields: ["Position", "Name", "Status"],
+            bestTimes: []
         };
     },
     created() {
@@ -44,7 +28,55 @@ export default {
     },
     methods: {
         onmessage: function(msg) {
+            this.loading = true;
             this.data = JSON.parse(msg.data);
+
+            // generate table fields
+            var dynamicFields = [];
+            if (this.data[0].Times.length) {
+                for (var i = 1; i <= this.data[0].Times.length - 1; i++) {
+                    dynamicFields.push("Leg " + i);
+                    dynamicFields.push("Diff " + i);
+
+                    // put the biggest time possible in each date
+                    this.bestTimes[i] = new Date(8640000000000000);
+                }
+            }
+            this.tableFields = this.staticFields.concat(dynamicFields);
+
+            // build table items
+            for (i = 0; i <= this.data.length - 1; i++) {
+                this.data[i].Position = i + 1;
+                this.data[i].Name =
+                    this.data[i].FirstName + " " + this.data[i].LastName;
+                if (this.data[i].Times.length !== 0) {
+                    this.data[i].Status = "Started";
+                } else {
+                    this.data[i].Status = "Ready";
+                }
+                if (this.data[i].Times.length) {
+                    for (var j = 1; j <= this.data[i].Times.length - 1; j++) {
+                        var t = new Date(this.data[i].Times[j]);
+
+                        if (t < this.bestTimes[j]) {
+                            this.bestTimes[j] = t;
+                            this.data[i]["Diff " + j] = "";
+                        } else {
+                            // calculate time diff
+                            this.data[i]["Diff " + j] =
+                                "(+" +
+                                new Date(t - this.bestTimes[j])
+                                    .toISOString()
+                                    .slice(11, -2) +
+                                ")";
+                        }
+
+                        this.data[i]["Leg " + j] = t
+                            .toISOString()
+                            .slice(11, -2);
+                    }
+                }
+            }
             this.loading = false;
         }
     }
