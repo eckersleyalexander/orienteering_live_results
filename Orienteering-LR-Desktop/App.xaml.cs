@@ -96,7 +96,7 @@ namespace Orienteering_LR_Desktop
 
             // Test string I was using
             // Broadcast("[{\"FirstName\": \"Gary\",\"LastName\": \"Jam\",\"Times\": []},{\"FirstName\": \"Bob\",\"LastName\": \"Johnson\",\"Times\": [0, 17387]},{\"FirstName\": \"Bill\",\"LastName\": \"Ginseng\",\"Times\": [0, 19435]}]");
-            Broadcast("[{\"FirstName\": \"Bob\",\"LastName\": \"Johnson\",\"Times\": [0, 17387]},{\"FirstName\": \"Bill\",\"LastName\": \"Ginseng\",\"Times\": [0, 19435]},{\"FirstName\": \"Gary\",\"LastName\": \"Jam\",\"Times\": []}]");
+            Broadcast("[{\"FirstName\": \"Bob\",\"LastName\": \"Johnson\",\"Times\": [0, 17387, 24325]},{\"FirstName\": \"Bill\",\"LastName\": \"Ginseng\",\"Times\": [0, 15210, 25210]},{\"FirstName\": \"Janice\",\"LastName\": \"Thyme\",\"Times\": [0, 12101, 27435]},{\"FirstName\": \"Gary\",\"LastName\": \"Jam\",\"Times\": []}]");
 
         }
 

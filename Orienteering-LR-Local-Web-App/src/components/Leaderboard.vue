@@ -7,7 +7,6 @@
             dark
             borderless
         >
-            
             <template slot="Position" slot-scope="data">
                 {{ data.index + 1 }}
             </template>
@@ -17,9 +16,8 @@
             </template>
 
             <template slot="Status" slot-scope="data">
-                {{ data.item.Times.length ? 'Started' : 'Ready' }}
+                {{ data.item.Times.length ? "Started" : "Ready" }}
             </template>
-
         </b-table>
     </div>
 </template>
@@ -57,28 +55,47 @@ export default {
             }
             this.tableFields = this.staticFields.concat(dynamicFields);
 
-            // build table items
+            // assign legs
             for (i = 0; i <= this.data.length - 1; i++) {
                 if (this.data[i].Times.length) {
                     for (var j = 1; j <= this.data[i].Times.length - 1; j++) {
                         var t = new Date(this.data[i].Times[j]);
-
                         if (t < this.bestTimes[j]) {
                             this.bestTimes[j] = t;
-                            this.data[i]["Diff " + j] = "";
-                        } else {
-                            // calculate time diff
-                            this.data[i]["Diff " + j] =
-                                "(+" +
-                                new Date(t - this.bestTimes[j])
-                                    .toISOString()
-                                    .slice(11, -2) +
-                                ")";
                         }
-
                         this.data[i]["Leg " + j] = t
                             .toISOString()
                             .slice(11, -2);
+                    }
+                }
+            }
+
+            // calculate time differences
+            for (i = 0; i <= this.data.length - 1; i++) {
+                if (this.data[i].Times.length) {
+                    for (j = 1; j <= this.data[i].Times.length - 1; j++) {
+                        t = new Date(this.data[i].Times[j]);
+
+                        // calculate time diff
+                        if (t.getTime() !== this.bestTimes[j].getTime()) {
+                            if (t < this.bestTimes[j]) {
+                                this.data[i]["Diff " + j] =
+                                    "(-" +
+                                    new Date(t - this.bestTimes[j])
+                                        .toISOString()
+                                        .slice(11, -2) +
+                                    ")";
+                            } else {
+                                this.data[i]["Diff " + j] =
+                                    "(+" +
+                                    new Date(t - this.bestTimes[j])
+                                        .toISOString()
+                                        .slice(11, -2) +
+                                    ")";
+                            }
+                        } else {
+                            this.data[i]["Diff " + j] = "( - )";
+                        }
                     }
                 }
             }
