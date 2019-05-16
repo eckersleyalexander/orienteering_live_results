@@ -30,8 +30,7 @@ export default {
             loading: true,
             data: null,
             tableFields: null,
-            staticFields: ["Position", "Name", "Status"],
-            bestTimes: []
+            staticFields: ["Position", "Name", "Status"]
         };
     },
     created() {
@@ -48,54 +47,43 @@ export default {
                 for (var i = 1; i <= this.data[0].Times.length - 1; i++) {
                     dynamicFields.push("Leg " + i);
                     dynamicFields.push("Diff " + i);
-
-                    // put the biggest time possible in each date
-                    this.bestTimes[i] = new Date(8640000000000000);
                 }
             }
             this.tableFields = this.staticFields.concat(dynamicFields);
 
-            // assign legs
+            // calculate time differences
             for (i = 0; i <= this.data.length - 1; i++) {
                 if (this.data[i].Times.length) {
                     for (var j = 1; j <= this.data[i].Times.length - 1; j++) {
                         var t = new Date(this.data[i].Times[j]);
-                        if (t < this.bestTimes[j]) {
-                            this.bestTimes[j] = t;
-                        }
-                        this.data[i]["Leg " + j] = t
-                            .toISOString()
-                            .slice(11, -2);
-                    }
-                }
-            }
-
-            // calculate time differences
-            for (i = 0; i <= this.data.length - 1; i++) {
-                if (this.data[i].Times.length) {
-                    for (j = 1; j <= this.data[i].Times.length - 1; j++) {
-                        t = new Date(this.data[i].Times[j]);
 
                         // calculate time diff
-                        if (t.getTime() !== this.bestTimes[j].getTime()) {
-                            if (t < this.bestTimes[j]) {
+                        if (
+                            t.getTime() !==
+                            new Date(this.data[0].Times[j]).getTime()
+                        ) {
+                            if (t < this.data[0].Times[j]) {
                                 this.data[i]["Diff " + j] =
                                     "(-" +
-                                    new Date(t - this.bestTimes[j])
+                                    new Date(this.data[0].Times[j] - t)
                                         .toISOString()
                                         .slice(11, -2) +
                                     ")";
                             } else {
                                 this.data[i]["Diff " + j] =
                                     "(+" +
-                                    new Date(t - this.bestTimes[j])
+                                    new Date(t - this.data[0].Times[j])
                                         .toISOString()
                                         .slice(11, -2) +
                                     ")";
                             }
                         } else {
-                            this.data[i]["Diff " + j] = "( - )";
+                            this.data[i]["Diff " + j] = "";
                         }
+
+                        this.data[i]["Leg " + j] = t
+                            .toISOString()
+                            .slice(11, -2);
                     }
                 }
             }
