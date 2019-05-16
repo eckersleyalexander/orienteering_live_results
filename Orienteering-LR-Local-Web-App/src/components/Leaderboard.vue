@@ -7,6 +7,19 @@
             dark
             borderless
         >
+            
+            <template slot="Position" slot-scope="data">
+                {{ data.index + 1 }}
+            </template>
+
+            <template slot="Name" slot-scope="data">
+                {{ data.item.FirstName }} {{ data.item.LastName }}
+            </template>
+
+            <template slot="Status" slot-scope="data">
+                {{ data.item.Times.length ? 'Started' : 'Ready' }}
+            </template>
+
         </b-table>
     </div>
 </template>
@@ -46,14 +59,6 @@ export default {
 
             // build table items
             for (i = 0; i <= this.data.length - 1; i++) {
-                this.data[i].Position = i + 1;
-                this.data[i].Name =
-                    this.data[i].FirstName + " " + this.data[i].LastName;
-                if (this.data[i].Times.length !== 0) {
-                    this.data[i].Status = "Started";
-                } else {
-                    this.data[i].Status = "Ready";
-                }
                 if (this.data[i].Times.length) {
                     for (var j = 1; j <= this.data[i].Times.length - 1; j++) {
                         var t = new Date(this.data[i].Times[j]);
