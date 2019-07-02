@@ -28,70 +28,114 @@ namespace Orienteering_LR_Desktop
 	/// </summary>
 	public partial class MainWindow : Window
     {
+        private void CommandBinding_CanExecute_1(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
 
+        private void CommandBinding_Executed_1(object sender, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.CloseWindow(this);
+        }
+
+        private void CommandBinding_Executed_2(object sender, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.MaximizeWindow(this);
+        }
+
+        private void CommandBinding_Executed_3(object sender, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.MinimizeWindow(this);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            int index = int.Parse(((Button)e.Source).Uid);
+
+            GridCursor.Margin = new Thickness(10 + (150 * index), 45, 0, 0);
+
+            switch (index)
+            {
+                case 0:
+                    CompGrid.Visibility = Visibility.Visible;
+                    ContGrid.Visibility = Visibility.Hidden;
+                    ClassGrid.Visibility = Visibility.Hidden;
+                    break;
+                case 1:
+                    CompGrid.Visibility = Visibility.Hidden;
+                    ContGrid.Visibility = Visibility.Visible;
+                    ClassGrid.Visibility = Visibility.Hidden;
+                    break;
+                case 2:
+                    CompGrid.Visibility = Visibility.Hidden;
+                    ContGrid.Visibility = Visibility.Hidden;
+                    ClassGrid.Visibility = Visibility.Visible;
+                    break;
+            }
+        }
         public List<Runner> runners = new List<Runner>();
         private readonly Reader _reader;
 
         public MainWindow()
         {
-            InitializeComponent();
-            testGrid.CellEditEnding += Datagrid_CellEditEnding;
+            //InitializeComponent();
+            //testGrid.CellEditEnding += Datagrid_CellEditEnding;
 
-            runners.Add(new Runner()
-            {
-                id = "1",
-                firstName = "John",
-                lastName = "Smith"
-            });
-            testGrid.ItemsSource = runners;
-            if (File.Exists("testdb.db"))
-            {
-                File.Delete("testdb.db");
-            }
-            using (var db = new CompetitorContext())
-            {
-                db.GetService<IMigrator>().Migrate();                
-            }
+            //runners.Add(new Runner()
+            //{
+            //    id = "1",
+            //    firstName = "John",
+            //    lastName = "Smith"
+            //});
+            //testGrid.ItemsSource = runners;
+            //if (File.Exists("testdb.db"))
+            //{
+            //    File.Delete("testdb.db");
+            //}
+            //using (var db = new CompetitorContext())
+            //{
+            //    db.GetService<IMigrator>().Migrate();                
+            //}
 
-            var s = new Database.Store();
-            s.CreateClub(new Club()
-            {
-                ClubId = 1
-            });
+            //var s = new Database.Store();
+            //s.CreateClub(new Club()
+            //{
+            //    ClubId = 1
+            //});
 
-            s.CreateRaceClass(new RaceClass()
-            {
-                RaceClassId = 1
-            });
+            //s.CreateRaceClass(new RaceClass()
+            //{
+            //    RaceClassId = 1
+            //});
 
-            s.CreateCompetitor(new Competitor()
-            {
-                FirstName = "Person",
-                LastName = "A",
-                ChipId = 2087837,
-                ClubId = 1,
-                RaceClassId = 1
-            });
+            //s.CreateCompetitor(new Competitor()
+            //{
+            //    FirstName = "Person",
+            //    LastName = "A",
+            //    ChipId = 2087837,
+            //    ClubId = 1,
+            //    RaceClassId = 1
+            //});
         
-            s.CreateCompetitor(new Competitor()
-            {
-                FirstName = "Person",
-                LastName = "B",
-                ChipId = 2128274,
-                ClubId = 1,
-                RaceClassId = 1
-            });
+            //s.CreateCompetitor(new Competitor()
+            //{
+            //    FirstName = "Person",
+            //    LastName = "B",
+            //    ChipId = 2128274,
+            //    ClubId = 1,
+            //    RaceClassId = 1
+            //});
 
-            _reader = new Reader
-            {
-                WriteBackupFile = false,
-                WriteLogFile = false
-            };
+            //_reader = new Reader
+            //{
+            //    WriteBackupFile = false,
+            //    WriteLogFile = false
+            //};
 
-            _reader.OnlineStampRead += _reader_OnlineStampRead;
+            //_reader.OnlineStampRead += _reader_OnlineStampRead;
 
-            _reader.OutputDevice = new ReaderDeviceInfo(ReaderDeviceType.None);
-            _reader.OpenOutputDevice();
+            //_reader.OutputDevice = new ReaderDeviceInfo(ReaderDeviceType.None);
+            //_reader.OpenOutputDevice();
         }
 
         private void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
@@ -153,6 +197,12 @@ namespace Orienteering_LR_Desktop
                     MessageBox.Show(ex.Message);
                 }
             }
+        }
+
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+                this.DragMove();
         }
     }
 
