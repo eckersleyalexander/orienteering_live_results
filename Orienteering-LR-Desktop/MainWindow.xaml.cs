@@ -28,57 +28,25 @@ namespace Orienteering_LR_Desktop
 	/// </summary>
 	public partial class MainWindow : Window
     {
-        private void CommandBinding_CanExecute_1(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
-        }
+        public List<Runner> CompetitorsList;
+        public List<Control> ControlsList = new List<Control>();
+        public List<Course> CoursesList = new List<Course>();
+        public List<Runner> Runners = new List<Runner>();
 
-        private void CommandBinding_Executed_1(object sender, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.CloseWindow(this);
-        }
-
-        private void CommandBinding_Executed_2(object sender, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.MaximizeWindow(this);
-        }
-
-        private void CommandBinding_Executed_3(object sender, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.MinimizeWindow(this);
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            int index = int.Parse(((Button)e.Source).Uid);
-
-            GridCursor.Margin = new Thickness(10 + (150 * index), 45, 0, 0);
-
-            switch (index)
-            {
-                case 0:
-                    CompGrid.Visibility = Visibility.Visible;
-                    ContGrid.Visibility = Visibility.Hidden;
-                    ClassGrid.Visibility = Visibility.Hidden;
-                    break;
-                case 1:
-                    CompGrid.Visibility = Visibility.Hidden;
-                    ContGrid.Visibility = Visibility.Visible;
-                    ClassGrid.Visibility = Visibility.Hidden;
-                    break;
-                case 2:
-                    CompGrid.Visibility = Visibility.Hidden;
-                    ContGrid.Visibility = Visibility.Hidden;
-                    ClassGrid.Visibility = Visibility.Visible;
-                    break;
-            }
-        }
-        public List<Runner> runners = new List<Runner>();
         private readonly Reader _reader;
 
         public MainWindow()
         {
-            //InitializeComponent();
+            InitializeComponent();
+            CompetitorsList = new List<Runner>();
+            CompetitorsList.Add(new Runner()
+            {
+                Id = "1",
+                FirstName = "Alex",
+                LastName = "Test"
+            });
+            CompetitorsTable.ItemsSource = CompetitorsList;
+
             //testGrid.CellEditEnding += Datagrid_CellEditEnding;
 
             //runners.Add(new Runner()
@@ -116,7 +84,7 @@ namespace Orienteering_LR_Desktop
             //    ClubId = 1,
             //    RaceClassId = 1
             //});
-        
+
             //s.CreateCompetitor(new Competitor()
             //{
             //    FirstName = "Person",
@@ -168,8 +136,8 @@ namespace Orienteering_LR_Desktop
                     var row = e.Row;
                     var el = e.EditingElement as TextBox;
                     int rowIndex = row.GetIndex();
-                    Runner runnerRow = runners[rowIndex];
-                    Debug.WriteLine("Row: " + rowIndex + ", column changed: " + bindingPath + ", new value: " + el.Text + ", ID = " + runnerRow.id);
+                    Runner runnerRow = Runners[rowIndex];
+                    Debug.WriteLine("Row: " + rowIndex + ", column changed: " + bindingPath + ", new value: " + el.Text + ", ID = " + runnerRow.Id);
                 }
             }
         }
@@ -199,6 +167,52 @@ namespace Orienteering_LR_Desktop
             }
         }
 
+        private void CommandBinding_CanExecute_1(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void CommandBinding_Executed_1(object sender, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.CloseWindow(this);
+        }
+
+        private void CommandBinding_Executed_2(object sender, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.MaximizeWindow(this);
+        }
+
+        private void CommandBinding_Executed_3(object sender, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.MinimizeWindow(this);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            int index = int.Parse(((Button)e.Source).Uid);
+
+            GridCursor.Margin = new Thickness(10 + (150 * index), 45, 0, 0);
+
+            switch (index)
+            {
+                case 0:
+                    CompGrid.Visibility = Visibility.Visible;
+                    ContGrid.Visibility = Visibility.Hidden;
+                    ClassGrid.Visibility = Visibility.Hidden;
+                    break;
+                case 1:
+                    CompGrid.Visibility = Visibility.Hidden;
+                    ContGrid.Visibility = Visibility.Visible;
+                    ClassGrid.Visibility = Visibility.Hidden;
+                    break;
+                case 2:
+                    CompGrid.Visibility = Visibility.Hidden;
+                    ContGrid.Visibility = Visibility.Hidden;
+                    ClassGrid.Visibility = Visibility.Visible;
+                    break;
+            }
+        }
+
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
@@ -208,11 +222,23 @@ namespace Orienteering_LR_Desktop
 
     public class Runner
     {
-        public string id { get; set; }
-        public string firstName { get; set; }
-        public string lastName { get; set; }
+        public string Id { get; set; }
+        public string Status { get; set;  }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 
+    public class Control
+    {
+        public string Id { get; set; }
+        public string RadioBool { get; set; }
+    }
+
+    public class Course
+    {
+        public List<Control> Controls { get; set; }
+        public String Name { get; set; }
+    }
 
 
 }

@@ -11,8 +11,8 @@
         <CommandBinding Command="{x:Static SystemCommands.MaximizeWindowCommand}" CanExecute="CommandBinding_CanExecute_1" Executed="CommandBinding_Executed_2" />
         <CommandBinding Command="{x:Static SystemCommands.MinimizeWindowCommand}" CanExecute="CommandBinding_CanExecute_1" Executed="CommandBinding_Executed_3" />
     </Window.CommandBindings>
-    <StackPanel Background="WhiteSmoke" Margin="0">
-        <Grid Height="40" MouseDown="Grid_MouseDown" Background="Transparent">
+    <DockPanel>
+        <Grid DockPanel.Dock="Top" Height="40" MouseDown="Grid_MouseDown" Background="Transparent">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                 <DockPanel>
                     <Menu DockPanel.Dock="Top">
@@ -34,7 +34,7 @@
                 <Button Content="Close" Command="{x:Static SystemCommands.CloseWindowCommand}" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FFA2A2A2" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
             </StackPanel>
         </Grid>
-        <Grid Height="50">
+        <Grid Height="50" DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="10 0">
                 <Button Uid="0" Width="150" Content="COMPETITORS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Button_Click"/>
                 <Button Uid="1" Width="150" Content="CONTROLS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Button_Click"/>
@@ -42,11 +42,12 @@
             </StackPanel>
             <Grid x:Name="GridCursor" Width="150" Height="5" Background="#FF2196F3" HorizontalAlignment="Left" Margin="10,45,0,0"/>
         </Grid>
-        <Grid x:Name="MainGrid" Height="{Binding Source={x:Static SystemParameters.FullPrimaryScreenHeight}}" Background="Transparent">
-            <Grid x:Name="CompGrid" Background="Aquamarine" Visibility="Visible">
-
+        <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" Background="Red" VerticalAlignment="Stretch">
+            <Grid x:Name="CompGrid" Background="#018786" Visibility="Visible">
+                <DataGrid Name="CompetitorsTable" HorizontalAlignment="Stretch" Margin="50,50,50,50" VerticalAlignment="Stretch" Background="White" Foreground="Black" AutoGenerateColumns="False"/>
+                    
             </Grid>
-            <Grid x:Name="ContGrid" Background="Beige" Visibility="Hidden">
+            <Grid x:Name="ContGrid" Background="#03DAC6" Visibility="Hidden">
 
             </Grid>
             <Grid x:Name="ClassGrid" Background="CadetBlue" Visibility="Hidden">
@@ -54,5 +55,5 @@
             </Grid>
         </Grid>
         
-    </StackPanel>
+    </DockPanel>
 </Window>
