@@ -49,7 +49,7 @@ namespace Orienteering_LR_Desktop
         {
             try
             {
-                var text = "";
+                var text = 0;
                 var text2 = "";
                 var text3 = "";
                 // 

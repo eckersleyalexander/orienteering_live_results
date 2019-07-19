@@ -28,7 +28,7 @@ namespace Orienteering_LR_Desktop
 	/// </summary>
 	public partial class MainWindow : Window
     {
-        public List<Runner> CompetitorsList;
+        public List<Runner> CompetitorsList = new List<Runner>();
         public List<Control> ControlsList = new List<Control>();
         public List<Course> CoursesList = new List<Course>();
         public List<Runner> Runners = new List<Runner>();
@@ -38,72 +38,57 @@ namespace Orienteering_LR_Desktop
         public MainWindow()
         {
             InitializeComponent();
-            CompetitorsList = new List<Runner>();
-            CompetitorsList.Add(new Runner()
-            {
-                Id = "1",
-                FirstName = "Alex",
-                LastName = "Test"
-            });
+            GetInitData();
             CompetitorsTable.ItemsSource = CompetitorsList;
+            ControlsTable.ItemsSource = ControlsList;
+            if (File.Exists("testdb.db"))
+            {
+                File.Delete("testdb.db");
+            }
+            using (var db = new CompetitorContext())
+            {
+                db.GetService<IMigrator>().Migrate();
+            }
 
-            //testGrid.CellEditEnding += Datagrid_CellEditEnding;
+            var s = new Database.Store();
+            s.CreateClub(new Club()
+            {
+                ClubId = 1
+            });
 
-            //runners.Add(new Runner()
-            //{
-            //    id = "1",
-            //    firstName = "John",
-            //    lastName = "Smith"
-            //});
-            //testGrid.ItemsSource = runners;
-            //if (File.Exists("testdb.db"))
-            //{
-            //    File.Delete("testdb.db");
-            //}
-            //using (var db = new CompetitorContext())
-            //{
-            //    db.GetService<IMigrator>().Migrate();                
-            //}
+            s.CreateRaceClass(new RaceClass()
+            {
+                RaceClassId = 1
+            });
 
-            //var s = new Database.Store();
-            //s.CreateClub(new Club()
-            //{
-            //    ClubId = 1
-            //});
+            s.CreateCompetitor(new Competitor()
+            {
+                FirstName = "Bob",
+                LastName = "Bobington",
+                ChipId = 2087837,
+                ClubId = 1,
+                RaceClassId = 1
+            });
 
-            //s.CreateRaceClass(new RaceClass()
-            //{
-            //    RaceClassId = 1
-            //});
+            s.CreateCompetitor(new Competitor()
+            {
+                FirstName = "Testman",
+                LastName = "Smith",
+                ChipId = 2128274,
+                ClubId = 1,
+                RaceClassId = 1
+            });
 
-            //s.CreateCompetitor(new Competitor()
-            //{
-            //    FirstName = "Person",
-            //    LastName = "A",
-            //    ChipId = 2087837,
-            //    ClubId = 1,
-            //    RaceClassId = 1
-            //});
+            _reader = new Reader
+            {
+                WriteBackupFile = false,
+                WriteLogFile = false
+            };
 
-            //s.CreateCompetitor(new Competitor()
-            //{
-            //    FirstName = "Person",
-            //    LastName = "B",
-            //    ChipId = 2128274,
-            //    ClubId = 1,
-            //    RaceClassId = 1
-            //});
+            _reader.OnlineStampRead += _reader_OnlineStampRead;
 
-            //_reader = new Reader
-            //{
-            //    WriteBackupFile = false,
-            //    WriteLogFile = false
-            //};
-
-            //_reader.OnlineStampRead += _reader_OnlineStampRead;
-
-            //_reader.OutputDevice = new ReaderDeviceInfo(ReaderDeviceType.None);
-            //_reader.OpenOutputDevice();
+            _reader.OutputDevice = new ReaderDeviceInfo(ReaderDeviceType.None);
+            _reader.OpenOutputDevice();
         }
 
         private void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
@@ -140,6 +125,31 @@ namespace Orienteering_LR_Desktop
                     Debug.WriteLine("Row: " + rowIndex + ", column changed: " + bindingPath + ", new value: " + el.Text + ", ID = " + runnerRow.Id);
                 }
             }
+        }
+       
+        private void GetInitData()
+        {
+            var db = new Database.Query();
+            List<Database.Competitor> Competitors = db.GetCompetitors();
+            foreach (Database.Competitor c in Competitors)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    CompetitorsList.Add(new Runner()
+                    {
+                        FirstName = c.FirstName,
+                        LastName = c.LastName,
+                        Id = c.ChipId,
+                        Status = "Implement Status Field"
+                    });
+                }
+            }
+
+            ControlsList.Add(new Control()
+            {
+                Id = 1000001,
+                RadioBool = false
+            });
         }
 
         private void ConnectRadio(object sender, RoutedEventArgs e)
@@ -222,7 +232,7 @@ namespace Orienteering_LR_Desktop
 
     public class Runner
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Status { get; set;  }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -230,8 +240,8 @@ namespace Orienteering_LR_Desktop
 
     public class Control
     {
-        public string Id { get; set; }
-        public string RadioBool { get; set; }
+        public int Id { get; set; }
+        public Boolean RadioBool { get; set; }
     }
 
     public class Course

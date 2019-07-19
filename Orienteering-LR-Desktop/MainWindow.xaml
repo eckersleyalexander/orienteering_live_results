@@ -44,11 +44,94 @@
         </Grid>
         <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" Background="Red" VerticalAlignment="Stretch">
             <Grid x:Name="CompGrid" Background="#018786" Visibility="Visible">
-                <DataGrid Name="CompetitorsTable" HorizontalAlignment="Stretch" Margin="50,50,50,50" VerticalAlignment="Stretch" Background="White" Foreground="Black" AutoGenerateColumns="False"/>
-                    
+                <DataGrid Name="CompetitorsTable" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Stretch" Background="White" Foreground="Black" AutoGenerateColumns="False"
+                    CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserSortColumns="False" RowDetailsVisibilityMode="Collapsed" CanUserAddRows="False" IsReadOnly="True" BorderBrush="{x:Null}">
+                    <DataGrid.Resources>
+                        <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
+                            <Setter Property="Background" Value="White" />
+                            <Setter Property="Foreground" Value="Black" />
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style TargetType="{x:Type DataGridRow}">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#e3e5e8"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#e3e5e8" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="{x:Type DataGridCell}">
+                            <Setter Property="BorderBrush" Value="{x:Null}" />
+                            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#e3e5e8"/>
+                                    <Setter Property="BorderBrush" Value="{x:Null}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style TargetType="ScrollBar">
+                            <Setter Property="Background" Value="White" />
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Width="*" Binding="{Binding Id}" Foreground="Black"/>
+                        <DataGridTextColumn Header="Status" Width="*" Binding="{Binding Status}" Foreground="Black"/>
+                        <DataGridTextColumn Header="First Name" Width="*" Binding="{Binding FirstName}" Foreground="Black"/>
+                        <DataGridTextColumn Header="Last Name" Width="*" Binding="{Binding LastName}" Foreground="Black"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
             <Grid x:Name="ContGrid" Background="#03DAC6" Visibility="Hidden">
-
+                <DataGrid Name="ControlsTable" HorizontalAlignment="Stretch" Margin="150,10,150,10" VerticalAlignment="Stretch" Background="White" Foreground="Black" AutoGenerateColumns="False"
+                    CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserSortColumns="False" RowDetailsVisibilityMode="Collapsed" CanUserAddRows="False" BorderBrush="{x:Null}">
+                    <DataGrid.Resources>
+                        <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
+                            <Setter Property="Background" Value="White" />
+                            <Setter Property="Foreground" Value="Black" />
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style TargetType="{x:Type DataGridRow}">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#e3e5e8"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#e3e5e8" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="{x:Type DataGridCell}">
+                            <Setter Property="BorderBrush" Value="{x:Null}" />
+                            <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#e3e5e8"/>
+                                    <Setter Property="BorderBrush" Value="{x:Null}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style TargetType="ScrollBar">
+                            <Setter Property="Background" Value="White" />
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Control ID" Width="*" Binding="{Binding Id}" Foreground="Black" IsReadOnly="True"/>
+                        <DataGridCheckBoxColumn Header="Radio Control" Width="*" Binding="{Binding RadioBool}" />
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
             <Grid x:Name="ClassGrid" Background="CadetBlue" Visibility="Hidden">
 
