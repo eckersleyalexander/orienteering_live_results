@@ -31,6 +31,7 @@ namespace Orienteering_LR_Desktop
 
         public List<Runner> runners = new List<Runner>();
         private readonly Reader _reader;
+        private readonly OESync oeSync;
 
         public MainWindow()
         {
@@ -92,6 +93,10 @@ namespace Orienteering_LR_Desktop
 
             _reader.OutputDevice = new ReaderDeviceInfo(ReaderDeviceType.None);
             _reader.OpenOutputDevice();
+
+            // this should be in the setup process -> need to choose the oe directory
+            // currently using pwd\test
+            oeSync = new OESync(Directory.GetCurrentDirectory() + "\\test");
         }
 
         private void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)

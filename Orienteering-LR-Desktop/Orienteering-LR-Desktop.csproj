@@ -212,6 +212,7 @@
     <Compile Include="Database\Model.cs" />
     <Compile Include="Database\Query.cs" />
     <Compile Include="Database\Store.cs" />
+    <Compile Include="DbisamRead.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -223,6 +224,7 @@
       <DependentUpon>20190514124920_mig.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\CompetitorContextModelSnapshot.cs" />
+    <Compile Include="OESync.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
