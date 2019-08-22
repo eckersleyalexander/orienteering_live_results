@@ -16,8 +16,7 @@ namespace Orienteering_LR_Desktop.Database
         public DbSet<Course> Courses { get; set; }
         public DbSet<Punch> Punches { get; set; }
         public DbSet<Stage> Stages { get; set; }
-
-
+        public DbSet<ClassCourse> ClassCourses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,7 +43,6 @@ namespace Orienteering_LR_Desktop.Database
         public int StartNo { get; set; }
         public string Gender { get; set; }
         public int ChipId { get; set; }
-        
         public int ClubId { get; set; } // fk -> Club
         public Club Club { get; set; }
         public int RaceClassId { get; set; } // fk -> RaceClass
@@ -105,7 +103,6 @@ namespace Orienteering_LR_Desktop.Database
         public float Distance { get; set; } // in km
         public float Climb { get; set; } // in m
         public string Description { get; set; }
-
         public string CourseData { get; set; }
         public string DistanceData { get; set; }
     }
@@ -113,7 +110,6 @@ namespace Orienteering_LR_Desktop.Database
     public class ClassCourse {
         public int CompetitionPos { get; set; }
         public string Stage { get; set; }
-
         public int RaceClassId { get; set; }
         public int CourseId { get; set; }
         public Course Course { get; set; }
