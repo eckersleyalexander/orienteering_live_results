@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 
 namespace Orienteering_LR_Desktop.Database
 {
@@ -40,14 +41,14 @@ namespace Orienteering_LR_Desktop.Database
         public int CompetitorId {get; set;}
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public int Age { get; set; }
-        public int StartNo { get; set; }
+        public Nullable<int> Age { get; set; }
+        public Nullable<int> StartNo { get; set; }
         public string Gender { get; set; }
-        public int ChipId { get; set; }
+        public Nullable<int> ChipId { get; set; }
         
-        public int ClubId { get; set; } // fk -> Club
+        public Nullable<int> ClubId { get; set; } // fk -> Club
         public Club Club { get; set; }
-        public int RaceClassId { get; set; } // fk -> RaceClass
+        public Nullable<int> RaceClassId { get; set; } // fk -> RaceClass
         public RaceClass RaceClass { get; set; }
 	}	
 
@@ -89,8 +90,8 @@ namespace Orienteering_LR_Desktop.Database
         public int RaceClassId { get; set; }
         public string Abbreviation { get; set; }
         public string Name { get; set; }
-        public int AgeFrom { get; set; }
-        public int AgeTo { get; set; }
+        public Nullable<int> AgeFrom { get; set; }
+        public Nullable<int> AgeTo { get; set; }
         public string Gender { get; set; }
         public int _RaceClassTypeValue { get; set; }
         public RaceClassType RaceClassType 

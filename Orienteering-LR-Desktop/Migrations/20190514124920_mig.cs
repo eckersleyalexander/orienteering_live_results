@@ -60,8 +60,8 @@ namespace Orienteering_LR_Desktop.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Abbreviation = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    AgeFrom = table.Column<int>(nullable: false),
-                    AgeTo = table.Column<int>(nullable: false),
+                    AgeFrom = table.Column<int>(nullable: true),
+                    AgeTo = table.Column<int>(nullable: true),
                     Gender = table.Column<string>(nullable: true),
                     _RaceClassTypeValue = table.Column<int>(nullable: false),
                     RaceClassType = table.Column<int>(nullable: false)
@@ -111,12 +111,12 @@ namespace Orienteering_LR_Desktop.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
-                    Age = table.Column<int>(nullable: false),
-                    StartNo = table.Column<int>(nullable: false),
+                    Age = table.Column<int>(nullable: true),
+                    StartNo = table.Column<int>(nullable: true),
                     Gender = table.Column<string>(nullable: true),
-                    ChipId = table.Column<int>(nullable: false),
-                    ClubId = table.Column<int>(nullable: false),
-                    RaceClassId = table.Column<int>(nullable: false)
+                    ChipId = table.Column<int>(nullable: true),
+                    ClubId = table.Column<int>(nullable: true),
+                    RaceClassId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {

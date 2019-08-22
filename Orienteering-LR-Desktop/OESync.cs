@@ -12,15 +12,13 @@ namespace Orienteering_LR_Desktop
     {
         public string OEEventPath;
         private int SyncTime; // in seconds
-        private bool Running;
         private Timer SyncFunc;
-        
+        private static readonly string[] ExpectedTables = { "Teiln.dat", "Kat.dat", "Club.dat", "Chip1.dat", "Bahnen1.dat" };
 
         public OESync(string path)
         {
             OEEventPath = path;
             SyncTime = 30;
-            Running = false;
             SyncFunc = null;
         }
 
@@ -28,7 +26,6 @@ namespace Orienteering_LR_Desktop
         {
             OEEventPath = path;
             SyncTime = timer;
-            Running = false;
             SyncFunc = null;
         }
 
@@ -45,7 +42,7 @@ namespace Orienteering_LR_Desktop
             return db;
         }
 
-        public void OESyncDataNow()
+        public bool OESyncDataNow()
         {
             DataSet OEdb = ReadOEDb();
 
@@ -53,34 +50,132 @@ namespace Orienteering_LR_Desktop
             // drop the current tables
             // then write all the records to our db
 
-            if (!OEdb.Tables.Contains("Telin"))
+            foreach (string tableName in ExpectedTables)
             {
-                return;
+                if(OEdb.Tables[tableName] == null)
+                {
+                    // throw error or otherwise notify main window?
+                    return false;
+                }
             }
 
             using (var context = new Database.CompetitorContext())
             {
-                //context.Competitors.RemoveRange(context.Competitors);
 
+                context.RaceClasses.RemoveRange(context.RaceClasses);
+                context.Clubs.RemoveRange(context.Clubs);
+
+                // add clubs
+                foreach (DataRow row in OEdb.Tables["Club.dat"].Rows)
+                {
+                    Database.Club newClub = new Database.Club
+                    {
+                        ClubId = row.Field<int>("ClubNr"),
+                        Name = row.Field<string>("Ort")
+                    };
+                    context.Clubs.Add(newClub);
+                }
+
+                // add classes
+                foreach (DataRow row in OEdb.Tables["Kat.dat"].Rows)
+                {
+                    Database.RaceClass newClass = new Database.RaceClass
+                    {
+                        RaceClassId = row.Field<int>("KatNr"),
+                        Abbreviation = row.Field<string>("KatKurz"),
+                        Name = row.Field<string>("KatLang"),
+                        AgeFrom = row.Field<Nullable<int>>("AlterVon"),
+                        AgeTo = row.Field<Nullable<int>>("AlterBis"),
+                        Gender = row.Field<Nullable<bool>>("Maennlich") == null ? null : (row.Field<bool>("Maennlich") ? "Male" : "Female"),
+                        _RaceClassTypeValue = row.Field<Nullable<int>>("KatTyp2") == null ? 0 : row.Field<int>("KatTyp2")
+                    };
+                    context.RaceClasses.Add(newClass);
+                }
+
+                context.SaveChanges();
+
+                // add competitors
+                context.Competitors.RemoveRange(context.Competitors);
+                foreach (DataRow row in OEdb.Tables["Teiln.dat"].Rows)
+                {
+                    Database.Competitor comp = new Database.Competitor();
+
+                    comp.CompetitorId = row.Field<int>("IdNr");
+                    comp.FirstName = row.Field<string>("Vorname");
+                    comp.LastName = row.Field<string>("Name");
+                    comp.Age = row.Field<Nullable<int>>("Jgg");
+                    comp.StartNo = row.Field<Nullable<int>>("StartNr");
+
+                    if (row.Field<Nullable<bool>>("Maennlich") == true)
+                    {
+                        comp.Gender = "Male";
+                    }
+                    else if (row.Field<Nullable<bool>>("Maennlich") == false)
+                    {
+                        comp.Gender = "Female";
+                    }
+                    else
+                    {
+                        comp.Gender = null;
+                    }
+
+                    comp.ChipId = row.Field<Nullable<int>>("ChipNr1");
+
+                    comp.ClubId = row.Field<Nullable<int>>("ClubNr");
+                    if (comp.ClubId == null)
+                    {
+                        comp.Club = null;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            comp.Club = context.Clubs.Single(a => a.ClubId == comp.ClubId);
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            comp.Club = null;
+                        }
+                    }
+
+                    comp.RaceClassId = row.Field<Nullable<int>>("KatNr");
+                    if (comp.RaceClassId == null)
+                    {
+                        comp.RaceClass = null;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            comp.RaceClass = context.RaceClasses.Single(a => a.RaceClassId == comp.RaceClassId);
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            comp.RaceClass = null;
+                        }
+                    }
+
+                    context.Competitors.Add(comp);
+                }
+
+                context.SaveChanges();
             }
-
-            // competitor
-
-            // club
 
             // team
 
-            // comptimes - times incomplete
+            // comptimes
 
-            // raceclass
-
-            
+            return true;
         }
 
         public void StartSync()
         {
             // begin syncing on timer
-            SyncFunc = new Timer(e => OESyncDataNow(), null, TimeSpan.Zero, TimeSpan.FromSeconds(SyncTime));
+            StopSync();
+            if (OESyncDataNow())
+            {
+                SyncFunc = new Timer(e => OESyncDataNow(), null, TimeSpan.FromSeconds(SyncTime), TimeSpan.FromSeconds(SyncTime));
+            }
         }
 
         public void StopSync()

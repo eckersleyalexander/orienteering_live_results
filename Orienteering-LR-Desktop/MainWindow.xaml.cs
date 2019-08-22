@@ -83,20 +83,20 @@ namespace Orienteering_LR_Desktop
                 RaceClassId = 1
             });
 
+            // radio punch receiver
             _reader = new Reader
             {
                 WriteBackupFile = false,
                 WriteLogFile = false
             };
-
             _reader.OnlineStampRead += _reader_OnlineStampRead;
-
             _reader.OutputDevice = new ReaderDeviceInfo(ReaderDeviceType.None);
             _reader.OpenOutputDevice();
 
             // this should be in the setup process -> need to choose the oe directory
             // currently using pwd\test
             oeSync = new OESync(Directory.GetCurrentDirectory() + "\\test");
+            oeSync.StartSync();
         }
 
         private void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)

@@ -30,9 +30,9 @@ namespace Orienteering_LR_Desktop
 
             server.RegisterModule(new WebApiModule());
             server.Module<WebApiModule>().RegisterController<ApiController>();
-			server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
-			server.Module<StaticFilesModule>().UseRamCache = true;
-			server.Module<StaticFilesModule>().DefaultExtension = ".html";
+			//server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
+			//server.Module<StaticFilesModule>().UseRamCache = true;
+			//server.Module<StaticFilesModule>().DefaultExtension = ".html";
             server.RegisterModule(new WebSocketsModule());
             server.Module<WebSocketsModule>().RegisterWebSocketsServer<LeaderboardSocket>("/leaderboard", leaderboard);
             server.RunAsync();
