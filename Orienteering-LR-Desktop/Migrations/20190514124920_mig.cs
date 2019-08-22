@@ -25,8 +25,8 @@ namespace Orienteering_LR_Desktop.Migrations
                 {
                     CourseId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Distance = table.Column<float>(nullable: false),
-                    Climb = table.Column<float>(nullable: false),
+                    Distance = table.Column<float>(nullable: true),
+                    Climb = table.Column<float>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     CourseData = table.Column<string>(nullable: true),
                     DistanceData = table.Column<string>(nullable: true)
@@ -84,19 +84,25 @@ namespace Orienteering_LR_Desktop.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ClassCourse",
+                name: "ClassCourses",
                 columns: table => new
                 {
                     RaceClassId = table.Column<int>(nullable: false),
-                    CourseId = table.Column<int>(nullable: false),
+                    CourseId = table.Column<int>(nullable: true),
                     CompetitionPos = table.Column<int>(nullable: false),
-                    Stage = table.Column<string>(nullable: true)
+                    Stage = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ClassCourse", x => new { x.RaceClassId, x.CourseId });
+                    table.PrimaryKey("PK_ClassCourses", x => new { x.RaceClassId, x.Stage, x.CompetitionPos });
                     table.ForeignKey(
-                        name: "FK_ClassCourse_Courses_CourseId",
+                        name: "FK_ClassCourses_RaceClasses_RaceClassId",
+                        column: x => x.RaceClassId,
+                        principalTable: "RaceClasses",
+                        principalColumn: "RaceClassId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ClassCourses_Courses_CourseId",
                         column: x => x.CourseId,
                         principalTable: "Courses",
                         principalColumn: "CourseId",
@@ -176,9 +182,14 @@ namespace Orienteering_LR_Desktop.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ClassCourse_CourseId",
-                table: "ClassCourse",
+                name: "IX_ClassCourses_CourseId",
+                table: "ClassCourses",
                 column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ClassCourses_RaceClassId",
+                table: "ClassCourses",
+                column: "RaceClassId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Competitors_ClubId",
@@ -191,6 +202,11 @@ namespace Orienteering_LR_Desktop.Migrations
                 column: "RaceClassId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CompTimes_CompetitorId",
+                table: "CompTimes",
+                column: "CompetitorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Teams_CompetitorId",
                 table: "Teams",
                 column: "CompetitorId");
@@ -199,7 +215,7 @@ namespace Orienteering_LR_Desktop.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ClassCourse");
+                name: "ClassCourses");
 
             migrationBuilder.DropTable(
                 name: "CompTimes");

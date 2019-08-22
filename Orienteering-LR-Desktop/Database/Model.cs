@@ -15,15 +15,15 @@ namespace Orienteering_LR_Desktop.Database
         public DbSet<CompTimes> CompTimes { get; set; }
         public DbSet<RaceClass> RaceClasses { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<ClassCourse> ClassCourses { get; set; }
         public DbSet<Punch> Punches { get; set; }
         public DbSet<Stage> Stages { get; set; }
-
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ClassCourse>()
-                .HasKey(c => new { c.RaceClassId, c.CourseId });
+                .HasKey(c => new { c.RaceClassId, c.Stage, c.CompetitionPos });
             modelBuilder.Entity<CompTimes>()
                 .HasKey(c => new { c.CompetitorId, c.Stage });
             modelBuilder.Entity<Stage>()
@@ -103,8 +103,8 @@ namespace Orienteering_LR_Desktop.Database
 
     public class Course {
         public int CourseId { get; set; }
-        public float Distance { get; set; } // in km
-        public float Climb { get; set; } // in m
+        public Nullable<float> Distance { get; set; } // in km
+        public Nullable<float> Climb { get; set; } // in m
         public string Description { get; set; }
 
         public string CourseData { get; set; }
@@ -116,7 +116,8 @@ namespace Orienteering_LR_Desktop.Database
         public string Stage { get; set; }
 
         public int RaceClassId { get; set; }
-        public int CourseId { get; set; }
+        public RaceClass RaceClass { get; set; }
+        public Nullable<int> CourseId { get; set; }
         public Course Course { get; set; }
     }
 

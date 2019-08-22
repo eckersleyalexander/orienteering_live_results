@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Data;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Orienteering_LR_Desktop
 {
@@ -61,9 +62,71 @@ namespace Orienteering_LR_Desktop
 
             using (var context = new Database.CompetitorContext())
             {
-
+                // drop current tables
+                context.Courses.RemoveRange(context.Courses);
                 context.RaceClasses.RemoveRange(context.RaceClasses);
                 context.Clubs.RemoveRange(context.Clubs);
+
+                //courses
+                foreach (DataRow row in OEdb.Tables["Bahnen1.dat"].Rows)
+                {
+                    // collect checkpoints for this course
+                    List<int> checkpoints = new List<int>();
+                    
+                    // start checkpoint
+                    if (row.Field<Nullable<int>>("StartCodeNr") != null)
+                    {
+                        checkpoints.Add(row.Field<int>("StartCodeNr"));
+                    }
+
+                    // course checkpoints
+                    for (int i = 1; i <= 64; i++)
+                    {
+                        Nullable<int> c = row.Field<Nullable<int>>("CodeNr" + i);
+                        if (c == null)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            checkpoints.Add((int)c);
+                        }
+                    }
+
+                    // finish checkpoint
+                    if (row.Field<Nullable<int>>("ZielStr") != null)
+                    {
+                        checkpoints.Add(row.Field<int>("ZielStr"));
+                    }
+
+                    Database.Course newCourse = new Database.Course
+                    {
+                        CourseId = row.Field<int>("BahnNr"),
+                        Distance = (Nullable<float>)row.Field<Nullable<double>>("BahnKm"),
+                        Climb = (Nullable<float>)row.Field<Nullable<int>>("BahnHm"),
+                        Description = row.Field<string>("Bez"),
+                        CourseData = JsonConvert.SerializeObject(checkpoints),
+                        DistanceData = null
+                    };
+
+                    // try to preserve distance data if it already exists
+                    try
+                    {
+                        newCourse.DistanceData = context.Courses.Single(a => a.CourseId == newCourse.CourseId).DistanceData;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        newCourse.DistanceData = null;
+                    }
+
+                    // ensure distance data agrees with checkpoints
+                    if (newCourse.DistanceData != null && JsonConvert.DeserializeObject<List<float>>(newCourse.DistanceData).Count != checkpoints.Count - 1)
+                    {
+                        newCourse.DistanceData = null;
+                    }
+
+                    context.Courses.Add(newCourse);
+                }
 
                 // add clubs
                 foreach (DataRow row in OEdb.Tables["Club.dat"].Rows)
@@ -93,6 +156,42 @@ namespace Orienteering_LR_Desktop
                 }
 
                 context.SaveChanges();
+
+                // classcourse
+                context.ClassCourses.RemoveRange(context.ClassCourses);
+                foreach (DataRow row in OEdb.Tables["Kat.dat"].Rows)
+                {
+                    Database.ClassCourse cc = new Database.ClassCourse
+                    {
+                        CompetitionPos = 1,
+                        Stage = "1",
+                        RaceClassId = row.Field<int>("KatNr"),
+                        CourseId = row.Field<Nullable<int>>("BahnNr1")
+                    };
+                    
+                    try
+                    {
+                        cc.RaceClass = context.RaceClasses.Single(a => a.RaceClassId == cc.RaceClassId);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        cc.RaceClass = null;
+                    }
+
+                    if (cc.CourseId != null)
+                    {
+                        try
+                        {
+                            cc.Course = context.Courses.Single(a => a.CourseId == cc.CourseId);
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            cc.Course = null;
+                        }
+                    }
+
+                    context.ClassCourses.Add(cc);
+                }
 
                 // add competitors
                 context.Competitors.RemoveRange(context.Competitors);
@@ -159,11 +258,11 @@ namespace Orienteering_LR_Desktop
                 }
 
                 context.SaveChanges();
+
+
+                // comptimes
+
             }
-
-            // team
-
-            // comptimes
 
             return true;
         }
