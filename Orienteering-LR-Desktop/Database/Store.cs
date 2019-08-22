@@ -52,5 +52,41 @@ namespace Orienteering_LR_Desktop.Database
                 context.SaveChanges();
             }
         }
+
+        public void CreateTeam(Team team)
+        {
+            using (var context = new CompetitorContext())
+            {
+                context.Teams.Add(team);
+                context.SaveChanges();
+            }
+        }
+
+        public void CreateCourse(Course course)
+        {
+            using (var context = new CompetitorContext())
+            {
+                context.Courses.Add(course);
+                context.SaveChanges();
+            }
+        }
+
+        public void CreateClassCourse(ClassCourse classCourse)
+        {
+            using (var context = new CompetitorContext())
+            {
+                context.ClassCourses.Add(classCourse);
+                context.SaveChanges();
+            }
+        }
+
+        public void CreateCompTimes(CompTimes compTimes)
+        {
+            using (var context = new CompetitorContext())
+            {
+                context.CompTimes.Add(compTimes);
+                context.SaveChanges();
+            }
+        }
     }
 }
