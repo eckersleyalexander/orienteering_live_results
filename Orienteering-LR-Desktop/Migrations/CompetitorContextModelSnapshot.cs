@@ -25,7 +25,9 @@ namespace Orienteering_LR_Desktop.Migrations
 
                     b.Property<string>("Stage");
 
-                    b.HasKey("RaceClassId", "CourseId");
+                    b.HasKey("RaceClassId", "Stage", "CompetitionPos");
+
+                    b.HasIndex("RaceClassId");
 
                     b.HasIndex("CourseId");
 
@@ -181,6 +183,11 @@ namespace Orienteering_LR_Desktop.Migrations
 
             modelBuilder.Entity("Orienteering_LR_Desktop.Database.ClassCourse", b =>
                 {
+                    b.HasOne("Orienteering_LR_Desktop.Database.RaceClass", "RaceClass")
+                        .WithMany()
+                        .HasForeignKey("RaceClassId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("Orienteering_LR_Desktop.Database.Course", "Course")
                         .WithMany()
                         .HasForeignKey("CourseId")
