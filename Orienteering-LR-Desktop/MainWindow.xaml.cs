@@ -18,7 +18,6 @@ using System.Windows.Shapes;
 using Orienteering_LR_Desktop.Database;
 using SPORTident;
 using SPORTident.Communication.UsbDevice;
-using Unosquare.Labs.EmbedIO.Modules;
 using System.IO;
 
 namespace Orienteering_LR_Desktop
@@ -112,7 +111,7 @@ namespace Orienteering_LR_Desktop
             s.CreatePunch(chipId, checkpointId, punchTime);
 
             // push to front end
-            ((App)Application.Current).leaderboard.SendUpdates();
+            ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
         }
 
         void Datagrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
