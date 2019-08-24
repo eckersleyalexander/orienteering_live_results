@@ -51,35 +51,6 @@ namespace Orienteering_LR_Desktop
                 db.GetService<IMigrator>().Migrate();
             }
 
-            var s = new Database.Store();
-            s.CreateClub(new Club()
-            {
-                ClubId = 1
-            });
-
-            s.CreateRaceClass(new RaceClass()
-            {
-                RaceClassId = 1
-            });
-
-            s.CreateCompetitor(new Competitor()
-            {
-                FirstName = "Bob",
-                LastName = "Bobington",
-                ChipId = 2087837,
-                ClubId = 1,
-                RaceClassId = 1
-            });
-
-            s.CreateCompetitor(new Competitor()
-            {
-                FirstName = "Testman",
-                LastName = "Smith",
-                ChipId = 2128274,
-                ClubId = 1,
-                RaceClassId = 1
-            });
-
             // radio punch receiver
             _reader = new Reader
             {
@@ -138,16 +109,13 @@ namespace Orienteering_LR_Desktop
             List<Database.Competitor> Competitors = db.GetCompetitors();
             foreach (Database.Competitor c in Competitors)
             {
-                for (int i = 0; i < 10; i++)
+                CompetitorsList.Add(new Runner()
                 {
-                    CompetitorsList.Add(new Runner()
-                    {
-                        FirstName = c.FirstName,
-                        LastName = c.LastName,
-                        Id = c.ChipId,
-                        Status = "Implement Status Field"
-                    });
-                }
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Id = 1,
+                    Status = "Implement Status Field"
+                });
             }
 
             ControlsList.Add(new Control()

@@ -6,11 +6,11 @@ namespace Orienteering_LR_Desktop.Database
 {
     public class Store
     {
-        public void SetCurrentStage(string stageName)
+        public void SetCurrentStage(int stageId)
         {
             using (var context = new CompetitorContext())
             {
-                var stage = new Stage {Name = stageName, Current = false};
+                var stage = new Stage {StageId = stageId, Current = false};
                 context.Stages.Add(stage);
                 context.SaveChanges();
             }
@@ -20,7 +20,7 @@ namespace Orienteering_LR_Desktop.Database
         {
             using (var context = new CompetitorContext())
             {
-                var punch = new Punch {ChipId = chipId, Stage = "1", CheckpointId = controlId, Timestamp = timestamp};
+                var punch = new Punch {ChipId = chipId, Stage = 1, CheckpointId = controlId, Timestamp = timestamp};
                 context.Punches.Add(punch);
                 context.SaveChanges();
             }
@@ -80,7 +80,7 @@ namespace Orienteering_LR_Desktop.Database
             }
         }
 
-        public void CreateCompTimes(CompTimes compTimes)
+        public void CreateCompTimes(CompTime compTimes)
         {
             using (var context = new CompetitorContext())
             {

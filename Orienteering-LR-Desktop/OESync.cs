@@ -15,6 +15,7 @@ namespace Orienteering_LR_Desktop
         private int SyncTime; // in seconds
         private Timer SyncFunc;
         private static readonly string[] ExpectedTables = { "Teiln.dat", "Kat.dat", "Club.dat", "Chip1.dat", "Bahnen1.dat" };
+        private readonly string emptyTimes = JsonConvert.SerializeObject(new List<int>());
 
         public OESync(string path)
         {
@@ -62,6 +63,14 @@ namespace Orienteering_LR_Desktop
 
             using (var context = new Database.CompetitorContext())
             {
+                // stages
+                context.Stages.RemoveRange(context.Stages);
+                context.Stages.Add(new Database.Stage
+                {
+                    StageId = 1,
+                    Current = true
+                });
+
                 // drop current tables
                 context.Courses.RemoveRange(context.Courses);
                 context.RaceClasses.RemoveRange(context.RaceClasses);
@@ -164,9 +173,10 @@ namespace Orienteering_LR_Desktop
                     Database.ClassCourse cc = new Database.ClassCourse
                     {
                         CompetitionPos = 1,
-                        Stage = "1",
+                        Stage = 1,
                         RaceClassId = row.Field<int>("KatNr"),
-                        CourseId = row.Field<Nullable<int>>("BahnNr1")
+                        CourseId = row.Field<Nullable<int>>("BahnNr1"),
+                        StartTime = row.Field<Nullable<int>>("StartZ11") // TODO check this - should be the start time for this class - make sure it matches the punch card times/format
                     };
                     
                     try
@@ -195,8 +205,9 @@ namespace Orienteering_LR_Desktop
 
                 context.SaveChanges();
 
-                // add competitors
+                // add competitors and times
                 context.Competitors.RemoveRange(context.Competitors);
+                context.CompTimes.RemoveRange(context.CompTimes);
                 foreach (DataRow row in OEdb.Tables["Teiln.dat"].Rows)
                 {
                     Database.Competitor comp = new Database.Competitor();
@@ -219,8 +230,6 @@ namespace Orienteering_LR_Desktop
                     {
                         comp.Gender = null;
                     }
-
-                    comp.ChipId = row.Field<Nullable<int>>("ChipNr1");
 
                     comp.ClubId = row.Field<Nullable<int>>("ClubNr");
                     if (comp.ClubId == null)
@@ -257,13 +266,32 @@ namespace Orienteering_LR_Desktop
                     }
 
                     context.Competitors.Add(comp);
+
+                    // comptimes
+                    if (row.Field<Nullable<int>>("ChipNr1") != null)
+                    {
+                        Database.CompTime compTime = new Database.CompTime();
+                        compTime.ChipId = row.Field<int>("ChipNr1");
+                        compTime.CompetitorId = comp.CompetitorId;
+                        compTime.Competitor = comp;
+                        compTime.Stage = 1;
+                        compTime.Times = emptyTimes; // TODO fetch actual times
+                        context.CompTimes.Add(compTime);
+                    }
+
+
                 }
 
                 context.SaveChanges();
 
-                // comptimes
-
+                // tests
+                foreach (Database.RaceClass c in context.RaceClasses.ToList())
+                {
+                    List<GetLeaderboard.LeaderboardCompetitor> leaderboard = GetLeaderboard.ByClass(c.RaceClassId);
+                    string leaderboardJson = GetLeaderboard.ByClassJson(c.RaceClassId);
+                }
             }
+
 
             return true;
         }

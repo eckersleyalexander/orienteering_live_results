@@ -43,7 +43,7 @@ namespace Orienteering_LR_Desktop.Migrations
                     PunchId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ChipId = table.Column<int>(nullable: false),
-                    Stage = table.Column<string>(nullable: true),
+                    Stage = table.Column<int>(nullable: true),
                     CheckpointId = table.Column<int>(nullable: false),
                     Timestamp = table.Column<int>(nullable: false)
                 },
@@ -75,12 +75,12 @@ namespace Orienteering_LR_Desktop.Migrations
                 name: "Stages",
                 columns: table => new
                 {
-                    Name = table.Column<string>(nullable: false),
+                    StageId = table.Column<int>(nullable: false),
                     Current = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Stages", x => x.Name);
+                    table.PrimaryKey("PK_Stages", x => x.StageId);
                 });
 
             migrationBuilder.CreateTable(
@@ -89,6 +89,7 @@ namespace Orienteering_LR_Desktop.Migrations
                 {
                     RaceClassId = table.Column<int>(nullable: false),
                     CourseId = table.Column<int>(nullable: true),
+                    StartTime = table.Column<int>(nullable: true),
                     CompetitionPos = table.Column<int>(nullable: false),
                     Stage = table.Column<int>(nullable: false)
                 },
@@ -120,7 +121,6 @@ namespace Orienteering_LR_Desktop.Migrations
                     Age = table.Column<int>(nullable: true),
                     StartNo = table.Column<int>(nullable: true),
                     Gender = table.Column<string>(nullable: true),
-                    ChipId = table.Column<int>(nullable: true),
                     ClubId = table.Column<int>(nullable: true),
                     RaceClassId = table.Column<int>(nullable: true)
                 },
@@ -146,7 +146,7 @@ namespace Orienteering_LR_Desktop.Migrations
                 columns: table => new
                 {
                     CompetitorId = table.Column<int>(nullable: false),
-                    Stage = table.Column<string>(nullable: false),
+                    Stage = table.Column<int>(nullable: false),
                     ChipId = table.Column<int>(nullable: false),
                     Times = table.Column<string>(nullable: true)
                 },

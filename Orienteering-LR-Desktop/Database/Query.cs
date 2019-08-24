@@ -70,7 +70,7 @@ namespace Orienteering_LR_Desktop.Database
                         FirstName = competitor.FirstName,
                         LastName = competitor.LastName
                     };
-                    List<Punch> punches = context.Punches.Where(p => p.ChipId == competitor.ChipId).ToList();
+                    List<Punch> punches = context.Punches.Where(p => p.ChipId == context.CompTimes.Single(a => a.CompetitorId == competitor.CompetitorId && a.Stage == 1).ChipId && p.Stage == 1).ToList();
                     compPunches.Punches = punches;
                     things.Add(compPunches);
                 }
@@ -78,11 +78,11 @@ namespace Orienteering_LR_Desktop.Database
             }
         }
 
-        public string CurrentStage()
+        public int CurrentStage()
         {
             using (var context = new CompetitorContext())
             {
-                return context.Stages.Single(s => s.Current).Name;
+                return context.Stages.Single(s => s.Current).StageId;
             }
         }
     }

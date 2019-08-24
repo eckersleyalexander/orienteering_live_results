@@ -219,6 +219,7 @@
     <Compile Include="Database\Query.cs" />
     <Compile Include="Database\Store.cs" />
     <Compile Include="DbisamRead.cs" />
+    <Compile Include="GetLeaderboard.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
