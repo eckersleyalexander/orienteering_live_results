@@ -45,7 +45,7 @@ namespace Orienteering_LR_Desktop.API
             }
             things.Sort();
             var jsoned = JsonConvert.SerializeObject(things);
-            BroadcastAsync(jsoned);
+            await BroadcastAsync(jsoned);
         }
 
         protected override Task OnClientConnectedAsync(IWebSocketContext context)

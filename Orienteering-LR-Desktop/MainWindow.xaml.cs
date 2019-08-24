@@ -38,9 +38,6 @@ namespace Orienteering_LR_Desktop
         public MainWindow()
         {
             InitializeComponent();
-            GetInitData();
-            CompetitorsTable.ItemsSource = CompetitorsList;
-            ControlsTable.ItemsSource = ControlsList;
             if (File.Exists("testdb.db"))
             {
                 File.Delete("testdb.db");
@@ -49,6 +46,9 @@ namespace Orienteering_LR_Desktop
             {
                 db.GetService<IMigrator>().Migrate();
             }
+            CompetitorsTable.ItemsSource = CompetitorsList;
+            ControlsTable.ItemsSource = ControlsList;
+            GetInitData();
 
             var s = new Database.Store();
             s.CreateClub(new Club()
@@ -95,7 +95,7 @@ namespace Orienteering_LR_Desktop
             oeSync.StartSync();
         }
 
-        private void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
+        private async void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
         {
             // Siid = chipId
             int chipId = (int)e.PunchData[0].SiidValue;
@@ -111,7 +111,7 @@ namespace Orienteering_LR_Desktop
             s.CreatePunch(chipId, checkpointId, punchTime);
 
             // push to front end
-            ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
+            await ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
         }
 
         void Datagrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -143,7 +143,7 @@ namespace Orienteering_LR_Desktop
                     {
                         FirstName = c.FirstName,
                         LastName = c.LastName,
-                        Id = c.ChipId,
+                        Id = (int)c.ChipId,
                         Status = "Implement Status Field"
                     });
                 }
