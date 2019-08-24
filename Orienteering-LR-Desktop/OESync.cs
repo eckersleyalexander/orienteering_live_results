@@ -275,7 +275,7 @@ namespace Orienteering_LR_Desktop
                         compTime.CompetitorId = comp.CompetitorId;
                         compTime.Competitor = comp;
                         compTime.Stage = 1;
-                        compTime.Times = emptyTimes; // TODO fetch actual times
+                        compTime.Times = emptyTimes; // TODO fetch actual times and status'
                         context.CompTimes.Add(compTime);
                     }
 
@@ -287,7 +287,7 @@ namespace Orienteering_LR_Desktop
                 // tests
                 foreach (Database.RaceClass c in context.RaceClasses.ToList())
                 {
-                    List<GetLeaderboard.LeaderboardCompetitor> leaderboard = GetLeaderboard.ByClass(c.RaceClassId);
+                    //List<GetLeaderboard.LeaderboardCompetitor> leaderboard = GetLeaderboard.ByClass(c.RaceClassId);
                     string leaderboardJson = GetLeaderboard.ByClassJson(c.RaceClassId);
                 }
             }

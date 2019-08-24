@@ -7,7 +7,7 @@ using System;
 namespace Orienteering_LR_Desktop.Database
 {
     [NotMapped]
-    class CompetitorContext : DbContext
+    public class CompetitorContext : DbContext
     {
         public DbSet<Competitor> Competitors { get; set; }
         public DbSet<Club> Clubs { get; set; }
@@ -110,7 +110,7 @@ namespace Orienteering_LR_Desktop.Database
     }
 
     public class ClassCourse {
-        public int CompetitionPos { get; set; }
+        public int CompetitionPos { get; set; } // this is just 1 (for now)
         public int Stage { get; set; }
         public Nullable<int> StartTime { get; set; }
         public int RaceClassId { get; set; }

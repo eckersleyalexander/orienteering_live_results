@@ -13,7 +13,7 @@ namespace Orienteering_LR_Desktop
         public class LeaderboardCompetitor : IComparable<LeaderboardCompetitor>
         {
             public int CompetitorId;
-            public int ChipNo;
+            public Nullable<int> ChipNo;
             public string FirstName;
             public string LastName;
             public Nullable<int> Age;
@@ -21,24 +21,32 @@ namespace Orienteering_LR_Desktop
             public string Gender;
             public string Club;
             public string RaceClass;
-            public string RaceClassFull;
-            public List<Nullable<int>> Times;
             public string Status;
+            public List<Nullable<int>> Times;
 
-            public LeaderboardCompetitor(Database.CompTime compTime, Database.RaceClass raceClass)
+            public LeaderboardCompetitor(Database.CompetitorInfo competitorInfo)
             {
-                CompetitorId = compTime.CompetitorId;
-                ChipNo = compTime.ChipId;
-                FirstName = compTime.Competitor.FirstName;
-                LastName = compTime.Competitor.LastName;
-                Age = compTime.Competitor.Age;
-                StartNo = compTime.Competitor.StartNo;
-                Gender = compTime.Competitor.Gender;
-                Club = compTime.Competitor.Club == null ? null : compTime.Competitor.Club.Name;
-                RaceClass = raceClass.Abbreviation;
-                RaceClassFull = raceClass.Name;
-                Times = JsonConvert.DeserializeObject<List<Nullable<int>>>(compTime.Times);
-                Status = "";
+                Initialize(competitorInfo);
+            }
+
+            public LeaderboardCompetitor(Database.Competitor competitor, int stage)
+            {
+                Initialize(new Database.CompetitorInfo(competitor, stage));
+            }
+
+            private void Initialize(Database.CompetitorInfo competitorInfo)
+            {
+                CompetitorId = competitorInfo.CompetitorId;
+                ChipNo = competitorInfo.ChipId;
+                FirstName = competitorInfo.FirstName;
+                LastName = competitorInfo.LastName;
+                Age = competitorInfo.Age;
+                StartNo = competitorInfo.StartNo;
+                Gender = competitorInfo.Gender;
+                Club = competitorInfo.Club?.Name;
+                RaceClass = competitorInfo.RaceClass?.Abbreviation;
+                Status = competitorInfo.Status;
+                Times = competitorInfo.Times;
             }
 
             public int CompareTo(LeaderboardCompetitor o)
@@ -108,110 +116,45 @@ namespace Orienteering_LR_Desktop
 
         public static List<LeaderboardCompetitor> ByClass(int raceClassId)
         {
-            List<LeaderboardCompetitor> competitors = new List<LeaderboardCompetitor>();
+            List<LeaderboardCompetitor> leaderboard = new List<LeaderboardCompetitor>();
+            Database.RaceClassInfo raceClass;
+            int stage;
 
-            Database.CompetitorContext context = new Database.CompetitorContext();
-            int currentStage = context.Stages.Single(a => a.Current).StageId;
-            Database.RaceClass raceClass;
-            Database.ClassCourse classCourse;
-            try
+            using (var context = new Database.CompetitorContext())
             {
-                raceClass = context.RaceClasses.Single(a => a.RaceClassId == raceClassId);
-                classCourse = context.ClassCourses.Include(a => a.Course).Single(a => a.RaceClassId == raceClassId && a.Stage == currentStage);
-            }
-            catch (InvalidOperationException)
-            {
-                // return empty list if raceClass does not exist or if it does not have an associated course
-                return competitors;
-            }
-
-            List<int> currentCourse = JsonConvert.DeserializeObject<List<int>>(classCourse.Course.CourseData);
-
-
-            foreach (Database.CompTime compTime in context.CompTimes.Include(a => a.Competitor).ThenInclude(a => a.Club).Where(a => a.Stage == currentStage && a.Competitor.RaceClassId == raceClassId))
-            {
-                LeaderboardCompetitor compEntry = new LeaderboardCompetitor(compTime, raceClass);
-
-                // if times is empty (i.e. nothing sync'd from OE) then search for times in punch
-                if (compEntry.Times.Count == 0)
+                stage = context.Stages.Single(a => a.Current).StageId;
+                try
                 {
-                    // get times from Punch
-                    foreach (int checkpoint in currentCourse)
+                    raceClass = new Database.RaceClassInfo(context.RaceClasses.Single(a => a.RaceClassId == raceClassId), stage);
+                    if (raceClass.Course == null)
                     {
-                        // if a checkpoint is missing, time will be null
-                        Database.Punch punch = context.Punches.SingleOrDefault(a => a.ChipId == compTime.ChipId && a.Stage == currentStage && a.CheckpointId == checkpoint);
-                        compEntry.Times.Add(punch == null ? null : (Nullable<int>)punch.Timestamp);
+                        throw new InvalidOperationException();
                     }
-
-                    // if no times
-                    if (compEntry.Times.Count(s => s != null) == 0)
-                    {
-                        // not yet started
-                        compEntry.Status = "Ready";
-                    }
-                    else
-                    {
-                        // if there is a finish time
-                        if (compEntry.Times[compEntry.Times.Count - 1] != null)
-                        {
-                            compEntry.Status = "Provisional";
-                        }
-                        // there are times, but no finish yet
-                        else
-                        {
-                            compEntry.Status = "Started";
-                        }
-
-                        // zero the times to the start
-                        int startTime = 0;
-                        if (compEntry.Times[0] == null)
-                        {
-                            if (classCourse.StartTime != null)
-                            {
-                                startTime = (int)classCourse.StartTime;
-                            }
-                            else
-                            {
-                                // could not find a start time
-                                compEntry.Status = "Error";
-                            }
-                        }
-                        else
-                        {
-                            startTime = (int)compEntry.Times[0];
-                        }
-
-                        // subtract start time from each timestamp
-                        for (int i = 0; i < compEntry.Times.Count; i++)
-                        {
-                            if (compEntry.Times[i] != null)
-                            {
-                                // null all times if no start is found
-                                compEntry.Times[i] = compEntry.Status == "Error" ? null : compEntry.Times[i] - startTime;
-                            }
-                        }
-                    }
-
-
                 }
-                else if (compEntry.Times.Count == 1)
+                catch (InvalidOperationException)
                 {
-                    // TODO check OE status codes
-                    // DNF
-                    // DNS
-                    // DQ
-                }
-                else
-                {
-                    compEntry.Status = "Finished";
+                    // return empty list if raceClass does not exist or if the associated course can't be retrieved
+                    return leaderboard;
                 }
 
-                competitors.Add(compEntry);
+                foreach (Database.Competitor c in context.Competitors.Where(a => a.RaceClassId == raceClassId))
+                {
+                    Database.CompetitorInfo info = new Database.CompetitorInfo();
+                    info.PartialInitialize(c, context);
+                    info.RaceClass = raceClass;
+                    info.GetTimes(stage, context);
+
+                    if (info.ChipId != null)
+                    {
+                        LeaderboardCompetitor comp = new LeaderboardCompetitor(info);
+                        leaderboard.Add(comp);
+                    }
+                }
             }
 
-            competitors.Sort();
+            leaderboard.Sort();
 
-            return competitors;
+            return leaderboard;
         }
 
         public static string ByCourseJson(int courseId)
@@ -225,7 +168,7 @@ namespace Orienteering_LR_Desktop
             using (var context = new Database.CompetitorContext())
             {
                 List<Nullable<int>> classes = new List<Nullable<int>>();
-                foreach (Database.ClassCourse cc in context.ClassCourses.Where(a => a.CourseId == courseId).ToList())
+                foreach (Database.ClassCourse cc in context.ClassCourses.Where(a => a.CourseId == courseId))
                 {
                     classes.Add(cc.RaceClassId);
                 }
