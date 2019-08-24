@@ -27,7 +27,7 @@ namespace Orienteering_LR_Desktop
                     .WithMode(HttpListenerMode.EmbedIO)
                 )
                 .WithCors()
-                .WithWebApi("/api", api => api.WithController<ApiController>());
+                .WithWebApi("/api", api => api.WithController<LeaderboardAPI>());
             socketServer = new SocketServer(server);
 
         
@@ -37,36 +37,6 @@ namespace Orienteering_LR_Desktop
             server.RunAsync();
         }
 	}
-
-    public class ApiController: WebApiController 
-    {
-        [Route(HttpVerbs.Get, "/api/hello/")]
-        public async Task<string> SayHello(int id)
-        {
-            try
-            {
-                var text = 0;
-                var text2 = "";
-                var text3 = "";
-                // 
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-               {
-                   text = ((MainWindow)Application.Current.MainWindow).Runners[0].Id;
-                   text2 = ((MainWindow)Application.Current.MainWindow).Runners[0].FirstName;
-                   text3 = ((MainWindow)Application.Current.MainWindow).Runners[0].LastName;
-                   
-               }));
-                // This is fake call to a Repository
-                // var person = await PeopleRepository.GetById(id);
-                return "{\"ID\": \"" + text + "\", \"firstName\": \"" + text2 + "\", \"lastName\": \"" + text3 + "\"}";
-            }
-            catch (Exception ex)
-            {
-                return ex.ToJson();
-            }
-        }
-    
-    }
 
    
     public class BoardDemoClass : IComparable<BoardDemoClass>
