@@ -30,7 +30,7 @@ namespace Orienteering_LR_Desktop
     {
         public List<Runner> CompetitorsList = new List<Runner>();
         public List<Control> ControlsList = new List<Control>();
-        public List<Course> CoursesList = new List<Course>();
+        public List<CourseDesktop> CoursesList = new List<CourseDesktop>();
         public List<Runner> Runners = new List<Runner>();
 
         private readonly Reader _reader;
@@ -217,7 +217,7 @@ namespace Orienteering_LR_Desktop
         public Boolean RadioBool { get; set; }
     }
 
-    public class Course
+    public class CourseDesktop
     {
         public List<Control> Controls { get; set; }
         public String Name { get; set; }

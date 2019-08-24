@@ -10,6 +10,23 @@ namespace Orienteering_LR_Desktop
 {
     class GetLeaderboard
     {
+        public class ClassLeaderboard
+        {
+            public string Type = "Class";
+            public Database.RaceClassInfo Class;
+            public int Stage;
+            public List<LeaderboardCompetitor> Competitors;
+        }
+
+        public class CourseLeaderboard
+        {
+            public string Type = "Course";
+            public Database.CourseInfo Course;
+            public List<Database.RaceClassInfo> Classes;
+            public int Stage;
+            public List<LeaderboardCompetitor> Competitors;
+        }
+
         public class LeaderboardCompetitor : IComparable<LeaderboardCompetitor>
         {
             public int CompetitorId;
@@ -114,45 +131,57 @@ namespace Orienteering_LR_Desktop
             return JsonConvert.SerializeObject(ByClass(raceClassId));
         }
 
-        public static List<LeaderboardCompetitor> ByClass(int raceClassId)
+        public static ClassLeaderboard ByClass(int raceClassId)
         {
-            List<LeaderboardCompetitor> leaderboard = new List<LeaderboardCompetitor>();
-            Database.RaceClassInfo raceClass;
-            int stage;
-
             using (var context = new Database.CompetitorContext())
             {
-                stage = context.Stages.Single(a => a.Current).StageId;
+                int stage = context.Stages.Single(a => a.Current).StageId;
                 try
                 {
-                    raceClass = new Database.RaceClassInfo(context.RaceClasses.Single(a => a.RaceClassId == raceClassId), stage);
+                    Database.RaceClassInfo raceClass = new Database.RaceClassInfo(context.RaceClasses.Single(a => a.RaceClassId == raceClassId), stage);
                     if (raceClass.Course == null)
                     {
                         throw new InvalidOperationException();
                     }
+                    else
+                    {
+                        return ByClass(raceClass, stage, context);
+                    }
                 }
                 catch (InvalidOperationException)
                 {
-                    // return empty list if raceClass does not exist or if the associated course can't be retrieved
-                    return leaderboard;
-                }
-
-                foreach (Database.Competitor c in context.Competitors.Where(a => a.RaceClassId == raceClassId))
-                {
-                    Database.CompetitorInfo info = new Database.CompetitorInfo();
-                    info.PartialInitialize(c, context);
-                    info.RaceClass = raceClass;
-                    info.GetTimes(stage, context);
-
-                    if (info.ChipId != null)
+                    // return empty leaderboard if raceClass does not exist or if the associated course can't be retrieved
+                    return new ClassLeaderboard()
                     {
-                        LeaderboardCompetitor comp = new LeaderboardCompetitor(info);
-                        leaderboard.Add(comp);
-                    }
+                        Competitors = new List<LeaderboardCompetitor>()
+                    };
+                }
+            }
+        }
+
+        public static ClassLeaderboard ByClass(Database.RaceClassInfo raceClass, int stage, Database.CompetitorContext context)
+        {
+            ClassLeaderboard leaderboard = new ClassLeaderboard
+            {
+                Competitors = new List<LeaderboardCompetitor>(),
+                Class = raceClass,
+                Stage = stage
+            };
+
+            foreach (Database.Competitor c in context.Competitors.Where(a => a.RaceClassId == raceClass.RaceClassId))
+            {
+                Database.CompetitorInfo info = new Database.CompetitorInfo();
+                info.PartialInitialize(c, context);
+                info.RaceClass = raceClass;
+                info.GetTimes(stage, context);
+
+                if (info.ChipId != null)
+                {
+                    leaderboard.Competitors.Add(new LeaderboardCompetitor(info));
                 }
             }
 
-            leaderboard.Sort();
+            leaderboard.Competitors.Sort();
 
             return leaderboard;
         }
@@ -163,24 +192,28 @@ namespace Orienteering_LR_Desktop
         }
 
         // gets results for all classes that are running a particular course
-        public static List<LeaderboardCompetitor> ByCourse(int courseId)
+        public static CourseLeaderboard ByCourse(int courseId)
         {
             using (var context = new Database.CompetitorContext())
             {
-                List<Nullable<int>> classes = new List<Nullable<int>>();
-                foreach (Database.ClassCourse cc in context.ClassCourses.Where(a => a.CourseId == courseId))
+                Database.Course course = context.Courses.SingleOrDefault(a => a.CourseId == courseId);
+
+                CourseLeaderboard leaderboard = new CourseLeaderboard
                 {
-                    classes.Add(cc.RaceClassId);
+                    Stage = context.Stages.Single(a => a.Current).StageId,
+                    Course = course != null ? new Database.CourseInfo(course) : null,
+                    Classes = new List<Database.RaceClassInfo>(),
+                    Competitors = new List<LeaderboardCompetitor>()
+                };
+
+                foreach (Database.ClassCourse cc in context.ClassCourses.Include(b => b.RaceClass).Where(a => a.CourseId == courseId))
+                {
+                    Database.RaceClassInfo raceClass = new Database.RaceClassInfo(cc.RaceClass, leaderboard.Stage);
+                    leaderboard.Classes.Add(raceClass);
+                    leaderboard.Competitors.AddRange(ByClass(raceClass, leaderboard.Stage, context).Competitors);
                 }
 
-                List<LeaderboardCompetitor> leaderboard = new List<LeaderboardCompetitor>();
-
-                foreach (int raceClass in classes)
-                {
-                    leaderboard.AddRange(ByClass(raceClass));
-                }
-
-                leaderboard.Sort();
+                leaderboard.Competitors.Sort();
 
                 return leaderboard;
             }
