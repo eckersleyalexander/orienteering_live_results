@@ -193,6 +193,8 @@ namespace Orienteering_LR_Desktop
                     context.ClassCourses.Add(cc);
                 }
 
+                context.SaveChanges();
+
                 // add competitors
                 context.Competitors.RemoveRange(context.Competitors);
                 foreach (DataRow row in OEdb.Tables["Teiln.dat"].Rows)
@@ -259,7 +261,6 @@ namespace Orienteering_LR_Desktop
 
                 context.SaveChanges();
 
-
                 // comptimes
 
             }
@@ -285,6 +286,11 @@ namespace Orienteering_LR_Desktop
                 SyncFunc.Dispose();
                 SyncFunc = null;
             }
+        }
+
+        public bool Syncing()
+        {
+            return SyncFunc != null;
         }
     }
 }
