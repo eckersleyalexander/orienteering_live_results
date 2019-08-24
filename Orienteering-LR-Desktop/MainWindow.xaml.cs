@@ -28,30 +28,27 @@ namespace Orienteering_LR_Desktop
 	/// </summary>
 	public partial class MainWindow : Window
     {
+        public List<Runner> CompetitorsList = new List<Runner>();
+        public List<Control> ControlsList = new List<Control>();
+        public List<Course> CoursesList = new List<Course>();
+        public List<Runner> Runners = new List<Runner>();
 
-        public List<Runner> runners = new List<Runner>();
         private readonly Reader _reader;
         private readonly OESync oeSync;
 
         public MainWindow()
         {
             InitializeComponent();
-            testGrid.CellEditEnding += Datagrid_CellEditEnding;
-
-            runners.Add(new Runner()
-            {
-                id = "1",
-                firstName = "John",
-                lastName = "Smith"
-            });
-            testGrid.ItemsSource = runners;
+            GetInitData();
+            CompetitorsTable.ItemsSource = CompetitorsList;
+            ControlsTable.ItemsSource = ControlsList;
             if (File.Exists("testdb.db"))
             {
                 File.Delete("testdb.db");
             }
             using (var db = new CompetitorContext())
             {
-                db.GetService<IMigrator>().Migrate();                
+                db.GetService<IMigrator>().Migrate();
             }
 
             var s = new Database.Store();
@@ -67,17 +64,17 @@ namespace Orienteering_LR_Desktop
 
             s.CreateCompetitor(new Competitor()
             {
-                FirstName = "Person",
-                LastName = "A",
+                FirstName = "Bob",
+                LastName = "Bobington",
                 ChipId = 2087837,
                 ClubId = 1,
                 RaceClassId = 1
             });
-        
+
             s.CreateCompetitor(new Competitor()
             {
-                FirstName = "Person",
-                LastName = "B",
+                FirstName = "Testman",
+                LastName = "Smith",
                 ChipId = 2128274,
                 ClubId = 1,
                 RaceClassId = 1
@@ -129,10 +126,35 @@ namespace Orienteering_LR_Desktop
                     var row = e.Row;
                     var el = e.EditingElement as TextBox;
                     int rowIndex = row.GetIndex();
-                    Runner runnerRow = runners[rowIndex];
-                    Debug.WriteLine("Row: " + rowIndex + ", column changed: " + bindingPath + ", new value: " + el.Text + ", ID = " + runnerRow.id);
+                    Runner runnerRow = Runners[rowIndex];
+                    Debug.WriteLine("Row: " + rowIndex + ", column changed: " + bindingPath + ", new value: " + el.Text + ", ID = " + runnerRow.Id);
                 }
             }
+        }
+       
+        private void GetInitData()
+        {
+            var db = new Database.Query();
+            List<Database.Competitor> Competitors = db.GetCompetitors();
+            foreach (Database.Competitor c in Competitors)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    CompetitorsList.Add(new Runner()
+                    {
+                        FirstName = c.FirstName,
+                        LastName = c.LastName,
+                        Id = c.ChipId,
+                        Status = "Implement Status Field"
+                    });
+                }
+            }
+
+            ControlsList.Add(new Control()
+            {
+                Id = 1000001,
+                RadioBool = false
+            });
         }
 
         private void ConnectRadio(object sender, RoutedEventArgs e)
@@ -159,15 +181,79 @@ namespace Orienteering_LR_Desktop
                 }
             }
         }
+
+        private void CommandBinding_CanExecute_1(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void CommandBinding_Executed_1(object sender, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.CloseWindow(this);
+        }
+
+        private void CommandBinding_Executed_2(object sender, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.MaximizeWindow(this);
+        }
+
+        private void CommandBinding_Executed_3(object sender, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.MinimizeWindow(this);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            int index = int.Parse(((Button)e.Source).Uid);
+
+            GridCursor.Margin = new Thickness(10 + (150 * index), 45, 0, 0);
+
+            switch (index)
+            {
+                case 0:
+                    CompGrid.Visibility = Visibility.Visible;
+                    ContGrid.Visibility = Visibility.Hidden;
+                    ClassGrid.Visibility = Visibility.Hidden;
+                    break;
+                case 1:
+                    CompGrid.Visibility = Visibility.Hidden;
+                    ContGrid.Visibility = Visibility.Visible;
+                    ClassGrid.Visibility = Visibility.Hidden;
+                    break;
+                case 2:
+                    CompGrid.Visibility = Visibility.Hidden;
+                    ContGrid.Visibility = Visibility.Hidden;
+                    ClassGrid.Visibility = Visibility.Visible;
+                    break;
+            }
+        }
+
+        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+                this.DragMove();
+        }
     }
 
     public class Runner
     {
-        public string id { get; set; }
-        public string firstName { get; set; }
-        public string lastName { get; set; }
+        public int Id { get; set; }
+        public string Status { get; set;  }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
     }
 
+    public class Control
+    {
+        public int Id { get; set; }
+        public Boolean RadioBool { get; set; }
+    }
+
+    public class Course
+    {
+        public List<Control> Controls { get; set; }
+        public String Name { get; set; }
+    }
 
 
 }

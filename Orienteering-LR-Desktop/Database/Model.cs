@@ -19,7 +19,6 @@ namespace Orienteering_LR_Desktop.Database
         public DbSet<Punch> Punches { get; set; }
         public DbSet<Stage> Stages { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ClassCourse>()
@@ -44,10 +43,12 @@ namespace Orienteering_LR_Desktop.Database
         public Nullable<int> Age { get; set; }
         public Nullable<int> StartNo { get; set; }
         public string Gender { get; set; }
+        
         public Nullable<int> ChipId { get; set; }
         
         public Nullable<int> ClubId { get; set; } // fk -> Club
         public Club Club { get; set; }
+        
         public Nullable<int> RaceClassId { get; set; } // fk -> RaceClass
         public RaceClass RaceClass { get; set; }
 	}	
@@ -106,7 +107,6 @@ namespace Orienteering_LR_Desktop.Database
         public Nullable<float> Distance { get; set; } // in km
         public Nullable<float> Climb { get; set; } // in m
         public string Description { get; set; }
-
         public string CourseData { get; set; }
         public string DistanceData { get; set; }
     }
@@ -114,7 +114,6 @@ namespace Orienteering_LR_Desktop.Database
     public class ClassCourse {
         public int CompetitionPos { get; set; }
         public string Stage { get; set; }
-
         public int RaceClassId { get; set; }
         public RaceClass RaceClass { get; set; }
         public Nullable<int> CourseId { get; set; }
