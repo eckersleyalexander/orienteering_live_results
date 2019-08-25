@@ -7,12 +7,12 @@ using System;
 namespace Orienteering_LR_Desktop.Database
 {
     [NotMapped]
-    class CompetitorContext : DbContext
+    public class CompetitorContext : DbContext
     {
         public DbSet<Competitor> Competitors { get; set; }
         public DbSet<Club> Clubs { get; set; }
         public DbSet<Team> Teams { get; set; }
-        public DbSet<CompTimes> CompTimes { get; set; }
+        public DbSet<CompTime> CompTimes { get; set; }
         public DbSet<RaceClass> RaceClasses { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<ClassCourse> ClassCourses { get; set; }
@@ -23,10 +23,10 @@ namespace Orienteering_LR_Desktop.Database
         {
             modelBuilder.Entity<ClassCourse>()
                 .HasKey(c => new { c.RaceClassId, c.Stage, c.CompetitionPos });
-            modelBuilder.Entity<CompTimes>()
+            modelBuilder.Entity<CompTime>()
                 .HasKey(c => new { c.CompetitorId, c.Stage });
             modelBuilder.Entity<Stage>()
-                .HasKey(c => new {c.Name});
+                .HasKey(c => new {c.StageId});
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -43,8 +43,6 @@ namespace Orienteering_LR_Desktop.Database
         public Nullable<int> Age { get; set; }
         public Nullable<int> StartNo { get; set; }
         public string Gender { get; set; }
-        
-        public Nullable<int> ChipId { get; set; }
         
         public Nullable<int> ClubId { get; set; } // fk -> Club
         public Club Club { get; set; }
@@ -65,10 +63,10 @@ namespace Orienteering_LR_Desktop.Database
         public Competitor Competitor { get; set; }
     }
 
-    public class CompTimes {
+    public class CompTime {
         public int CompetitorId { get; set; }
         public Competitor Competitor { get; set; }
-        public string Stage { get; set; }
+        public int Stage { get; set; }
         public int ChipId { get; set; }
         public string Times { get; set; }
     }
@@ -112,8 +110,9 @@ namespace Orienteering_LR_Desktop.Database
     }
 
     public class ClassCourse {
-        public int CompetitionPos { get; set; }
-        public string Stage { get; set; }
+        public int CompetitionPos { get; set; } // this is just 1 (for now)
+        public int Stage { get; set; }
+        public Nullable<int> StartTime { get; set; }
         public int RaceClassId { get; set; }
         public RaceClass RaceClass { get; set; }
         public Nullable<int> CourseId { get; set; }
@@ -123,14 +122,14 @@ namespace Orienteering_LR_Desktop.Database
     public class Punch {
         public int PunchId { get; set; }
         public int ChipId { get; set; }
-        public string Stage { get; set; }
+        public int Stage { get; set; }
         public int CheckpointId { get; set; }
         public int Timestamp { get; set; }
     }
 
     public class Stage
     {
-        public string Name { get; set; } // pk
+        public int StageId { get; set; } // pk
         public bool Current { get; set; }
     }
 

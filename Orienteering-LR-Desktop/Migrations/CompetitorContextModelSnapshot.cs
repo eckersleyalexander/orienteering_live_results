@@ -23,7 +23,9 @@ namespace Orienteering_LR_Desktop.Migrations
 
                     b.Property<int>("CompetitionPos");
 
-                    b.Property<string>("Stage");
+                    b.Property<int>("StartTime");
+
+                    b.Property<int>("Stage");
 
                     b.HasKey("RaceClassId", "Stage", "CompetitionPos");
 
@@ -50,7 +52,7 @@ namespace Orienteering_LR_Desktop.Migrations
                 {
                     b.Property<int>("CompetitorId");
 
-                    b.Property<string>("Stage");
+                    b.Property<int>("Stage");
 
                     b.Property<int>("ChipId");
 
@@ -67,8 +69,6 @@ namespace Orienteering_LR_Desktop.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("Age");
-
-                    b.Property<int>("ChipId");
 
                     b.Property<int>("ClubId");
 
@@ -120,7 +120,7 @@ namespace Orienteering_LR_Desktop.Migrations
 
                     b.Property<int>("ChipId");
 
-                    b.Property<string>("Stage");
+                    b.Property<int>("Stage");
 
                     b.Property<int>("Timestamp");
 
@@ -155,7 +155,7 @@ namespace Orienteering_LR_Desktop.Migrations
 
             modelBuilder.Entity("Orienteering_LR_Desktop.Database.Stage", b =>
                 {
-                    b.Property<string>("Name")
+                    b.Property<int>("StageId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<bool>("Current");

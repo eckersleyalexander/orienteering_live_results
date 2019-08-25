@@ -29,7 +29,7 @@ namespace Orienteering_LR_Desktop
     {
         public List<Runner> CompetitorsList = new List<Runner>();
         public List<Control> ControlsList = new List<Control>();
-        public List<Course> CoursesList = new List<Course>();
+        public List<CourseDesktop> CoursesList = new List<CourseDesktop>();
         public List<Runner> Runners = new List<Runner>();
 
         private readonly Reader _reader;
@@ -49,35 +49,6 @@ namespace Orienteering_LR_Desktop
             CompetitorsTable.ItemsSource = CompetitorsList;
             ControlsTable.ItemsSource = ControlsList;
             GetInitData();
-
-            var s = new Database.Store();
-            s.CreateClub(new Club()
-            {
-                ClubId = 1
-            });
-
-            s.CreateRaceClass(new RaceClass()
-            {
-                RaceClassId = 1
-            });
-
-            s.CreateCompetitor(new Competitor()
-            {
-                FirstName = "Bob",
-                LastName = "Bobington",
-                ChipId = 2087837,
-                ClubId = 1,
-                RaceClassId = 1
-            });
-
-            s.CreateCompetitor(new Competitor()
-            {
-                FirstName = "Testman",
-                LastName = "Smith",
-                ChipId = 2128274,
-                ClubId = 1,
-                RaceClassId = 1
-            });
 
             // radio punch receiver
             _reader = new Reader
@@ -137,7 +108,7 @@ namespace Orienteering_LR_Desktop
             List<Database.Competitor> Competitors = db.GetCompetitors();
             foreach (Database.Competitor c in Competitors)
             {
-                for (int i = 0; i < 10; i++)
+                CompetitorsList.Add(new Runner()
                 {
                     CompetitorsList.Add(new Runner()
                     {
@@ -248,7 +219,7 @@ namespace Orienteering_LR_Desktop
         public Boolean RadioBool { get; set; }
     }
 
-    public class Course
+    public class CourseDesktop
     {
         public List<Control> Controls { get; set; }
         public String Name { get; set; }
