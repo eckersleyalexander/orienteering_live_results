@@ -82,7 +82,7 @@ namespace Orienteering_LR_Desktop
             s.CreatePunch(chipId, checkpointId, punchTime);
 
             // push to front end
-            await ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
+            ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
         }
 
         void Datagrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
@@ -110,14 +110,11 @@ namespace Orienteering_LR_Desktop
             {
                 CompetitorsList.Add(new Runner()
                 {
-                    CompetitorsList.Add(new Runner()
-                    {
-                        FirstName = c.FirstName,
-                        LastName = c.LastName,
-                        Id = (int)c.ChipId,
-                        Status = "Implement Status Field"
-                    });
-                }
+                    FirstName = c.FirstName,
+                    LastName = c.LastName,
+                    Id = 1,
+                    Status = "Implement Status Field"
+                });
             }
 
             ControlsList.Add(new Control()

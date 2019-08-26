@@ -109,6 +109,26 @@ namespace Orienteering_LR_Desktop.Database
             else
             {
                 ChipId = compTime.ChipId;
+                switch (compTime.Status)
+                {
+                    case 0:
+                        Status = "Ready";
+                        break;
+                    case 1:
+                        Status = "DNS";
+                        break;
+                    case 2:
+                        Status = "DNF";
+                        break;
+                    case 3:
+                        Status = "MP";
+                        break;
+                    case 5:
+                        Status = "OT";
+                        break;
+                    default:
+                        break;
+                }
 
                 try
                 {
@@ -116,19 +136,7 @@ namespace Orienteering_LR_Desktop.Database
                     if (Times.Count == 0)
                     {
                         // no data sync'd from OE yet (i.e. not yet finished)
-                        if (RaceClass == null)
-                        {
-                            Status = "No Class";
-                        }
-                        else if (RaceClass.Course == null)
-                        {
-                            Status = "No Course";
-                        }
-                        else if (RaceClass.Course.CourseData == null)
-                        {
-                            Status = "Bad Course";
-                        }
-                        else
+                        if (RaceClass != null && RaceClass.Course != null && RaceClass.Course.CourseData != null)
                         {
                             // scan Punches for times instead
                             foreach (int checkpoint in RaceClass.Course.CourseData)
@@ -141,7 +149,6 @@ namespace Orienteering_LR_Desktop.Database
                             if (Times.Count(s => s != null) == 0)
                             {
                                 // not yet started
-                                Status = "Ready";
                             }
                             else
                             {
@@ -177,10 +184,7 @@ namespace Orienteering_LR_Desktop.Database
                                     // subtract start time from each timestamp
                                     for (int i = 0; i < Times.Count; i++)
                                     {
-                                        if (Times[i] != null)
-                                        {
-                                            Times[i] -= start;
-                                        }
+                                        Times[i] -= start;
                                     }
                                 }
                             }

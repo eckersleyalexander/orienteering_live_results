@@ -147,6 +147,7 @@ namespace Orienteering_LR_Desktop.Migrations
                 {
                     CompetitorId = table.Column<int>(nullable: false),
                     Stage = table.Column<int>(nullable: false),
+                    Status = table.Column<int>(nullable: true),
                     ChipId = table.Column<int>(nullable: false),
                     Times = table.Column<string>(nullable: true)
                 },
