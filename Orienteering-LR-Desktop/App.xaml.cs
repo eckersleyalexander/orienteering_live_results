@@ -23,17 +23,15 @@ namespace Orienteering_LR_Desktop
         {
             base.OnStartup(e);
             server = new WebServer(o => o
-                    .WithUrlPrefix("http://10.0.0.3:9696/")
+                    .WithUrlPrefix("http://localhost:9696/")
                     .WithMode(HttpListenerMode.EmbedIO)
                 )
                 .WithCors()
                 .WithWebApi("/api", api => api.WithController<LeaderboardAPI>());
             socketServer = new SocketServer(server);
-
-        
-//			      server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
-//			      server.Module<StaticFilesModule>().UseRamCache = true;
-//			      server.Module<StaticFilesModule>().DefaultExtension = ".html"
+			//server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
+			//server.Module<StaticFilesModule>().UseRamCache = true;
+			//server.Module<StaticFilesModule>().DefaultExtension = ".html"
             server.RunAsync();
         }
 	}
