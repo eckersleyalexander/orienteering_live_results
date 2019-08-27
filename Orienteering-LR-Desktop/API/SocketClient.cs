@@ -8,13 +8,9 @@ namespace Orienteering_LR_Desktop.API
     {
         public string ClientId { get; set; }
         public string SocketId { get; set; }
-        public bool Connected { get; set; }
-
-        public SocketClient(string clientId, string socketId, bool connected)
+        public SocketClient(string clientId, string socketId)
         {
             ClientId = clientId;
-            SocketId = socketId;
-            Connected = connected;
-        }
+            SocketId = socketId;        }
     }
 }
