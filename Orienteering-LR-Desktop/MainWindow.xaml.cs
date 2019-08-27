@@ -33,8 +33,6 @@ namespace Orienteering_LR_Desktop
         public List<Control> ControlsList = new List<Control>();
         public List<CourseDesktop> CoursesList = new List<CourseDesktop>();
         public List<Runner> Runners = new List<Runner>();
-        public String OEPath;
-        public String IOPath;
         private readonly Reader _reader;
         private OESync oeSync;
 
@@ -42,6 +40,18 @@ namespace Orienteering_LR_Desktop
         {
             InitializeComponent();
             
+            if (Properties.Settings.Default.OEPath != "")
+            {
+                OESync testSync = new OESync(Properties.Settings.Default.OEPath);
+                testSync.StartSync();
+                if (testSync.SyncSuccess)
+                {
+                    OEPathLabel.Content = Properties.Settings.Default.OEPath;
+                    oeSync = testSync;
+                    GetInitData();
+                }
+            }
+
             if (File.Exists("LRDB.db"))
             {
                 File.Delete("LRDB.db");
@@ -228,16 +238,25 @@ namespace Orienteering_LR_Desktop
         private void SetOEPathButton(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.InitialDirectory = "C:\\";
+            dialog.InitialDirectory = Properties.Settings.Default.OEPath == "" ? "C:\\" : Properties.Settings.Default.OEPath;
             dialog.IsFolderPicker = true;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                OEPath = dialog.FileName;
-                OEPathLabel.Content = OEPath;
+                OESync testSync = new OESync(dialog.FileName);
+                testSync.StartSync();
+                if (testSync.SyncSuccess)
+                {
+                    OEPathLabel.Content = dialog.FileName;
+                    oeSync = testSync;
+                    GetInitData();
+                    Properties.Settings.Default.OEPath = dialog.FileName;
+                    Properties.Settings.Default.Save();
+                }
+                else
+                {
+                    MessageBox.Show("No/Incomplete OE Data at specified location. Please try a different folder.");
+                }
             }
-            oeSync = new OESync(OEPath);
-            oeSync.StartSync();
-            GetInitData();
         }
     }
 

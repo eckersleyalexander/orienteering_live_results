@@ -117,9 +117,12 @@
             </Grid>
 
             <Grid x:Name="SettingsGrid" Background="AntiqueWhite" Visibility="Visible">
-                <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="542,55,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="28"/>
-                <Label x:Name="OEPathLabel" Content="! PATH NOT SET !" HorizontalAlignment="Left" Margin="177,53,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="360" FontWeight="Bold"/>
+                <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="542,53,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="30"/>
+                <Label x:Name="OEPathLabel" Content="! PATH NOT SET !" HorizontalAlignment="Left" Margin="193,53,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
                 <Label Content="OE Database Folder Path:" HorizontalAlignment="Left" Margin="25,55,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
+                <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="542,96,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="32"/>
+                <Label x:Name="IOPathLabel" Content="! PATH NOT SET !" HorizontalAlignment="Left" Margin="193,96,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
+                <Label Content="Live Results Database Path:" HorizontalAlignment="Left" Margin="25,100,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
             </Grid>
         </Grid>
 
