@@ -82,10 +82,10 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Width="*" Binding="{Binding Id}" Foreground="Black"/>
-                        <DataGridTextColumn Header="Status" Width="*" Binding="{Binding Status}" Foreground="Black"/>
                         <DataGridTextColumn Header="First Name" Width="*" Binding="{Binding FirstName}" Foreground="Black"/>
                         <DataGridTextColumn Header="Last Name" Width="*" Binding="{Binding LastName}" Foreground="Black"/>
+                        <DataGridTextColumn Header="ChipID" Width="*" Binding="{Binding ChipId}" Foreground="Black"/>
+                        <DataGridTextColumn Header="Status" Width="*" Binding="{Binding Status}" Foreground="Black"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

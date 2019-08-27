@@ -211,19 +211,25 @@ namespace Orienteering_LR_Desktop
                 }
 
                 // records
-                for (int i = 0; i < nRecords; i++)
+                for (int i = 0; i < nRecords;)
                 {
-                    // create a row for the record
-                    DataRow row = table.NewRow();
-
-                    // for each field
-                    foreach (DbisamField field in fields)
+                    // if first byte is non-zero then it's deleted/error
+                    if (tableRaw[offset] == 0)
                     {
-                        row[field.Name] = ReadDbisamRecordField(tableRaw, offset, field);
-                    }
+                        // create a row for the record
+                        DataRow row = table.NewRow();
 
-                    // add row to the table
-                    table.Rows.Add(row);
+                        // for each field
+                        foreach (DbisamField field in fields)
+                        {
+                            row[field.Name] = ReadDbisamRecordField(tableRaw, offset, field);
+                        }
+
+                        // add row to the table
+                        table.Rows.Add(row);
+
+                        i++;
+                    }
 
                     // increment offset for each record
                     offset += recordSize;

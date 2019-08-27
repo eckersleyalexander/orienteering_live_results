@@ -48,7 +48,6 @@ namespace Orienteering_LR_Desktop
             }
             CompetitorsTable.ItemsSource = CompetitorsList;
             ControlsTable.ItemsSource = ControlsList;
-            GetInitData();
 
             // radio punch receiver
             _reader = new Reader
@@ -64,6 +63,8 @@ namespace Orienteering_LR_Desktop
             // currently using pwd\test
             oeSync = new OESync(Directory.GetCurrentDirectory() + "\\test");
             oeSync.StartSync();
+
+            GetInitData();
         }
 
         private async void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
@@ -97,7 +98,7 @@ namespace Orienteering_LR_Desktop
                     var el = e.EditingElement as TextBox;
                     int rowIndex = row.GetIndex();
                     Runner runnerRow = Runners[rowIndex];
-                    Debug.WriteLine("Row: " + rowIndex + ", column changed: " + bindingPath + ", new value: " + el.Text + ", ID = " + runnerRow.Id);
+                    Debug.WriteLine("Row: " + rowIndex + ", column changed: " + bindingPath + ", new value: " + el.Text + ", ID = " + runnerRow.ChipId);
                 }
             }
         }
@@ -105,15 +106,15 @@ namespace Orienteering_LR_Desktop
         private void GetInitData()
         {
             var db = new Database.Query();
-            List<Database.Competitor> Competitors = db.GetCompetitors();
-            foreach (Database.Competitor c in Competitors)
+            List<Database.CompetitorInfo> Competitors = db.GetAllCompetitorInfo(1);
+            foreach (Database.CompetitorInfo c in Competitors)
             {
                 CompetitorsList.Add(new Runner()
                 {
                     FirstName = c.FirstName,
                     LastName = c.LastName,
-                    Id = 1,
-                    Status = "Implement Status Field"
+                    ChipId = c.ChipId,
+                    Status = c.Status
                 });
             }
 
@@ -204,7 +205,7 @@ namespace Orienteering_LR_Desktop
 
     public class Runner
     {
-        public int Id { get; set; }
+        public int? ChipId { get; set; }
         public string Status { get; set;  }
         public string FirstName { get; set; }
         public string LastName { get; set; }
