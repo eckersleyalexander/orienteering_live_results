@@ -1,11 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using EmbedIO.WebSockets;
 using Newtonsoft.Json;
-using Remotion.Linq.Utilities;
 
 
 namespace Orienteering_LR_Desktop.API
