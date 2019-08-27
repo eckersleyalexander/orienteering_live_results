@@ -15,13 +15,13 @@ namespace Orienteering_LR_Desktop.API
         {
             try
             {
-                var text = 0;
+                int? text = null;
                 var text2 = "";
                 var text3 = "";
                 // 
                 Application.Current.Dispatcher.Invoke((Action)(() =>
                 {
-                    text = ((MainWindow)Application.Current.MainWindow).Runners[0].Id;
+                    text = ((MainWindow)Application.Current.MainWindow).Runners[0].ChipId;
                     text2 = ((MainWindow)Application.Current.MainWindow).Runners[0].FirstName;
                     text3 = ((MainWindow)Application.Current.MainWindow).Runners[0].LastName;
                    

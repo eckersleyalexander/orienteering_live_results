@@ -68,6 +68,7 @@ namespace Orienteering_LR_Desktop.Database
         public Competitor Competitor { get; set; }
         public int Stage { get; set; }
         public int ChipId { get; set; }
+        public int? Status { get; set; }
         public string Times { get; set; }
     }
 

@@ -54,6 +54,8 @@ namespace Orienteering_LR_Desktop.Migrations
 
                     b.Property<int>("Stage");
 
+                    b.Property<int>("Status");
+
                     b.Property<int>("ChipId");
 
                     b.Property<string>("Times");

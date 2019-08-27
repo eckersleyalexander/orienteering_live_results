@@ -109,75 +109,76 @@ namespace Orienteering_LR_Desktop.Database
             else
             {
                 ChipId = compTime.ChipId;
-
-                try
+                switch (compTime.Status)
                 {
-                    Times = JsonConvert.DeserializeObject<List<int?>>(compTime.Times);
-                    if (Times.Count == 0)
-                    {
-                        // no data sync'd from OE yet (i.e. not yet finished)
-                        if (RaceClass == null)
+                    case 0:
+                        Times = JsonConvert.DeserializeObject<List<int?>>(compTime.Times);
+                        // if no data sync'd from OE yet (i.e. not yet finished)
+                        if (Times.Count(s => s != null) == 0)
                         {
-                            Status = "No Class";
-                        }
-                        else if (RaceClass.Course == null)
-                        {
-                            Status = "No Course";
-                        }
-                        else if (RaceClass.Course.CourseData == null)
-                        {
-                            Status = "Bad Course";
-                        }
-                        else
-                        {
-                            // scan Punches for times instead
-                            foreach (int checkpoint in RaceClass.Course.CourseData)
+                            if (RaceClass == null)
                             {
-                                Punch punch = context.Punches.SingleOrDefault(a => a.ChipId == ChipId && a.Stage == stage && a.CheckpointId == checkpoint);
-                                Times.Add(punch != null ? (Nullable<int>)punch.Timestamp : null);
+                                Status = "No Class";
                             }
-
-                            // if no times
-                            if (Times.Count(s => s != null) == 0)
+                            else if (RaceClass.Course == null)
                             {
-                                // not yet started
-                                Status = "Ready";
+                                Status = "No Course";
+                            }
+                            else if (RaceClass.Course.CourseData == null)
+                            {
+                                Status = "Empty Course";
                             }
                             else
                             {
-                                // if there is a finish time
-                                if (Times[Times.Count - 1] != null)
+                                // scan Punches for times instead
+                                foreach (int checkpoint in RaceClass.Course.CourseData)
                                 {
-                                    Status = "Provisional";
-                                }
-                                // there are times, but no finish yet
-                                else
-                                {
-                                    Status = "Started";
+                                    Punch punch = context.Punches.SingleOrDefault(a => a.ChipId == ChipId && a.Stage == stage && a.CheckpointId == checkpoint);
+                                    Times.Add(punch != null ? (Nullable<int>)punch.Timestamp : null);
                                 }
 
-                                // zero the times
-                                int start = 0;
-                                if (Times[0] != null)
+                                // if no times
+                                if (Times.Count(s => s != null) == 0)
                                 {
-                                    start = (int)Times[0];
-                                }
-                                else if (RaceClass.StartTime != null)
-                                {
-                                    start = (int)RaceClass.StartTime;
+                                    // not yet started
+                                    Status = "Ready";
                                 }
                                 else
                                 {
-                                    Status = "No Start";
-                                    Times.Clear();
-                                }
-
-                                if (start != 0)
-                                {
-                                    // subtract start time from each timestamp
-                                    for (int i = 0; i < Times.Count; i++)
+                                    // if there is a finish time
+                                    if (Times[Times.Count - 1] != null)
                                     {
-                                        if (Times[i] != null)
+                                        Status = "Provisional";
+                                    }
+                                    // there are times, but no finish yet
+                                    else
+                                    {
+                                        Status = "Started";
+                                    }
+
+                                    // zero the times
+                                    int start = 0;
+                                    if (Times[0] != null)
+                                    {
+                                        start = (int)Times[0];
+                                    }
+                                    else if (RaceClass.StartTime != null)
+                                    {
+                                        start = (int)RaceClass.StartTime;
+                                    }
+                                    else
+                                    {
+                                        Status = "No Start";
+                                        for (int i = 0; i < Times.Count; i++)
+                                        {
+                                            Times[i] = null;
+                                        }
+                                    }
+
+                                    if (start != 0)
+                                    {
+                                        // subtract start time from each timestamp
+                                        for (int i = 0; i < Times.Count; i++)
                                         {
                                             Times[i] -= start;
                                         }
@@ -185,19 +186,26 @@ namespace Orienteering_LR_Desktop.Database
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        Status = "Finished";
-                    }
+                        else if (Times[Times.Count - 1] != null)
+                        {
+                            Status = "Finished";
+                        }
+                        break;
+                    case 1:
+                        Status = "DNS";
+                        break;
+                    case 2:
+                        Status = "DNF";
+                        break;
+                    case 3:
+                        Status = "MP";
+                        break;
+                    case 5:
+                        Status = "OT";
+                        break;
+                    default:
+                        break;
                 }
-                catch (Newtonsoft.Json.JsonReaderException)
-                {
-                    // times is a status code
-                    Status = compTime.Times;
-                }
-
-                
             }
         }
 

@@ -6,16 +6,23 @@ using System.Threading;
 using System.Data;
 using System.IO;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace Orienteering_LR_Desktop
 {
+
     class OESync
     {
+        private class ChipPunch
+        {
+            public int? checkpoint;
+            public int? timestamp;
+        }
+
         public string OEEventPath;
         private int SyncTime; // in seconds
         private Timer SyncFunc;
         private static readonly string[] ExpectedTables = { "Teiln.dat", "Kat.dat", "Club.dat", "Chip1.dat", "Bahnen1.dat" };
-        private readonly string emptyTimes = JsonConvert.SerializeObject(new List<int>());
 
         public OESync(string path)
         {
@@ -176,8 +183,16 @@ namespace Orienteering_LR_Desktop
                         Stage = 1,
                         RaceClassId = row.Field<int>("KatNr"),
                         CourseId = row.Field<Nullable<int>>("BahnNr1"),
-                        StartTime = row.Field<Nullable<int>>("StartZ11") // TODO check this - should be the start time for this class - make sure it matches the punch card times/format
+                        StartTime = row.Field<Nullable<int>>("StartZ11")
                     };
+
+                    if (cc.StartTime < 0 || cc.StartTime > 360000000)
+                    {
+                        cc.StartTime = null;
+                    }
+
+                    // get it into milliseconds
+                    cc.StartTime *= 10;
                     
                     try
                     {
@@ -270,16 +285,167 @@ namespace Orienteering_LR_Desktop
                     // comptimes
                     if (row.Field<Nullable<int>>("ChipNr1") != null)
                     {
-                        Database.CompTime compTime = new Database.CompTime();
-                        compTime.ChipId = row.Field<int>("ChipNr1");
-                        compTime.CompetitorId = comp.CompetitorId;
-                        compTime.Competitor = comp;
-                        compTime.Stage = 1;
-                        compTime.Times = emptyTimes; // TODO fetch actual times and status'
+                        Database.CompTime compTime = new Database.CompTime
+                        {
+                            ChipId = row.Field<int>("ChipNr1"),
+                            CompetitorId = comp.CompetitorId,
+                            Competitor = comp,
+                            Stage = 1,
+                            Status = row.Field<int?>("NCKen1")
+                        };
+
+                        List<int?> times = new List<int?>();
+
+                        // get list of checkpoints that this person should be running
+                        Database.ClassCourse cc = context.ClassCourses.Include(b => b.Course).SingleOrDefault(a => a.RaceClassId == comp.RaceClassId && a.Stage == compTime.Stage);
+                        List<int> checkpoints = JsonConvert.DeserializeObject<List<int>>(cc?.Course?.CourseData ?? "[]");
+
+                        if (checkpoints.Count > 0)
+                        {
+                            if (compTime.Status == 0)
+                            {
+                                // get punch entries from OE
+                                List<ChipPunch> chipTimes = new List<ChipPunch>();
+                                // search for this person
+                                DataRow[] chip = OEdb.Tables["Chip1.dat"].Select("ChipNr = " + compTime.ChipId + " AND IdNr = " + comp.CompetitorId);
+
+                                // if we found a matching entry
+                                if (chip.Length == 1)
+                                {
+                                    // start punch
+                                    int? checkpoint = chip[0].Field<int?>("ChipStartP");
+                                    int? timestamp = chip[0].Field<int?>("ChipStart");
+                                    chipTimes.Add(new ChipPunch()
+                                    {
+                                        checkpoint = checkpoint,
+                                        timestamp = timestamp > 0 && timestamp < 360000000 ? timestamp : null
+                                    });
+
+                                    // checkpoint punches
+                                    for (int i = 1; i <= 64; i++)
+                                    {
+                                        checkpoint = chip[0].Field<int?>("ChipStempelP" + i);
+                                        timestamp = chip[0].Field<int?>("ChipStempel" + i);
+                                        if (checkpoint != null)
+                                        {
+                                            chipTimes.Add(new ChipPunch()
+                                            {
+                                                checkpoint = checkpoint,
+                                                timestamp = timestamp > 0 && timestamp < 360000000 ? timestamp : null
+                                            });
+                                        }
+                                    }
+
+                                    // finish punch
+                                    checkpoint = chip[0].Field<int?>("ChipZielP");
+                                    timestamp = chip[0].Field<int?>("ChipZiel");
+                                    chipTimes.Add(new ChipPunch()
+                                    {
+                                        checkpoint = checkpoint,
+                                        timestamp = timestamp > 0 && timestamp < 360000000 ? timestamp : null
+                                    });
+
+                                    // if list matches punches then easy
+                                    if (MatchingCheckpoints(checkpoints, chipTimes))
+                                    {
+                                        // just copy over times
+                                        foreach (ChipPunch punch in chipTimes)
+                                        {
+                                            times.Add(punch.timestamp);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // otherwise more flexibly look for matching punches
+                                        // always take start punch without checking checkpoint
+                                        if (chipTimes.Count > 0)
+                                        {
+                                            times.Add(chipTimes[0].timestamp);
+                                        }
+                                        else
+                                        {
+                                            times.Add(null);
+                                        }
+
+                                        // search for matching punch for each course checkpoint (not start or end)
+                                        for (int i = 1; i < checkpoints.Count - 1; i++)
+                                        {
+                                            // look for first punch that matches
+                                            ChipPunch match = chipTimes.FirstOrDefault(a => a.checkpoint == checkpoints[i]);
+                                            if (match != null)
+                                            {
+                                                // if it exists then add it and remove it from list of punches
+                                                // remove this way the same punch doesnt get used for multiple checkpoints (for a butterfly course)
+                                                times.Add(match.timestamp);
+                                                chipTimes.Remove(match);
+                                            }
+                                            else
+                                            {
+                                                times.Add(null);
+                                            }
+                                        }
+
+                                        // always take finish punch without checking
+                                        if (chipTimes.Count > 0)
+                                        {
+                                            times.Add(chipTimes[chipTimes.Count - 1].timestamp);
+                                        }
+                                        else
+                                        {
+                                            times.Add(null);
+                                        }
+                                    }
+
+                                    // if there is no start time, then check if this was a non-punch start
+                                    if (times[0] == null && cc?.StartTime != null)
+                                    {
+                                        times[0] = cc?.StartTime / 10;
+                                    }
+
+                                    // if there is a start time
+                                    int? min = times[0];
+                                    if (min != null)
+                                    {
+                                        // zero the split times
+                                        // and convert from hundreths of seconds to milliseconds
+                                        for (int i = 0; i < times.Count; i++)
+                                        {
+                                            times[i] -= min;
+                                            if (times[i] < 0)
+                                            {
+                                                // compensate for the times rolling-over at the 12h mark
+                                                times[i] += 12 * 60 * 60 * 100;
+                                            }
+                                            times[i] *= 10;
+                                        }
+
+                                        // if the final time exists but it didn't get pulled over by the chip scan then add it
+                                        if (times[times.Count - 1] == null)
+                                        {
+                                            int finalTime = row.Field<int?>("Zeit1") ?? 0;
+                                            if (finalTime > 0 && finalTime < 360000000)
+                                            {
+                                                times[times.Count - 1] = finalTime * 10;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // if no start time then discard the data
+                                        times.Clear();
+                                    }
+                                }
+                            }
+
+                            if (times.Count == 0)
+                            {
+                                times.AddRange(Enumerable.Repeat<int?>(null, checkpoints.Count));
+                            }
+                        }
+
+                        compTime.Times = JsonConvert.SerializeObject(times);
                         context.CompTimes.Add(compTime);
                     }
-
-
                 }
 
                 context.SaveChanges();
@@ -292,6 +458,28 @@ namespace Orienteering_LR_Desktop
                 }
             }
 
+
+            return true;
+        }
+
+        // check if a list of chip punches correctly matches an ordered list of checkpoints
+        private bool MatchingCheckpoints(List<int> checkpoints, List<ChipPunch> punches)
+        {
+            if (checkpoints.Count != punches.Count)
+            {
+                return false;
+            }
+            else
+            {
+                // ignoring start and finish
+                for (int i = 1; i < checkpoints.Count - 1; i++)
+                {
+                    if (punches[i].checkpoint != checkpoints[i])
+                    {
+                        return false;
+                    }
+                }
+            }
 
             return true;
         }
