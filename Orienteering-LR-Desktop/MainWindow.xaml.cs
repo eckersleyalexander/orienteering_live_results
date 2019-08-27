@@ -19,6 +19,8 @@ using Orienteering_LR_Desktop.Database;
 using SPORTident;
 using SPORTident.Communication.UsbDevice;
 using System.IO;
+using Microsoft.WindowsAPICodePack;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace Orienteering_LR_Desktop
 {
@@ -31,16 +33,28 @@ namespace Orienteering_LR_Desktop
         public List<Control> ControlsList = new List<Control>();
         public List<CourseDesktop> CoursesList = new List<CourseDesktop>();
         public List<Runner> Runners = new List<Runner>();
-
         private readonly Reader _reader;
-        private readonly OESync oeSync;
+        private OESync oeSync;
 
         public MainWindow()
         {
             InitializeComponent();
-            if (File.Exists("testdb.db"))
+            
+            if (Properties.Settings.Default.OEPath != "")
             {
-                File.Delete("testdb.db");
+                OESync testSync = new OESync(Properties.Settings.Default.OEPath);
+                testSync.StartSync();
+                if (testSync.SyncSuccess)
+                {
+                    OEPathLabel.Content = Properties.Settings.Default.OEPath;
+                    oeSync = testSync;
+                    GetInitData();
+                }
+            }
+
+            if (File.Exists("LRDB.db"))
+            {
+                File.Delete("LRDB.db");
             }
             using (var db = new CompetitorContext())
             {
@@ -61,10 +75,7 @@ namespace Orienteering_LR_Desktop
 
             // this should be in the setup process -> need to choose the oe directory
             // currently using pwd\test
-            oeSync = new OESync(Directory.GetCurrentDirectory() + "\\test");
-            oeSync.StartSync();
 
-            GetInitData();
         }
 
         private async void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
@@ -107,6 +118,8 @@ namespace Orienteering_LR_Desktop
         {
             var db = new Database.Query();
             List<Database.CompetitorInfo> Competitors = db.GetAllCompetitorInfo(1);
+            List<Database.CourseInfo> Courses = db.GetAllCourseInfo();
+            
             foreach (Database.CompetitorInfo c in Competitors)
             {
                 CompetitorsList.Add(new Runner()
@@ -118,11 +131,22 @@ namespace Orienteering_LR_Desktop
                 });
             }
 
-            ControlsList.Add(new Control()
+            foreach (Database.CourseInfo c in Courses)
             {
-                Id = 1000001,
-                RadioBool = false
-            });
+                foreach (int controlID in c.CourseData)
+                {
+                    if (!ControlsList.Any(x => x.Id == controlID)) {
+                        ControlsList.Add(new Control()
+                        {
+                            Id = controlID,
+                            RadioBool = false
+                        });
+                    }  
+                }
+            }
+
+            ControlsList.Sort((x, y) => x.Id.CompareTo(y.Id));
+            
         }
 
         private void ConnectRadio(object sender, RoutedEventArgs e)
@@ -182,16 +206,25 @@ namespace Orienteering_LR_Desktop
                     CompGrid.Visibility = Visibility.Visible;
                     ContGrid.Visibility = Visibility.Hidden;
                     ClassGrid.Visibility = Visibility.Hidden;
+                    SettingsGrid.Visibility = Visibility.Hidden;
                     break;
                 case 1:
                     CompGrid.Visibility = Visibility.Hidden;
                     ContGrid.Visibility = Visibility.Visible;
                     ClassGrid.Visibility = Visibility.Hidden;
+                    SettingsGrid.Visibility = Visibility.Hidden;
                     break;
                 case 2:
                     CompGrid.Visibility = Visibility.Hidden;
                     ContGrid.Visibility = Visibility.Hidden;
                     ClassGrid.Visibility = Visibility.Visible;
+                    SettingsGrid.Visibility = Visibility.Hidden;
+                    break;
+                case 3:
+                    CompGrid.Visibility = Visibility.Hidden;
+                    ContGrid.Visibility = Visibility.Hidden;
+                    ClassGrid.Visibility = Visibility.Hidden;
+                    SettingsGrid.Visibility = Visibility.Visible;
                     break;
             }
         }
@@ -200,6 +233,30 @@ namespace Orienteering_LR_Desktop
         {
             if (e.LeftButton == MouseButtonState.Pressed)
                 this.DragMove();
+        }
+
+        private void SetOEPathButton(object sender, RoutedEventArgs e)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.InitialDirectory = Properties.Settings.Default.OEPath == "" ? "C:\\" : Properties.Settings.Default.OEPath;
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                OESync testSync = new OESync(dialog.FileName);
+                testSync.StartSync();
+                if (testSync.SyncSuccess)
+                {
+                    OEPathLabel.Content = dialog.FileName;
+                    oeSync = testSync;
+                    GetInitData();
+                    Properties.Settings.Default.OEPath = dialog.FileName;
+                    Properties.Settings.Default.Save();
+                }
+                else
+                {
+                    MessageBox.Show("No/Incomplete OE Data at specified location. Please try a different folder.");
+                }
+            }
         }
     }
 

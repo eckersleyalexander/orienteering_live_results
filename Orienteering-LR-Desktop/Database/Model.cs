@@ -31,7 +31,7 @@ namespace Orienteering_LR_Desktop.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=testdb.db");
+            optionsBuilder.UseSqlite("Data Source=LRDB.db");
         }
     }
 
