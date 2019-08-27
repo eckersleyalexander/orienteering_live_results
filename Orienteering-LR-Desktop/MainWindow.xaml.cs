@@ -19,6 +19,8 @@ using Orienteering_LR_Desktop.Database;
 using SPORTident;
 using SPORTident.Communication.UsbDevice;
 using System.IO;
+using Microsoft.WindowsAPICodePack;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace Orienteering_LR_Desktop
 {
@@ -31,16 +33,18 @@ namespace Orienteering_LR_Desktop
         public List<Control> ControlsList = new List<Control>();
         public List<CourseDesktop> CoursesList = new List<CourseDesktop>();
         public List<Runner> Runners = new List<Runner>();
-
+        public String OEPath;
+        public String IOPath;
         private readonly Reader _reader;
-        private readonly OESync oeSync;
+        private OESync oeSync;
 
         public MainWindow()
         {
             InitializeComponent();
-            if (File.Exists("testdb.db"))
+            
+            if (File.Exists("LRDB.db"))
             {
-                File.Delete("testdb.db");
+                File.Delete("LRDB.db");
             }
             using (var db = new CompetitorContext())
             {
@@ -61,10 +65,7 @@ namespace Orienteering_LR_Desktop
 
             // this should be in the setup process -> need to choose the oe directory
             // currently using pwd\test
-            oeSync = new OESync(Directory.GetCurrentDirectory() + "\\test");
-            oeSync.StartSync();
 
-            GetInitData();
         }
 
         private async void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
@@ -222,6 +223,21 @@ namespace Orienteering_LR_Desktop
         {
             if (e.LeftButton == MouseButtonState.Pressed)
                 this.DragMove();
+        }
+
+        private void SetOEPathButton(object sender, RoutedEventArgs e)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            dialog.InitialDirectory = "C:\\";
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                OEPath = dialog.FileName;
+                OEPathLabel.Content = OEPath;
+            }
+            oeSync = new OESync(OEPath);
+            oeSync.StartSync();
+            GetInitData();
         }
     }
 
