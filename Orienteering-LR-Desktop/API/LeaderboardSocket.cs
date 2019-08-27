@@ -19,7 +19,7 @@ namespace Orienteering_LR_Desktop.API
              _server = server;
          }
 
-         public async Task SendUpdates()
+        public async Task SendUpdates()
         {
             await BroadcastAsync(GetLeaderboard.GetAllClassesJson());
         }
