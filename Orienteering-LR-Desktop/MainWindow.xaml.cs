@@ -195,16 +195,25 @@ namespace Orienteering_LR_Desktop
                     CompGrid.Visibility = Visibility.Visible;
                     ContGrid.Visibility = Visibility.Hidden;
                     ClassGrid.Visibility = Visibility.Hidden;
+                    SettingsGrid.Visibility = Visibility.Hidden;
                     break;
                 case 1:
                     CompGrid.Visibility = Visibility.Hidden;
                     ContGrid.Visibility = Visibility.Visible;
                     ClassGrid.Visibility = Visibility.Hidden;
+                    SettingsGrid.Visibility = Visibility.Hidden;
                     break;
                 case 2:
                     CompGrid.Visibility = Visibility.Hidden;
                     ContGrid.Visibility = Visibility.Hidden;
                     ClassGrid.Visibility = Visibility.Visible;
+                    SettingsGrid.Visibility = Visibility.Hidden;
+                    break;
+                case 3:
+                    CompGrid.Visibility = Visibility.Hidden;
+                    ContGrid.Visibility = Visibility.Hidden;
+                    ClassGrid.Visibility = Visibility.Hidden;
+                    SettingsGrid.Visibility = Visibility.Visible;
                     break;
             }
         }
