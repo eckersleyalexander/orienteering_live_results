@@ -107,6 +107,8 @@ namespace Orienteering_LR_Desktop
         {
             var db = new Database.Query();
             List<Database.CompetitorInfo> Competitors = db.GetAllCompetitorInfo(1);
+            List<Database.CourseInfo> Courses = db.GetAllCourseInfo();
+            
             foreach (Database.CompetitorInfo c in Competitors)
             {
                 CompetitorsList.Add(new Runner()
@@ -118,11 +120,22 @@ namespace Orienteering_LR_Desktop
                 });
             }
 
-            ControlsList.Add(new Control()
+            foreach (Database.CourseInfo c in Courses)
             {
-                Id = 1000001,
-                RadioBool = false
-            });
+                foreach (int controlID in c.CourseData)
+                {
+                    if (!ControlsList.Any(x => x.Id == controlID)) {
+                        ControlsList.Add(new Control()
+                        {
+                            Id = controlID,
+                            RadioBool = false
+                        });
+                    }  
+                }
+            }
+
+            ControlsList.Sort((x, y) => x.Id.CompareTo(y.Id));
+            
         }
 
         private void ConnectRadio(object sender, RoutedEventArgs e)
