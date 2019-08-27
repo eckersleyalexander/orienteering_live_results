@@ -6,6 +6,7 @@ using System.Windows.Input;
 using EmbedIO;
 using EmbedIO.WebSockets;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Newtonsoft.Json;
 
 
 namespace Orienteering_LR_Desktop.API
@@ -67,12 +68,39 @@ namespace Orienteering_LR_Desktop.API
         public async Task OnClientDisconnected(IWebSocketContext context)
         {
             await UpdateSocketClient(null,context.Id, null, false);
+            await ControlSocket.SendToControlPanels(context, ControlSocket.GetClientsResponse(null));
         }
 
 
         public async Task OnClientRegister(IWebSocketContext context, string uuid, string endpoint)
         {
             await UpdateSocketClient(uuid, context.Id, endpoint,true);
+            await ControlSocket.SendToControlPanels(context, ControlSocket.GetClientsResponse(null));
+        }
+        
+        public string MakeActionResponse(string action, string uuid, string payload)
+        {
+            Dictionary<string, dynamic> actionResponse = new Dictionary<string, dynamic>
+            {
+                {"action", action},
+                {"uuid", uuid},
+                {"payload", payload}
+            };
+            return JsonConvert.SerializeObject(actionResponse);
+        }
+        
+        public string MakeErrorResponse(string message)
+        {
+            Dictionary<string, dynamic> errorResponse = new Dictionary<string, dynamic>
+            {
+                {"action", "error"},
+                {"uuid", null},
+                {"payload", new Dictionary<string, string>
+                {
+                    {"message",message}
+                }}
+            };
+            return JsonConvert.SerializeObject(errorResponse);
         }
     }
 }

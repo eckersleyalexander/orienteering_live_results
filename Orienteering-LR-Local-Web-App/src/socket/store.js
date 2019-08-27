@@ -15,7 +15,7 @@ Vue.use(Vuex);
 export const control_store = new Vuex.Store({
   state: {
     socket: {
-      isConnected: false,
+      online: false,
       message: '',
       reconnectError: false,
       clients: [],
@@ -25,12 +25,12 @@ export const control_store = new Vuex.Store({
   mutations:{
     [SOCKET_ONOPEN] (state, event)  {
       Vue.prototype.$socket = event.currentTarget
-      state.socket.isConnected = true
+      state.socket.online = true
       console.log("socket connected")
       Vue.prototype.$socket.sendObj({action:"register", uuid:"controller1"})
     },
     [SOCKET_ONCLOSE] (state, event)  {
-      state.socket.isConnected = false
+      state.socket.online = false
     },
     [SOCKET_ONERROR] (state, event)  {
       console.error(state, event)
@@ -52,7 +52,7 @@ export const control_store = new Vuex.Store({
     }
   },
   actions: {
-    getClients (context, message) { context.commit("handleClientsMessage", message) },
+    clients (context, message) { context.commit("handleClientsMessage", message) },
     error(context,message) {console.error(message)}
   }
 })
@@ -60,7 +60,7 @@ export const control_store = new Vuex.Store({
 export const leaderboard_store = new Vuex.Store({
   state: {
     socket: {
-      isConnected: false,
+      online: false,
       message: '',
       reconnectError: false,
       clients: [],
@@ -70,12 +70,11 @@ export const leaderboard_store = new Vuex.Store({
   mutations:{
     [SOCKET_ONOPEN] (state, event)  {
       Vue.prototype.$socket = event.currentTarget
-      state.socket.isConnected = true
+      state.socket.online = true
       console.log("socket connected")
-      Vue.prototype.$socket.sendObj({action:"register", uuid:"leaderboard1"})
     },
     [SOCKET_ONCLOSE] (state, event)  {
-      state.socket.isConnected = false
+      state.socket.online = false
     },
     [SOCKET_ONERROR] (state, event)  {
       console.error(state, event)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EmbedIO.WebSockets;
@@ -33,7 +34,36 @@ namespace Orienteering_LR_Desktop.API
 
          protected override Task OnMessageReceivedAsync(IWebSocketContext context, byte[] buffer, IWebSocketReceiveResult result)
          {
-             return SendUpdates();
+             return HandleMessage(context, buffer);
+         }
+         
+         protected async Task HandleMessage(IWebSocketContext context, byte[] buffer)
+         {
+             try
+             {
+                 string data = Encoding.GetString(buffer);
+                 var deserialised = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(data);
+
+                 string action = deserialised["action"];
+                 string uuid = deserialised["uuid"];
+
+                 switch (action)
+                 {
+                     case "register":
+                         string endpoint = context.RequestUri.LocalPath.Trim('/');
+                         await _server.OnClientRegister(context, uuid, endpoint);
+                         break;
+                   
+                    
+                     default:
+                         await SendAsync(context, _server.MakeErrorResponse(" unknown action: " + action));
+                         break;
+                 }
+             }
+             catch (Exception e)
+             {
+                 await SendAsync(context, _server.MakeErrorResponse(e.Message));
+             }
          }
      }
 }

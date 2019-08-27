@@ -50,10 +50,9 @@ namespace Orienteering_LR_Desktop.API
                     case "register":
                         string endpoint = context.RequestUri.LocalPath.Trim('/');
                         await _server.OnClientRegister(context, uuid, endpoint);
-                        await SendToControlPanels(context, GetClientsResponse(uuid));
                         break;
                     
-                    case "getClients":
+                    case "clients":
                         await SendAsync(context, GetClientsResponse(uuid));
                         break;
                     
@@ -62,57 +61,34 @@ namespace Orienteering_LR_Desktop.API
                         break; 
                     
                     default:
-                        await SendAsync(context, MakeErrorResponse(" unknown action: " + action));
+                        await SendAsync(context, _server.MakeErrorResponse(" unknown action: " + action));
                         break;
                 }
             }
             catch (Exception e)
             {
-                await SendAsync(context, MakeErrorResponse(e.Message));
+                await SendAsync(context, _server.MakeErrorResponse(e.Message));
             }
         }
 
-        private string GetClientsResponse(string uuid)
+        public string GetClientsResponse(string uuid)
         {
             var clients = _server.Clients
                 .Where(c => c.ClientId != null)
                 .Select(c => new Dictionary<string, string>(){{"id",c.ClientId},{"type", c.ClientType}})
                 .ToList();
             var serialised = JsonConvert.SerializeObject(clients);
-            return MakeActionResponse("getClients", uuid, serialised);
+            return _server.MakeActionResponse("clients", uuid, serialised);
         }
 
-        protected async Task SendToControlPanels(IWebSocketContext context, string message)
+        public async Task SendToControlPanels(IWebSocketContext context, string message)
         {
             var controlClients = _server.Clients
                 .Where(c => c.ClientType == "control").Select(c => c.SocketId);
             await BroadcastAsync(message, c => controlClients.Contains(c.Id));
         }
 
-        private string MakeActionResponse(string action, string uuid, string payload)
-        {
-            Dictionary<string, dynamic> actionResponse = new Dictionary<string, dynamic>
-            {
-                {"action", action},
-                {"uuid", uuid},
-                {"payload", payload}
-            };
-            return JsonConvert.SerializeObject(actionResponse);
-        }
         
-        private string MakeErrorResponse(string message)
-        {
-            Dictionary<string, dynamic> errorResponse = new Dictionary<string, dynamic>
-            {
-                {"action", "error"},
-                {"uuid", null},
-                {"payload", new Dictionary<string, string>
-                {
-                    {"message",message}
-                }}
-            };
-            return JsonConvert.SerializeObject(errorResponse);
-        }
 
     }
 }
