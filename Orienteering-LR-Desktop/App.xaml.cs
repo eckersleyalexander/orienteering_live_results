@@ -29,11 +29,9 @@ namespace Orienteering_LR_Desktop
                 .WithCors()
                 .WithWebApi("/api", api => api.WithController<LeaderboardAPI>());
             socketServer = new SocketServer(server);
-
-        
-//			      server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
-//			      server.Module<StaticFilesModule>().UseRamCache = true;
-//			      server.Module<StaticFilesModule>().DefaultExtension = ".html"
+			//server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
+			//server.Module<StaticFilesModule>().UseRamCache = true;
+			//server.Module<StaticFilesModule>().DefaultExtension = ".html"
             server.RunAsync();
         }
 	}

@@ -16,7 +16,17 @@ namespace Orienteering_LR_Desktop.Database
         public string Gender;
 
         public Club Club;
-        public RaceClassInfo RaceClass;
+        private RaceClassInfo RaceClass;
+
+        public RaceClassInfo GetRaceClass()
+        {
+            return RaceClass;
+        }
+
+        public void SetRaceClass(RaceClassInfo rc)
+        {
+            RaceClass = rc;
+        }
 
         public int? ChipId;
         public int? TeamId;
@@ -381,6 +391,11 @@ namespace Orienteering_LR_Desktop.Database
 
     public class Query
     {
+        public RaceClassInfo GetRaceClassInfo(int raceClassId)
+        {
+            return GetRaceClassInfo(raceClassId, CurrentStage());
+        }
+
         public RaceClassInfo GetRaceClassInfo(int raceClassId, int stage)
         {
             using (var context = new CompetitorContext())
@@ -397,12 +412,22 @@ namespace Orienteering_LR_Desktop.Database
             }
         }
 
+        public Competitor GetCompetitor(int competitorId)
+        {
+            return GetCompetitor(competitorId, CurrentStage());
+        }
+
         public Competitor GetCompetitor(int competitorId, int stage)
         {
             using (var context = new CompetitorContext())
             {
                 return context.CompTimes.SingleOrDefault(b => b.CompetitorId == competitorId && b.Stage == stage)?.Competitor;
             }
+        }
+
+        public CompetitorInfo GetCompetitorInfo(int competitorId)
+        {
+            return GetCompetitorInfo(competitorId, CurrentStage());
         }
 
         public CompetitorInfo GetCompetitorInfo(int competitorId, int stage)
@@ -421,12 +446,22 @@ namespace Orienteering_LR_Desktop.Database
             }
         }
 
+        public int? FindCompetitorIdByChipId(int chipId)
+        {
+            return FindCompetitorIdByChipId(chipId, CurrentStage());
+        }
+
         public int? FindCompetitorIdByChipId(int chipId, int stage)
         {
             using (var context = new CompetitorContext())
             {
                 return context.CompTimes.SingleOrDefault(b => b.ChipId == chipId && b.Stage == stage)?.CompetitorId;
             }
+        }
+
+        public int? GetChipId(int competitorId)
+        {
+            return GetChipId(competitorId, CurrentStage());
         }
 
         public int? GetChipId(int competitorId, int stage)
@@ -444,6 +479,11 @@ namespace Orienteering_LR_Desktop.Database
                 var classes = context.RaceClasses.ToList();
                 return classes;
             }
+        }
+
+        public List<RaceClassInfo> GetAllClassInfo()
+        {
+            return GetAllClassInfo(CurrentStage());
         }
 
         public List<RaceClassInfo> GetAllClassInfo(int stage)
@@ -482,6 +522,11 @@ namespace Orienteering_LR_Desktop.Database
             }
         }
 
+        public List<CourseInfoExtended> GetAllCourseInfoExtended()
+        {
+            return GetAllCourseInfoExtended(CurrentStage());
+        }
+
         public List<CourseInfoExtended> GetAllCourseInfoExtended(int stage)
         {
             using (var context = new CompetitorContext())
@@ -512,6 +557,11 @@ namespace Orienteering_LR_Desktop.Database
                 var competitors = context.Competitors.ToList();
                 return competitors;
             }
+        }
+
+        public List<CompetitorInfo> GetAllCompetitorInfo()
+        {
+            return GetAllCompetitorInfo(CurrentStage());
         }
 
         public List<CompetitorInfo> GetAllCompetitorInfo(int stage)
@@ -557,7 +607,7 @@ namespace Orienteering_LR_Desktop.Database
                         FirstName = competitor.FirstName,
                         LastName = competitor.LastName
                     };
-                    List<Punch> punches = context.Punches.Where(p => p.ChipId == context.CompTimes.Single(a => a.CompetitorId == competitor.CompetitorId && a.Stage == 1).ChipId && p.Stage == 1).ToList();
+                    List<Punch> punches = context.Punches.Where(p => p.ChipId == context.CompTimes.Single(a => a.CompetitorId == competitor.CompetitorId && a.Stage == CurrentStage()).ChipId && p.Stage == CurrentStage()).ToList();
                     compPunches.Punches = punches;
                     things.Add(compPunches);
                 }

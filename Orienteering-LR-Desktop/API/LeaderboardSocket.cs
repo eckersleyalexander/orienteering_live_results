@@ -8,7 +8,6 @@ namespace Orienteering_LR_Desktop.API
 {
      public class LeaderboardSocket : WebSocketModule
      {
-
          private SocketServer _server;
 
          public LeaderboardSocket(string urlPath, SocketServer server) : base(urlPath, true)
@@ -18,30 +17,7 @@ namespace Orienteering_LR_Desktop.API
 
          public async Task SendUpdates()
         {
-            var q = new Database.Query();
-            var CompPunches = q.GetCompetitorPunches();
-            var things = new List<BoardDemoClass>();
-            foreach (var c in CompPunches)
-            {
-                var temp = new BoardDemoClass {FirstName = c.FirstName, LastName = c.LastName};
-
-                var timez = new List<int>();
-                if (c.Punches.Count > 0)
-                {
-                    c.Punches.Sort((a, b) => a.Timestamp - b.Timestamp);
-                    var startTime = c.Punches[0].Timestamp;
-                    foreach (var p in c.Punches)
-                    {
-                        p.Timestamp -= startTime;
-                        timez.Add(p.Timestamp);
-                    }
-                }
-                temp.Times = timez;
-                things.Add(temp);
-            }
-            things.Sort();
-            var jsoned = JsonConvert.SerializeObject(things);
-            await BroadcastAsync(jsoned);
+            await BroadcastAsync(GetLeaderboard.GetAllClassesJson());
         }
 
         protected override Task OnClientConnectedAsync(IWebSocketContext context)
