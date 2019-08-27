@@ -1,14 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using System.Windows.Data;
-using System.Windows.Media.Animation;
 using EmbedIO.WebSockets;
 using Newtonsoft.Json;
-using Swan.Formatters;
 
 
 namespace Orienteering_LR_Desktop.API
@@ -53,16 +48,19 @@ namespace Orienteering_LR_Desktop.API
                 switch (action)
                 {
                     case "register":
-
-                        await _server.OnClientRegister(context, uuid);
+                        string endpoint = context.RequestUri.LocalPath.Trim('/');
+                        await _server.OnClientRegister(context, uuid, endpoint);
+                        await SendToControlPanels(context, GetClientsResponse(uuid));
                         break;
                     
-                    case "get clients":
-                        var uuids = _server.Clients.Select(c => c.ClientId).ToList();
-                        var serialised = JsonConvert.SerializeObject(uuids);
-                        await SendAsync(context, serialised);
+                    case "getClients":
+                        await SendAsync(context, GetClientsResponse(uuid));
                         break;
-
+                    
+                    case "broadcast":
+                        await BroadcastAsync("{\"action\":\"broadcast\"}", c => c != context);
+                        break; 
+                    
                     default:
                         await SendAsync(context, MakeErrorResponse(" unknown action: " + action));
                         break;
@@ -74,6 +72,34 @@ namespace Orienteering_LR_Desktop.API
             }
         }
 
+        private string GetClientsResponse(string uuid)
+        {
+            var clients = _server.Clients
+                .Where(c => c.ClientId != null)
+                .Select(c => new Dictionary<string, string>(){{"id",c.ClientId},{"type", c.ClientType}})
+                .ToList();
+            var serialised = JsonConvert.SerializeObject(clients);
+            return MakeActionResponse("getClients", uuid, serialised);
+        }
+
+        protected async Task SendToControlPanels(IWebSocketContext context, string message)
+        {
+            var controlClients = _server.Clients
+                .Where(c => c.ClientType == "control").Select(c => c.SocketId);
+            await BroadcastAsync(message, c => controlClients.Contains(c.Id));
+        }
+
+        private string MakeActionResponse(string action, string uuid, string payload)
+        {
+            Dictionary<string, dynamic> actionResponse = new Dictionary<string, dynamic>
+            {
+                {"action", action},
+                {"uuid", uuid},
+                {"payload", payload}
+            };
+            return JsonConvert.SerializeObject(actionResponse);
+        }
+        
         private string MakeErrorResponse(string message)
         {
             Dictionary<string, dynamic> errorResponse = new Dictionary<string, dynamic>

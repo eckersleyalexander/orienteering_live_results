@@ -22,13 +22,12 @@ namespace Orienteering_LR_Desktop.API
             LeaderboardSocket = new LeaderboardSocket("/leaderboard",this);
             ControlSocket = new ControlSocket("/control", this);
             
-
             server.WithModule(LeaderboardSocket)
                 .WithModule(ControlSocket);
 
         }
 
-        private async Task UpdateSocketClient(string clientId, string socketId, bool connected)
+        private async Task UpdateSocketClient(string clientId, string socketId, string endpoint, bool connected)
         {
             bool found = false;
             foreach (var client in Clients)
@@ -42,6 +41,10 @@ namespace Orienteering_LR_Desktop.API
                         client.ClientId = clientId;
                     }
 
+                    if (endpoint != null)
+                    {
+                        client.ClientType = endpoint;
+                    }
                 }
             }
 
@@ -52,24 +55,24 @@ namespace Orienteering_LR_Desktop.API
 
             if (!found && connected)
             {
-                Clients.Add(new SocketClient(clientId, socketId));
+                Clients.Add(new SocketClient(clientId, socketId, endpoint));
             }
             
         }
         public async Task OnClientConnected(IWebSocketContext context)
         {
-            await UpdateSocketClient(null,context.Id, true);
+            await UpdateSocketClient(null,context.Id, null, true);
         }
 
         public async Task OnClientDisconnected(IWebSocketContext context)
         {
-            await UpdateSocketClient(null,context.Id, false);
+            await UpdateSocketClient(null,context.Id, null, false);
         }
 
 
-        public async Task OnClientRegister(IWebSocketContext context, string uuid)
+        public async Task OnClientRegister(IWebSocketContext context, string uuid, string endpoint)
         {
-            await UpdateSocketClient(uuid, context.Id, true);
+            await UpdateSocketClient(uuid, context.Id, endpoint,true);
         }
     }
 }
