@@ -21,6 +21,7 @@ namespace Orienteering_LR_Desktop.API
 
             server.WithModule(LeaderboardSocket)
                 .WithModule(ControlSocket);
+
         }
 
         private void UpdateSocketClient(string clientId, bool connected)
@@ -32,7 +33,6 @@ namespace Orienteering_LR_Desktop.API
                 {
                     client.Connected = true;
                     found = true;
-                    break;
                 }
             }
 
