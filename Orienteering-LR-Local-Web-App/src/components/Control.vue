@@ -18,7 +18,7 @@
                     </b-card>
                 </b-col>
                 <b-col>
-                    <p>{{selected}}</p>
+                    <p>{{selected}} settings</p>
                 </b-col>
             </b-row>
         </b-container>

@@ -24,10 +24,10 @@ export const control_store = new Vuex.Store({
   },
   mutations:{
     [SOCKET_ONOPEN] (state, event)  {
-      Vue.prototype.$socket = event.currentTarget
+      Vue.prototype.$control_socket = event.currentTarget
       state.socket.online = true
       console.log("socket connected")
-      Vue.prototype.$socket.sendObj({action:"register", uuid:"controller1"})
+      Vue.prototype.$control_socket.sendObj({action:"register", uuid:"controller1"})
     },
     [SOCKET_ONCLOSE] (state, event)  {
       state.socket.online = false
@@ -38,6 +38,7 @@ export const control_store = new Vuex.Store({
     // default handler called for all methods
     [SOCKET_ONMESSAGE] (state, message)  {
       state.socket.message = message
+      console.error("Unhandled message:",message)
     },
     // mutations for reconnect methods
     [SOCKET_RECONNECT](state, count) {
@@ -69,12 +70,13 @@ export const leaderboard_store = new Vuex.Store({
   },
   mutations:{
     [SOCKET_ONOPEN] (state, event)  {
-      Vue.prototype.$socket = event.currentTarget
+      Vue.prototype.$leaderboard_socket = event.currentTarget
       state.socket.online = true
       console.log("socket connected")
     },
     [SOCKET_ONCLOSE] (state, event)  {
       state.socket.online = false
+      console.info("socket disconnected")
     },
     [SOCKET_ONERROR] (state, event)  {
       console.error(state, event)
@@ -82,6 +84,7 @@ export const leaderboard_store = new Vuex.Store({
     // default handler called for all methods
     [SOCKET_ONMESSAGE] (state, message)  {
       state.socket.message = message
+      console.error("Unhandled message")
     },
     // mutations for reconnect methods
     [SOCKET_RECONNECT](state, count) {
