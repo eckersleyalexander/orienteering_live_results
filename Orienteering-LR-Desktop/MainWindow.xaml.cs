@@ -21,6 +21,7 @@ using SPORTident.Communication.UsbDevice;
 using System.IO;
 using Microsoft.WindowsAPICodePack;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using System.Collections.ObjectModel;
 
 namespace Orienteering_LR_Desktop
 {
@@ -29,28 +30,17 @@ namespace Orienteering_LR_Desktop
 	/// </summary>
 	public partial class MainWindow : Window
     {
-        public List<Runner> CompetitorsList = new List<Runner>();
+        public ObservableCollection<Runner> CompetitorsList = new ObservableCollection<Runner>();
         public List<Control> ControlsList = new List<Control>();
-        public List<CourseDesktop> CoursesList = new List<CourseDesktop>();
-        public List<Runner> Runners = new List<Runner>();
+        public ObservableCollection<CourseDesktop> CoursesList = new ObservableCollection<CourseDesktop>();
         private readonly Reader _reader;
         private OESync oeSync;
+        ObservableCollection<Runner> DemoCompList = new ObservableCollection<Runner>();
+        ObservableCollection<Control> DemoControlsList = new ObservableCollection<Control>();
 
         public MainWindow()
         {
             InitializeComponent();
-            
-            if (Properties.Settings.Default.OEPath != "")
-            {
-                OESync testSync = new OESync(Properties.Settings.Default.OEPath);
-                testSync.StartSync();
-                if (testSync.SyncSuccess)
-                {
-                    OEPathLabel.Content = Properties.Settings.Default.OEPath;
-                    oeSync = testSync;
-                    GetInitData();
-                }
-            }
 
             if (File.Exists("LRDB.db"))
             {
@@ -60,6 +50,19 @@ namespace Orienteering_LR_Desktop
             {
                 db.GetService<IMigrator>().Migrate();
             }
+
+            if (Properties.Settings.Default.OEPath != "")
+            {
+                OESync testSync = new OESync(Properties.Settings.Default.OEPath);
+                testSync.StartSync();
+                if (testSync.SyncSuccess)
+                {
+                    OEPathLabel.Content = Properties.Settings.Default.OEPath;
+                    oeSync = testSync;
+                    GetInitData();
+                } 
+            }
+            
             CompetitorsTable.ItemsSource = CompetitorsList;
             ControlsTable.ItemsSource = ControlsList;
 
@@ -94,24 +97,7 @@ namespace Orienteering_LR_Desktop
             s.CreatePunch(chipId, checkpointId, punchTime);
 
             // push to front end
-            ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
-        }
-
-        void Datagrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
-        {
-            if (e.EditAction == DataGridEditAction.Commit)
-            {
-                var column = e.Column as DataGridBoundColumn;
-                if (column != null)
-                {
-                    var bindingPath = (column.Binding as Binding).Path.Path;
-                    var row = e.Row;
-                    var el = e.EditingElement as TextBox;
-                    int rowIndex = row.GetIndex();
-                    Runner runnerRow = Runners[rowIndex];
-                    Debug.WriteLine("Row: " + rowIndex + ", column changed: " + bindingPath + ", new value: " + el.Text + ", ID = " + runnerRow.ChipId);
-                }
-            }
+            await ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
         }
        
         private void GetInitData()
@@ -146,7 +132,7 @@ namespace Orienteering_LR_Desktop
             }
 
             ControlsList.Sort((x, y) => x.Id.CompareTo(y.Id));
-            
+
         }
 
         private void ConnectRadio(object sender, RoutedEventArgs e)
@@ -174,27 +160,7 @@ namespace Orienteering_LR_Desktop
             }
         }
 
-        private void CommandBinding_CanExecute_1(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
-        }
-
-        private void CommandBinding_Executed_1(object sender, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.CloseWindow(this);
-        }
-
-        private void CommandBinding_Executed_2(object sender, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.MaximizeWindow(this);
-        }
-
-        private void CommandBinding_Executed_3(object sender, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.MinimizeWindow(this);
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Tab_Click(object sender, RoutedEventArgs e)
         {
             int index = int.Parse(((Button)e.Source).Uid);
 
@@ -229,12 +195,6 @@ namespace Orienteering_LR_Desktop
             }
         }
 
-        private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-                this.DragMove();
-        }
-
         private void SetOEPathButton(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
@@ -257,6 +217,115 @@ namespace Orienteering_LR_Desktop
                     MessageBox.Show("No/Incomplete OE Data at specified location. Please try a different folder.");
                 }
             }
+        }
+
+        private void DemoButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (DemoGrid.Visibility == Visibility.Hidden)
+            {
+                oeSync = null;
+
+                if (File.Exists("LRDB.db"))
+                {
+                    File.Delete("LRDB.db");
+                }
+                using (var db = new CompetitorContext())
+                {
+                    db.GetService<IMigrator>().Migrate();
+                }
+                var dbstore = new Database.Store();
+                DemoGrid.Visibility = Visibility.Visible;
+                DemoCompList.Add(new Runner() {
+                    ChipId = 101,
+                    Status = "Not Started",
+                    FirstName = "John",
+                    LastName = "Smith"
+            
+                });
+                DemoCompList.Add(new Runner()
+                {
+                    ChipId = 102,
+                    Status = "Not Started",
+                    FirstName = "Bob",
+                    LastName = "Brown"
+
+                });
+                CompetitorsTable.ItemsSource = DemoCompList;
+                DemoControlsList.Add(new Control()
+                {
+                    Id = 1,
+                    RadioBool = false
+                });
+                DemoControlsList.Add(new Control()
+                {
+                    Id = 2,
+                    RadioBool = false
+                });
+                DemoControlsList.Add(new Control()
+                {
+                    Id = 3,
+                    RadioBool = false
+                });
+                ControlsTable.ItemsSource = DemoControlsList;
+
+                dbstore.CreateClub(new Club()
+                {
+                    ClubId = 1,
+                    Name = "Club One"
+                });
+                dbstore.CreateRaceClass(new RaceClass()
+                {
+                    RaceClassId = 1,
+                    Name = "Test Class"
+                });
+                foreach (Runner r in DemoCompList)
+                {
+                    dbstore.CreateCompetitor(new Competitor()
+                    {
+                        CompetitorId = r.ChipId ?? default(int),
+                        FirstName = r.FirstName,
+                        LastName = r.LastName,
+                        Gender = "Male",
+                        ClubId = 1,
+                        RaceClassId = 1
+                    });
+                }
+            }
+        }
+
+        private void DemoPunchClick(object sender, RoutedEventArgs e)
+        {
+            int index = int.Parse(((Button)e.Source).Uid);
+            var s = new Database.Store();
+            int now = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            switch (index)
+            {
+                case 0:
+                    s.CreatePunch(101, 0, now);
+                    DemoCompList[0].Status = "Started";  
+                    break;
+                case 1:
+                    s.CreatePunch(101, 1, now);
+                    break;
+                case 2:
+                    s.CreatePunch(101, 2, now);
+                    DemoCompList[0].Status = "Finished";
+                    break;
+                case 3:
+                    s.CreatePunch(102, 0, now);
+                    DemoCompList[1].Status = "Started";
+                    break;
+                case 4:
+                    s.CreatePunch(102, 1, now);
+                    break;
+                case 5:
+                    s.CreatePunch(102, 2, now);
+                    DemoCompList[1].Status = "Finished";
+                    break;
+            }
+            CompetitorsTable.ItemsSource = new ObservableCollection<Runner>();
+            CompetitorsTable.ItemsSource = DemoCompList;
+            ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
         }
     }
 

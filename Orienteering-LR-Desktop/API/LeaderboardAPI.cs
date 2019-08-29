@@ -18,14 +18,14 @@ namespace Orienteering_LR_Desktop.API
                 int? text = null;
                 var text2 = "";
                 var text3 = "";
-                // 
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-                {
-                    text = ((MainWindow)Application.Current.MainWindow).Runners[0].ChipId;
-                    text2 = ((MainWindow)Application.Current.MainWindow).Runners[0].FirstName;
-                    text3 = ((MainWindow)Application.Current.MainWindow).Runners[0].LastName;
+                //
+                //Application.Current.Dispatcher.Invoke((Action)(() =>
+                //{
+                  //  text = ((MainWindow)Application.Current.MainWindow).Runners[0].ChipId;
+                    //text2 = ((MainWindow)Application.Current.MainWindow).Runners[0].FirstName;
+                    //text3 = ((MainWindow)Application.Current.MainWindow).Runners[0].LastName;
                    
-                }));
+                //}));
                 // This is fake call to a Repository
                 // var person = await PeopleRepository.GetById(id);
                 return "{\"ID\": \"" + text + "\", \"firstName\": \"" + text2 + "\", \"lastName\": \"" + text3 + "\"}";
