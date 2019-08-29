@@ -6,25 +6,21 @@
         xmlns:local="clr-namespace:Orienteering_LR_Desktop"
         mc:Ignorable="d"
         Title="Orienteering Live Results Suite" Height="500" Width="700" MinHeight="500" MinWidth="700" ResizeMode="CanResizeWithGrip">
-    <Window.CommandBindings>
-        <CommandBinding Command="{x:Static SystemCommands.CloseWindowCommand}" CanExecute="CommandBinding_CanExecute_1" Executed="CommandBinding_Executed_1" />
-        <CommandBinding Command="{x:Static SystemCommands.MaximizeWindowCommand}" CanExecute="CommandBinding_CanExecute_1" Executed="CommandBinding_Executed_2" />
-        <CommandBinding Command="{x:Static SystemCommands.MinimizeWindowCommand}" CanExecute="CommandBinding_CanExecute_1" Executed="CommandBinding_Executed_3" />
-    </Window.CommandBindings>
     <DockPanel>
         <Grid Height="50" DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="10 0">
-                <Button Uid="0" Width="150" Content="COMPETITORS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Button_Click"/>
-                <Button Uid="1" Width="150" Content="CONTROLS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Button_Click"/>
-                <Button Uid="2" Width="150" Content="CLASSES" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Button_Click"/>
-                <Button Uid="3" Width="150" Content="SETTINGS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Button_Click"/>
+                <Button Uid="0" Width="150" Content="COMPETITORS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
+                <Button Uid="1" Width="150" Content="CONTROLS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
+                <Button Uid="2" Width="150" Content="CLASSES" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
+                <Button Uid="3" Width="150" Content="SETTINGS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
             </StackPanel>
             <Grid x:Name="GridCursor" Width="150" Height="5" Background="#FF2196F3" HorizontalAlignment="Left" Margin="460,45,0,0"/>
         </Grid>
         <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" Background="Red" VerticalAlignment="Stretch">
             <Grid x:Name="CompGrid" Background="#018786" Visibility="Hidden">
                 <DataGrid Name="CompetitorsTable" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Stretch" Background="White" Foreground="Black" AutoGenerateColumns="False"
-                    CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True" RowDetailsVisibilityMode="Collapsed" CanUserAddRows="False" IsReadOnly="True" BorderBrush="{x:Null}">
+                    CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True" RowDetailsVisibilityMode="Collapsed" CanUserAddRows="False" IsReadOnly="True" BorderBrush="{x:Null}"
+                          ItemsSource="{Binding Path=., Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}">
                     <DataGrid.Resources>
                         <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="White" />
@@ -113,16 +109,25 @@
                 </DataGrid>
             </Grid>
             <Grid x:Name="ClassGrid" Background="CadetBlue" Visibility="Hidden">
-
             </Grid>
-
             <Grid x:Name="SettingsGrid" Background="AntiqueWhite" Visibility="Visible">
                 <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="542,53,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="30"/>
                 <Label x:Name="OEPathLabel" Content="! PATH NOT SET !" HorizontalAlignment="Left" Margin="193,53,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
                 <Label Content="OE Database Folder Path:" HorizontalAlignment="Left" Margin="25,55,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
                 <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="542,96,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="32"/>
-                <Label x:Name="IOPathLabel" Content="! PATH NOT SET !" HorizontalAlignment="Left" Margin="193,96,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
+                <Label x:Name="IOPathLabel" Content="/bin/debug/" HorizontalAlignment="Left" Margin="193,96,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
                 <Label Content="Live Results Database Path:" HorizontalAlignment="Left" Margin="25,100,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
+                <Button Content="Demo Mode" HorizontalAlignment="Left" Margin="250,152,0,0" VerticalAlignment="Top" Width="200" FontSize="20" Height="35" Click="DemoButtonClick"/>
+                <Grid x:Name="DemoGrid" Visibility="Hidden">
+                    <Label Content="Competitor One" HorizontalAlignment="Left" Margin="82,214,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold" FontSize="20"/>
+                    <Label Content="Competitor Two" HorizontalAlignment="Left" Margin="442,214,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold" FontSize="20" RenderTransformOrigin="0.497,0.424"/>
+                    <Button Uid="0" Content="Punch Start" HorizontalAlignment="Left" Margin="97,256,0,0" VerticalAlignment="Top" Width="131" Click="DemoPunchClick"/>
+                    <Button Uid="1" Content="Punch Middle" HorizontalAlignment="Left" Margin="97,310,0,0" VerticalAlignment="Top" Width="131" Click="DemoPunchClick"/>
+                    <Button Uid="2" Content="Punch End" HorizontalAlignment="Left" Margin="97,365,0,0" VerticalAlignment="Top" Width="131" Click="DemoPunchClick"/>
+                    <Button Uid="3" Content="Punch Start" HorizontalAlignment="Left" Margin="456,256,0,0" VerticalAlignment="Top" Width="131" Click="DemoPunchClick"/>
+                    <Button Uid="4" Content="Punch Middle" HorizontalAlignment="Left" Margin="456,310,0,0" VerticalAlignment="Top" Width="131" Click="DemoPunchClick"/>
+                    <Button Uid="5" Content="Punch End" HorizontalAlignment="Left" Margin="456,365,0,0" VerticalAlignment="Top" Width="131" Click="DemoPunchClick"/>
+                </Grid>
             </Grid>
         </Grid>
 
