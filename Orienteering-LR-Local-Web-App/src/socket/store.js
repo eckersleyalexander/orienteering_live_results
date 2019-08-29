@@ -21,6 +21,13 @@ function makeAction(namespace, action, uuid, message) {
   }
 }
 
+function uuidv4() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  )
+}
+const socket_uuid = uuidv4();
+
 export const control = {
   namespaced: true,
   state: {
@@ -49,8 +56,8 @@ export const control = {
     classes(context, message) { context.commit("handleClassesMessage", message) },
     error(context, message) { console.error(message) },
     // local actions (not called by socket messages) are prefixed with _
-    _updateLeaderboard(context, data) {
-      Vue.prototype.$socket.sendObj(makeAction("control","updateLeaderboard", data.uuid, data.raceClass))
+    _setLeaderboardClass(context, data) {
+      Vue.prototype.$socket.sendObj(makeAction("control","setLeaderboardClass", data.uuid, data.raceClass))
     }
   }
 }
@@ -62,16 +69,24 @@ export const leaderboard = {
       online: false,
       message: '',
       reconnectError: false,
-      clients: [],
-      messages: []
+    },
+    leaderboard: {
+      raceClass: null,
+      data: []
     }
   },
   mutations: {
-    handleClientsMessage(state, message) {
-      state.socket.clients = message;
+    handleSetLeaderboardMessage(state, message) {
+      state.leaderboard.raceClass = message.payload;
+    },
+    handleLeaderboardUpdate(state,message) {
+      console.log("leaderboard update");
+      state.leaderboard.data = JSON.parse(message.payload);
     }
   },
   actions: {
+    setLeaderboardClass(context, message) {context.commit("handleSetLeaderboardMessage", message);},
+    leaderboardUpdate(context, message) {context.commit("handleLeaderboardUpdate", message);},
     error(context, message) { console.error(message) }
   }
 }
@@ -81,8 +96,10 @@ const socketEvents = {
     Vue.prototype.$socket = event.currentTarget
     state.control.socket.online = true
     console.log("socket connected")
-    Vue.prototype.$socket.sendObj(makeAction("control","register", "controller1", null))
-    Vue.prototype.$socket.sendObj(makeAction("control","classes", "controller1", null))
+    const namespace = window.location.pathname === "/control" ? "control" : "leaderboard";
+    console.log("namespace is", namespace);
+    Vue.prototype.$socket.sendObj(makeAction(namespace, "register", socket_uuid, null))
+    Vue.prototype.$socket.sendObj(makeAction(namespace, "classes", socket_uuid, null))
   },
   [SOCKET_ONCLOSE](state, event) {
     state.control.socket.online = false

@@ -63,19 +63,21 @@ namespace Orienteering_LR_Desktop.API
 
         protected override Task OnClientDisconnectedAsync(IWebSocketContext context)
         {
+            Debug.WriteLine("client disconnected " + context.Id);
             return UpdateSocketClient(null, context.Id, null, false);
         }
 
 
         public async Task OnClientRegister(IWebSocketContext context, string uuid, string nameSpace)
         {
-            Debug.WriteLine(uuid + " (" + nameSpace + ") registered");
+            Debug.WriteLine(uuid + " (" + nameSpace + ") registered " + context.Id);
             await UpdateSocketClient(uuid, context.Id, nameSpace, true);
         }
 
-        public async Task SendUpdates()
+        public async Task SendLeaderboardUpdates()
         {
-            await BroadcastAsync(GetLeaderboard.GetAllClassesJson());
+            await SendToLeaderboards(MakeActionResponse("leaderboard", "leaderboardUpdate", null,
+                GetLeaderboard.GetAllClassesJson()));
         }
 
         public string MakeActionResponse(string nameSpace, string action, string uuid, string payload)
@@ -152,10 +154,11 @@ namespace Orienteering_LR_Desktop.API
                             JsonConvert.SerializeObject(query.GetClasses())));
                     break;
 
-                case "updateLeaderboard":
+                case "setLeaderboardClass":
                     await SendToClient(context, "leaderboard", uuid,
-                        MakeActionResponse("leaderboard", "updateLeaderboard", uuid,
+                        MakeActionResponse("leaderboard", "setLeaderboardClass", uuid,
                             payload));
+                    await SendLeaderboardUpdates();
                     break;
 
                 default:
@@ -186,7 +189,7 @@ namespace Orienteering_LR_Desktop.API
             }
         }
 
-        public async Task SendToLeaderboards(IWebSocketContext context, string message)
+        public async Task SendToLeaderboards(string message)
         {
             var leaderboardClients = Clients
                 .Where(c => c.ClientType == "leaderboard").Select(c => c.SocketId);

@@ -56,7 +56,7 @@ export default {
     },
     methods: {
         setLeaderboardClass() {
-            this.$store.dispatch("control/_updateLeaderboard", {uuid:this.selected, raceClass:this.selectedClass});
+            this.$store.dispatch("control/_setLeaderboardClass", {uuid:this.selected, raceClass:this.selectedClass});
         }
     }
 };

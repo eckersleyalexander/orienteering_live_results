@@ -34,7 +34,10 @@ export default {
         };
     },
     created() {
-        this.$options.sockets.onmessage = data => this.onmessage(data);
+        // this.$options.sockets.onmessage = data => this.onmessage(data);
+        // data is now at: this.$store.state.leaderboard.data
+        // pls fix this 
+        // thank
     },
     methods: {
         onmessage: function(msg) {
