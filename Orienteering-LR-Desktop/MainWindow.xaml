@@ -19,8 +19,7 @@
         <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" Background="Red" VerticalAlignment="Stretch">
             <Grid x:Name="CompGrid" Background="#018786" Visibility="Hidden">
                 <DataGrid Name="CompetitorsTable" HorizontalAlignment="Stretch" Margin="10,10,10,10" VerticalAlignment="Stretch" Background="White" Foreground="Black" AutoGenerateColumns="False"
-                    CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True" RowDetailsVisibilityMode="Collapsed" CanUserAddRows="False" IsReadOnly="True" BorderBrush="{x:Null}"
-                          ItemsSource="{Binding Path=., Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}">
+                    CanUserResizeColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True" RowDetailsVisibilityMode="Collapsed" CanUserAddRows="False" IsReadOnly="True" BorderBrush="{x:Null}">
                     <DataGrid.Resources>
                         <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="White" />

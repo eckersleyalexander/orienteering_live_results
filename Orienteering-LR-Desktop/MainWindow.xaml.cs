@@ -30,9 +30,9 @@ namespace Orienteering_LR_Desktop
 	/// </summary>
 	public partial class MainWindow : Window
     {
-        public List<Runner> CompetitorsList = new List<Runner>();
+        public ObservableCollection<Runner> CompetitorsList = new ObservableCollection<Runner>();
         public List<Control> ControlsList = new List<Control>();
-        public List<CourseDesktop> CoursesList = new List<CourseDesktop>();
+        public ObservableCollection<CourseDesktop> CoursesList = new ObservableCollection<CourseDesktop>();
         private readonly Reader _reader;
         private OESync oeSync;
         ObservableCollection<Runner> DemoCompList = new ObservableCollection<Runner>();
@@ -60,9 +60,8 @@ namespace Orienteering_LR_Desktop
                     OEPathLabel.Content = Properties.Settings.Default.OEPath;
                     oeSync = testSync;
                     GetInitData();
-                }
+                } 
             }
-
             
             CompetitorsTable.ItemsSource = CompetitorsList;
             ControlsTable.ItemsSource = ControlsList;
@@ -133,7 +132,7 @@ namespace Orienteering_LR_Desktop
             }
 
             ControlsList.Sort((x, y) => x.Id.CompareTo(y.Id));
-            
+
         }
 
         private void ConnectRadio(object sender, RoutedEventArgs e)
@@ -277,6 +276,7 @@ namespace Orienteering_LR_Desktop
                 dbstore.CreateRaceClass(new RaceClass()
                 {
                     RaceClassId = 1,
+                    Name = "Test Class"
                 });
                 foreach (Runner r in DemoCompList)
                 {
@@ -286,7 +286,8 @@ namespace Orienteering_LR_Desktop
                         FirstName = r.FirstName,
                         LastName = r.LastName,
                         Gender = "Male",
-                        ClubId = 1
+                        ClubId = 1,
+                        RaceClassId = 1
                     });
                 }
             }
@@ -324,6 +325,7 @@ namespace Orienteering_LR_Desktop
             }
             CompetitorsTable.ItemsSource = new ObservableCollection<Runner>();
             CompetitorsTable.ItemsSource = DemoCompList;
+            ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
         }
     }
 
