@@ -21,7 +21,11 @@
                     <h3>{{selected}} settings</h3>
                     <div>
                         <b-form-select v-model="selectedClass" :options="classes"></b-form-select>
-                        <div class="mt-3">Selected: <strong>{{ selectedClass }}</strong></div>
+                        <hr>
+                        <b-button variant="success" :hidden="selectedClass == null"
+                        v-on:click="setLeaderboardClass">
+                            Set leaderboard class to {{selectedClass}}
+                        </b-button>
                     </div>
                 </b-col>
             </b-row>
@@ -37,7 +41,7 @@ export default {
         return {
             loading: true,
             selected: null,
-            selectedClass: "<select a class>"
+            selectedClass: null
         };
     },
     computed: {
@@ -51,7 +55,9 @@ export default {
         // store.actions.broadcast = data => this.onmessage(data);
     },
     methods: {
-        
+        setLeaderboardClass() {
+            console.log("set class", this.selectedClass, "on", this.selected);
+        }
     }
 };
 </script>

@@ -69,9 +69,21 @@ namespace Orienteering_LR_Desktop.API
          
          public async Task SendToLeaderboards(IWebSocketContext context, string message)
          {
-             var controlClients = _server.Clients
+             var leaderboardClients = _server.Clients
                  .Where(c => c.ClientType == "leaderboard").Select(c => c.SocketId);
-             await BroadcastAsync(message, c => controlClients.Contains(c.Id));
+             await BroadcastAsync(message, c => leaderboardClients.Contains(c.Id));
+         }
+         
+         public async Task SendToClient(IWebSocketContext context, string uuid, string message)
+         {
+             var leaderboardClients = _server.Clients
+                 .Where(c => c.ClientType == "leaderboard");
+             foreach (var client in leaderboardClients)
+             {
+                 if (client.ClientId != uuid) continue;
+                 await BroadcastAsync(message, c => c.Id == client.SocketId);
+                 return;
+             }
          }
      }
 }

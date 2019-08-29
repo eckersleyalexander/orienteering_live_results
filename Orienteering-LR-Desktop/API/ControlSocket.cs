@@ -91,6 +91,18 @@ namespace Orienteering_LR_Desktop.API
                 .Where(c => c.ClientType == "control").Select(c => c.SocketId);
             await BroadcastAsync(message, c => controlClients.Contains(c.Id));
         }
+        
+        public async Task SendToClient(IWebSocketContext context, string uuid, string message)
+        {
+            var controlClients = _server.Clients
+                .Where(c => c.ClientType == "control");
+            foreach (var client in controlClients)
+            {
+                if (client.ClientId != uuid) continue;
+                await BroadcastAsync(message, c => c.Id == client.SocketId);
+                return;
+            }
+        }
 
         
 
