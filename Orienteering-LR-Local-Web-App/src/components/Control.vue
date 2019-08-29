@@ -56,7 +56,7 @@ export default {
     },
     methods: {
         setLeaderboardClass() {
-            console.log("set class", this.selectedClass, "on", this.selected);
+            this.$store.dispatch("control/updateLeaderboard", {uuid:this.selected, raceClass:this.selectedClass});
         }
     }
 };

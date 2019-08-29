@@ -78,10 +78,11 @@ namespace Orienteering_LR_Desktop.API
             await ControlSocket.SendToControlPanels(context, ControlSocket.GetClientsResponse(null));
         }
         
-        public string MakeActionResponse(string action, string uuid, string payload)
+        public string MakeActionResponse(string nameSpace, string action, string uuid, string payload)
         {
             Dictionary<string, dynamic> actionResponse = new Dictionary<string, dynamic>
             {
+                {"namespace", nameSpace},
                 {"action", action},
                 {"uuid", uuid},
                 {"payload", payload}
@@ -89,10 +90,11 @@ namespace Orienteering_LR_Desktop.API
             return JsonConvert.SerializeObject(actionResponse);
         }
         
-        public string MakeErrorResponse(string message)
+        public string MakeErrorResponse(string nameSpace,string message)
         {
             Dictionary<string, dynamic> errorResponse = new Dictionary<string, dynamic>
             {
+                {"namespace", nameSpace},
                 {"action", "error"},
                 {"uuid", null},
                 {"payload", new Dictionary<string, string>

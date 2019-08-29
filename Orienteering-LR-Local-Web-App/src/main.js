@@ -3,7 +3,7 @@ import App from "./App.vue";
 import Control from "./components/Control.vue";
 import BoostrapVue from "bootstrap-vue";
 import VueNativeSock from "vue-native-websocket";
-import {control_store, leaderboard_store, app_store} from "./socket/store";
+import {app_store} from "./socket/store";
 import {
     SOCKET_ONOPEN,
     SOCKET_ONCLOSE,
@@ -37,7 +37,7 @@ const mutations = {
 
 Vue.use(VueNativeSock, "ws://localhost:9696/control", {
     format: "json",
-    store: control_store,
+    store: app_store,
     mutations: mutations
     });
 

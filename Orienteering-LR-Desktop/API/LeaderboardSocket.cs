@@ -57,13 +57,13 @@ namespace Orienteering_LR_Desktop.API
                    
                     
                      default:
-                         await SendAsync(context, _server.MakeErrorResponse(" unknown action: " + action));
+                         await SendAsync(context, _server.MakeErrorResponse("leaderboard"," unknown action: " + action));
                          break;
                  }
              }
              catch (Exception e)
              {
-                 await SendAsync(context, _server.MakeErrorResponse(e.Message));
+                 await SendAsync(context, _server.MakeErrorResponse("leaderboard",e.Message));
              }
          }
          

@@ -9,10 +9,19 @@ import {
   SOCKET_RECONNECT,
   SOCKET_RECONNECT_ERROR
 } from './mutation-types'
- 
+
 Vue.use(Vuex);
 
-export const control_store = new Vuex.Store({
+function makeAction(action, uuid, message) {
+  return {
+    action,
+    uuid,
+    payload: message
+  }
+}
+
+export const control = {
+  namespaced: true,
   state: {
     socket: {
       online: false,
@@ -23,34 +32,10 @@ export const control_store = new Vuex.Store({
       classes: []
     }
   },
-  mutations:{
-    [SOCKET_ONOPEN] (state, event)  {
-      Vue.prototype.$control_socket = event.currentTarget
-      state.socket.online = true
-      console.log("socket connected")
-      Vue.prototype.$control_socket.sendObj({action:"register", uuid:"controller1"})
-      Vue.prototype.$control_socket.sendObj({action:"classes", uuid:"controller1"})
-    },
-    [SOCKET_ONCLOSE] (state, event)  {
-      state.socket.online = false
-    },
-    [SOCKET_ONERROR] (state, event)  {
-      console.error(state, event)
-    },
-    // default handler called for all methods
-    [SOCKET_ONMESSAGE] (state, message)  {
-      state.socket.message = message
-      console.error("Unhandled message:",message)
-    },
-    // mutations for reconnect methods
-    [SOCKET_RECONNECT](state, count) {
-      console.info(state, count)
-    },
-    [SOCKET_RECONNECT_ERROR](state) {
-      state.socket.reconnectError = true;
-    },
+  mutations: {
 
-    handleClientsMessage (state, message) {
+
+    handleClientsMessage(state, message) {
       state.socket.clients = JSON.parse(message["payload"]);
     },
 
@@ -59,13 +44,19 @@ export const control_store = new Vuex.Store({
     }
   },
   actions: {
-    clients (context, message) { context.commit("handleClientsMessage", message) },
-    classes (context, message) { context.commit("handleClassesMessage", message) },
-    error(context,message) {console.error(message)}
+    clients(context, message) { context.commit("handleClientsMessage", message) },
+    classes(context, message) { context.commit("handleClassesMessage", message) },
+    error(context, message) { console.error(message) },
+    // local actions (not called by socket messages) are prefixed with _
+    updateLeaderboard(context, data) {
+      debugger;
+      Vue.prototype.$socket.sendObj(makeAction("updateLeaderboard", data.uuid, data.raceClass))
+    }
   }
-})
+}
 
-export const leaderboard_store = new Vuex.Store({
+export const leaderboard = {
+  namespaced: true,
   state: {
     socket: {
       online: false,
@@ -75,44 +66,48 @@ export const leaderboard_store = new Vuex.Store({
       messages: []
     }
   },
-  mutations:{
-    [SOCKET_ONOPEN] (state, event)  {
-      Vue.prototype.$leaderboard_socket = event.currentTarget
-      state.socket.online = true
-      console.log("socket connected")
-    },
-    [SOCKET_ONCLOSE] (state, event)  {
-      state.socket.online = false
-      console.info("socket disconnected")
-    },
-    [SOCKET_ONERROR] (state, event)  {
-      console.error(state, event)
-    },
-    // default handler called for all methods
-    [SOCKET_ONMESSAGE] (state, message)  {
-      state.socket.message = message
-      console.error("Unhandled message")
-    },
-    // mutations for reconnect methods
-    [SOCKET_RECONNECT](state, count) {
-      console.info(state, count)
-    },
-    [SOCKET_RECONNECT_ERROR](state) {
-      state.socket.reconnectError = true;
-    },
-
-    handleClientsMessage (state, message) {
+  mutations: {
+    handleClientsMessage(state, message) {
       state.socket.clients = message;
     }
   },
   actions: {
-    error(context,message) {console.error(message)}
+    error(context, message) { console.error(message) }
   }
-})
+}
+
+const socketEvents = {
+  [SOCKET_ONOPEN](state, event) {
+    Vue.prototype.$socket = event.currentTarget
+    state.control.socket.online = true
+    console.log("socket connected")
+    Vue.prototype.$socket.sendObj(makeAction("register", "controller1", null))
+    Vue.prototype.$socket.sendObj(makeAction("classes", "controller1", null))
+  },
+  [SOCKET_ONCLOSE](state, event) {
+    state.control.socket.online = false
+  },
+  [SOCKET_ONERROR](state, event) {
+    console.error(state, event)
+  },
+  // default handler called for all methods
+  [SOCKET_ONMESSAGE](state, message) {
+    state.socket.message = message
+    console.error("Unhandled message:", message)
+  },
+  // mutations for reconnect methods
+  [SOCKET_RECONNECT](state, count) {
+    console.info(state, count)
+  },
+  [SOCKET_RECONNECT_ERROR](state) {
+    state.socket.reconnectError = true;
+  }
+}
 
 export const app_store = new Vuex.Store({
   modules: {
-    control: control_store,
-    leaderboard: leaderboard_store
-  }
+    control,
+    leaderboard,
+  },
+  mutations: socketEvents
 })

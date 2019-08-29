@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using EmbedIO.WebSockets;
@@ -9,10 +10,8 @@ using Orienteering_LR_Desktop.Database;
 
 namespace Orienteering_LR_Desktop.API
 {
-       
     public class ControlSocket : WebSocketModule
     {
-
         private SocketServer _server;
 
         public ControlSocket(string urlPath, SocketServer server) : base(urlPath, true)
@@ -29,13 +28,14 @@ namespace Orienteering_LR_Desktop.API
         {
             return Task.WhenAll(_server.OnClientDisconnected(context));
         }
-                
 
-        protected override Task OnMessageReceivedAsync(IWebSocketContext context, byte[] buffer, IWebSocketReceiveResult result)
+
+        protected override Task OnMessageReceivedAsync(IWebSocketContext context, byte[] buffer,
+            IWebSocketReceiveResult result)
         {
             return HandleMessage(context, buffer);
         }
-        
+
         protected async Task HandleMessage(IWebSocketContext context, byte[] buffer)
         {
             try
@@ -54,24 +54,33 @@ namespace Orienteering_LR_Desktop.API
                         string endpoint = context.RequestUri.LocalPath.Trim('/');
                         await _server.OnClientRegister(context, uuid, endpoint);
                         break;
-                    
+
                     case "clients":
                         await SendAsync(context, GetClientsResponse(uuid));
                         break;
-                    
+
                     case "classes":
 //                        await BroadcastAsync("{\"action\":\"broadcast\"}", c => c != context);
-                        await SendAsync(context, _server.MakeActionResponse("classes", null, JsonConvert.SerializeObject(query.GetClasses())));
-                        break; 
-                    
+                        await SendAsync(context,
+                            _server.MakeActionResponse("control", "classes", null,
+                                JsonConvert.SerializeObject(query.GetClasses())));
+                        break;
+
+                    case "updateLeaderboard":
+                        await _server.LeaderboardSocket.SendToClient(context, uuid,
+                            _server.MakeActionResponse("leaderboard", "updateLeaderboard", uuid,
+                                deserialised["payload"]));
+                        break;
+
                     default:
-                        await SendAsync(context, _server.MakeErrorResponse(" unknown action: " + action));
+                        await SendAsync(context, _server.MakeErrorResponse("control", " unknown action: " + action));
                         break;
                 }
             }
             catch (Exception e)
             {
-                await SendAsync(context, _server.MakeErrorResponse(e.Message));
+                await SendAsync(context, _server.MakeErrorResponse("control", e.Message));
+                Debug.WriteLine(e);
             }
         }
 
@@ -79,10 +88,10 @@ namespace Orienteering_LR_Desktop.API
         {
             var clients = _server.Clients
                 .Where(c => c.ClientId != null)
-                .Select(c => new Dictionary<string, string>(){{"id",c.ClientId},{"type", c.ClientType}})
+                .Select(c => new Dictionary<string, string>() {{"id", c.ClientId}, {"type", c.ClientType}})
                 .ToList();
             var serialised = JsonConvert.SerializeObject(clients);
-            return _server.MakeActionResponse("clients", uuid, serialised);
+            return _server.MakeActionResponse("control", "clients", uuid, serialised);
         }
 
         public async Task SendToControlPanels(IWebSocketContext context, string message)
@@ -91,7 +100,7 @@ namespace Orienteering_LR_Desktop.API
                 .Where(c => c.ClientType == "control").Select(c => c.SocketId);
             await BroadcastAsync(message, c => controlClients.Contains(c.Id));
         }
-        
+
         public async Task SendToClient(IWebSocketContext context, string uuid, string message)
         {
             var controlClients = _server.Clients
@@ -103,8 +112,5 @@ namespace Orienteering_LR_Desktop.API
                 return;
             }
         }
-
-        
-
     }
 }
