@@ -118,6 +118,10 @@ namespace Orienteering_LR_Desktop
 
             foreach (Database.CourseInfo c in Courses)
             {
+                CourseDesktop cd = new CourseDesktop();
+                cd.Name = c.Description;
+                cd.Controls = c.CourseData;
+                CoursesList.Add(cd);
                 foreach (int controlID in c.CourseData)
                 {
                     if (!ControlsList.Any(x => x.Id == controlID)) {
@@ -131,6 +135,8 @@ namespace Orienteering_LR_Desktop
             }
 
             ControlsList.Sort((x, y) => x.Id.CompareTo(y.Id));
+
+            CoursesTable.ItemsSource = CoursesList;
 
         }
 
@@ -170,25 +176,25 @@ namespace Orienteering_LR_Desktop
                 case 0:
                     CompGrid.Visibility = Visibility.Visible;
                     ContGrid.Visibility = Visibility.Hidden;
-                    ClassGrid.Visibility = Visibility.Hidden;
+                    CoursesGrid.Visibility = Visibility.Hidden;
                     SettingsGrid.Visibility = Visibility.Hidden;
                     break;
                 case 1:
                     CompGrid.Visibility = Visibility.Hidden;
                     ContGrid.Visibility = Visibility.Visible;
-                    ClassGrid.Visibility = Visibility.Hidden;
+                    CoursesGrid.Visibility = Visibility.Hidden;
                     SettingsGrid.Visibility = Visibility.Hidden;
                     break;
                 case 2:
                     CompGrid.Visibility = Visibility.Hidden;
                     ContGrid.Visibility = Visibility.Hidden;
-                    ClassGrid.Visibility = Visibility.Visible;
+                    CoursesGrid.Visibility = Visibility.Visible;
                     SettingsGrid.Visibility = Visibility.Hidden;
                     break;
                 case 3:
                     CompGrid.Visibility = Visibility.Hidden;
                     ContGrid.Visibility = Visibility.Hidden;
-                    ClassGrid.Visibility = Visibility.Hidden;
+                    CoursesGrid.Visibility = Visibility.Hidden;
                     SettingsGrid.Visibility = Visibility.Visible;
                     break;
             }
@@ -223,6 +229,7 @@ namespace Orienteering_LR_Desktop
         {
             if (DemoGrid.Visibility == Visibility.Hidden)
             {
+                DemoModeBtn.Visibility = Visibility.Hidden;
                 oeSync.StopSync();
                 CompetitorsList = new ObservableCollection<Runner>();
                 ControlsList = new List<Control>();
@@ -328,6 +335,7 @@ namespace Orienteering_LR_Desktop
             CompetitorsTable.ItemsSource = CompetitorsList;
             ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
         }
+
     }
 
     public class Runner
@@ -346,9 +354,10 @@ namespace Orienteering_LR_Desktop
 
     public class CourseDesktop
     {
-        public List<Control> Controls { get; set; }
         public String Name { get; set; }
+        public List<int> Controls { get; set; }
     }
+
 
 
 }
