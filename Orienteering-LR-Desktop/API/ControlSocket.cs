@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using EmbedIO.WebSockets;
 using Newtonsoft.Json;
+using Orienteering_LR_Desktop.Database;
 
 
 namespace Orienteering_LR_Desktop.API
@@ -45,6 +46,8 @@ namespace Orienteering_LR_Desktop.API
                 string action = deserialised["action"];
                 string uuid = deserialised["uuid"];
 
+                Query query = new Query();
+
                 switch (action)
                 {
                     case "register":
@@ -56,8 +59,9 @@ namespace Orienteering_LR_Desktop.API
                         await SendAsync(context, GetClientsResponse(uuid));
                         break;
                     
-                    case "broadcast":
-                        await BroadcastAsync("{\"action\":\"broadcast\"}", c => c != context);
+                    case "classes":
+//                        await BroadcastAsync("{\"action\":\"broadcast\"}", c => c != context);
+                        await SendAsync(context, _server.MakeActionResponse("classes", null, JsonConvert.SerializeObject(query.GetClasses())));
                         break; 
                     
                     default:

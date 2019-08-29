@@ -17,8 +17,12 @@
                         <small class="d-block" slot="footer">{{leaderboards.length}} leaderboards and {{controls.length}} controls connected</small>
                     </b-card>
                 </b-col>
-                <b-col>
-                    <p>{{selected}} settings</p>
+                <b-col :hidden="selected == null">
+                    <h3>{{selected}} settings</h3>
+                    <div>
+                        <b-form-select v-model="selectedClass" :options="classes"></b-form-select>
+                        <div class="mt-3">Selected: <strong>{{ selectedClass }}</strong></div>
+                    </div>
                 </b-col>
             </b-row>
         </b-container>
@@ -32,13 +36,16 @@ export default {
     data() {
         return {
             loading: true,
-            selected: null
+            selected: null,
+            selectedClass: "<select a class>"
         };
     },
     computed: {
         offline() {return !this.$store.state.control.socket.online},
         leaderboards() {return this.$store.state.control.socket.clients.filter(client => client.type === "leaderboard")},
-        controls() {return this.$store.state.control.socket.clients.filter(client => client.type === "control")}
+        controls() {return this.$store.state.control.socket.clients.filter(client => client.type === "control")},
+        classes() {return this.$store.state.control.socket.classes.map(e => e.text = e.Name)},
+
     },
     created() {
         // store.actions.broadcast = data => this.onmessage(data);

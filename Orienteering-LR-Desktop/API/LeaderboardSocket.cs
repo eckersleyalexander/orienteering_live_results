@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using EmbedIO.WebSockets;
 using Newtonsoft.Json;
@@ -64,6 +65,13 @@ namespace Orienteering_LR_Desktop.API
              {
                  await SendAsync(context, _server.MakeErrorResponse(e.Message));
              }
+         }
+         
+         public async Task SendToLeaderboards(IWebSocketContext context, string message)
+         {
+             var controlClients = _server.Clients
+                 .Where(c => c.ClientType == "leaderboard").Select(c => c.SocketId);
+             await BroadcastAsync(message, c => controlClients.Contains(c.Id));
          }
      }
 }

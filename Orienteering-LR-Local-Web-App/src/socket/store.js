@@ -19,7 +19,8 @@ export const control_store = new Vuex.Store({
       message: '',
       reconnectError: false,
       clients: [],
-      messages: []
+      messages: [],
+      classes: []
     }
   },
   mutations:{
@@ -28,6 +29,7 @@ export const control_store = new Vuex.Store({
       state.socket.online = true
       console.log("socket connected")
       Vue.prototype.$control_socket.sendObj({action:"register", uuid:"controller1"})
+      Vue.prototype.$control_socket.sendObj({action:"classes", uuid:"controller1"})
     },
     [SOCKET_ONCLOSE] (state, event)  {
       state.socket.online = false
@@ -50,10 +52,15 @@ export const control_store = new Vuex.Store({
 
     handleClientsMessage (state, message) {
       state.socket.clients = JSON.parse(message["payload"]);
+    },
+
+    handleClassesMessage(state, message) {
+      state.socket.classes = JSON.parse(message["payload"]);
     }
   },
   actions: {
     clients (context, message) { context.commit("handleClientsMessage", message) },
+    classes (context, message) { context.commit("handleClassesMessage", message) },
     error(context,message) {console.error(message)}
   }
 })
