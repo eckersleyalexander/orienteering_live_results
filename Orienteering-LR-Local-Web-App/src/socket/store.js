@@ -12,8 +12,9 @@ import {
 
 Vue.use(Vuex);
 
-function makeAction(action, uuid, message) {
+function makeAction(namespace, action, uuid, message) {
   return {
+    namespace,
     action,
     uuid,
     payload: message
@@ -48,9 +49,8 @@ export const control = {
     classes(context, message) { context.commit("handleClassesMessage", message) },
     error(context, message) { console.error(message) },
     // local actions (not called by socket messages) are prefixed with _
-    updateLeaderboard(context, data) {
-      debugger;
-      Vue.prototype.$socket.sendObj(makeAction("updateLeaderboard", data.uuid, data.raceClass))
+    _updateLeaderboard(context, data) {
+      Vue.prototype.$socket.sendObj(makeAction("control","updateLeaderboard", data.uuid, data.raceClass))
     }
   }
 }
@@ -81,8 +81,8 @@ const socketEvents = {
     Vue.prototype.$socket = event.currentTarget
     state.control.socket.online = true
     console.log("socket connected")
-    Vue.prototype.$socket.sendObj(makeAction("register", "controller1", null))
-    Vue.prototype.$socket.sendObj(makeAction("classes", "controller1", null))
+    Vue.prototype.$socket.sendObj(makeAction("control","register", "controller1", null))
+    Vue.prototype.$socket.sendObj(makeAction("control","classes", "controller1", null))
   },
   [SOCKET_ONCLOSE](state, event) {
     state.control.socket.online = false

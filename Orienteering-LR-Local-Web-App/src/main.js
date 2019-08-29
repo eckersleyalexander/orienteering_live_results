@@ -29,13 +29,8 @@ const mutations = {
     SOCKET_RECONNECT,
     SOCKET_RECONNECT_ERROR
   }
-// Vue.use(VueNativeSock, "ws://localhost:9696/leaderboard", {
-//      format: "json",
-//      store: leaderboard_store,
-//      mutations: mutations  
-//     });
 
-Vue.use(VueNativeSock, "ws://localhost:9696/control", {
+Vue.use(VueNativeSock, "ws://localhost:9696/socket", {
     format: "json",
     store: app_store,
     mutations: mutations
