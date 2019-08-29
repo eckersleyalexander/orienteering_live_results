@@ -22,13 +22,14 @@ namespace Orienteering_LR_Desktop
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            socketServer = new SocketServer("/socket");
             server = new WebServer(o => o
                     .WithUrlPrefix("http://localhost:9696/")
                     .WithMode(HttpListenerMode.EmbedIO)
                 )
                 .WithCors()
-                .WithWebApi("/api", api => api.WithController<LeaderboardAPI>());
-            socketServer = new SocketServer(server);
+                .WithWebApi("/api", api => api.WithController<LeaderboardAPI>())
+                .WithModule(socketServer);
 			//server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
 			//server.Module<StaticFilesModule>().UseRamCache = true;
 			//server.Module<StaticFilesModule>().DefaultExtension = ".html"

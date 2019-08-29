@@ -96,7 +96,7 @@ namespace Orienteering_LR_Desktop
             s.CreatePunch(chipId, checkpointId, punchTime);
 
             // push to front end
-            await ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
+            await ((App)Application.Current).socketServer.SendLeaderboardUpdates();
         }
        
         private void GetInitData()
@@ -333,7 +333,7 @@ namespace Orienteering_LR_Desktop
             }
             CompetitorsTable.ItemsSource = new ObservableCollection<Runner>();
             CompetitorsTable.ItemsSource = CompetitorsList;
-            ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
+            ((App)Application.Current).socketServer.SendLeaderboardUpdates();
         }
 
     }

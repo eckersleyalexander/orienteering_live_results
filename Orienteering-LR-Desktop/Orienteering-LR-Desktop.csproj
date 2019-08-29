@@ -221,9 +221,7 @@
     </Page>
     <Compile Include="API\LeaderboardAPI.cs" />
     <Compile Include="API\SocketServer.cs" />
-    <Compile Include="API\ControlSocket.cs" />
     <Compile Include="API\SocketClient.cs" />
-    <Compile Include="API\LeaderboardSocket.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
