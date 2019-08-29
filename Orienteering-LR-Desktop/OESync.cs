@@ -19,6 +19,7 @@ namespace Orienteering_LR_Desktop
             public int? timestamp;
         }
 
+        public Boolean SyncSuccess;
         public string OEEventPath;
         private int SyncTime; // in seconds
         private Timer SyncFunc;
@@ -64,6 +65,7 @@ namespace Orienteering_LR_Desktop
                 if(OEdb.Tables[tableName] == null)
                 {
                     // throw error or otherwise notify main window?
+                    SyncSuccess = false;
                     return false;
                 }
             }
@@ -458,7 +460,7 @@ namespace Orienteering_LR_Desktop
                 }
             }
 
-
+            SyncSuccess = true;
             return true;
         }
 
