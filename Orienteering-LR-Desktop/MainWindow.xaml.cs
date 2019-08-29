@@ -35,8 +35,6 @@ namespace Orienteering_LR_Desktop
         public ObservableCollection<CourseDesktop> CoursesList = new ObservableCollection<CourseDesktop>();
         private readonly Reader _reader;
         private OESync oeSync;
-        ObservableCollection<Runner> DemoCompList = new ObservableCollection<Runner>();
-        ObservableCollection<Control> DemoControlsList = new ObservableCollection<Control>();
 
         public MainWindow()
         {
@@ -59,6 +57,7 @@ namespace Orienteering_LR_Desktop
                 {
                     OEPathLabel.Content = Properties.Settings.Default.OEPath;
                     oeSync = testSync;
+                    testSync.StopSync();
                     GetInitData();
                 } 
             }
@@ -208,6 +207,7 @@ namespace Orienteering_LR_Desktop
                 {
                     OEPathLabel.Content = dialog.FileName;
                     oeSync = testSync;
+                    testSync.StopSync();
                     GetInitData();
                     Properties.Settings.Default.OEPath = dialog.FileName;
                     Properties.Settings.Default.Save();
@@ -223,8 +223,9 @@ namespace Orienteering_LR_Desktop
         {
             if (DemoGrid.Visibility == Visibility.Hidden)
             {
-                oeSync = null;
-
+                oeSync.StopSync();
+                CompetitorsList = new ObservableCollection<Runner>();
+                ControlsList = new List<Control>();
                 if (File.Exists("LRDB.db"))
                 {
                     File.Delete("LRDB.db");
@@ -235,14 +236,14 @@ namespace Orienteering_LR_Desktop
                 }
                 var dbstore = new Database.Store();
                 DemoGrid.Visibility = Visibility.Visible;
-                DemoCompList.Add(new Runner() {
+                CompetitorsList.Add(new Runner() {
                     ChipId = 101,
                     Status = "Not Started",
                     FirstName = "John",
                     LastName = "Smith"
             
                 });
-                DemoCompList.Add(new Runner()
+                CompetitorsList.Add(new Runner()
                 {
                     ChipId = 102,
                     Status = "Not Started",
@@ -250,23 +251,23 @@ namespace Orienteering_LR_Desktop
                     LastName = "Brown"
 
                 });
-                CompetitorsTable.ItemsSource = DemoCompList;
-                DemoControlsList.Add(new Control()
+                CompetitorsTable.ItemsSource = CompetitorsList;
+                ControlsList.Add(new Control()
                 {
                     Id = 1,
                     RadioBool = false
                 });
-                DemoControlsList.Add(new Control()
+                ControlsList.Add(new Control()
                 {
                     Id = 2,
                     RadioBool = false
                 });
-                DemoControlsList.Add(new Control()
+                ControlsList.Add(new Control()
                 {
                     Id = 3,
                     RadioBool = false
                 });
-                ControlsTable.ItemsSource = DemoControlsList;
+                ControlsTable.ItemsSource = ControlsList;
 
                 dbstore.CreateClub(new Club()
                 {
@@ -278,7 +279,7 @@ namespace Orienteering_LR_Desktop
                     RaceClassId = 1,
                     Name = "Test Class"
                 });
-                foreach (Runner r in DemoCompList)
+                foreach (Runner r in CompetitorsList)
                 {
                     dbstore.CreateCompetitor(new Competitor()
                     {
@@ -302,29 +303,29 @@ namespace Orienteering_LR_Desktop
             {
                 case 0:
                     s.CreatePunch(101, 0, now);
-                    DemoCompList[0].Status = "Started";  
+                    CompetitorsList[0].Status = "Started";  
                     break;
                 case 1:
                     s.CreatePunch(101, 1, now);
                     break;
                 case 2:
                     s.CreatePunch(101, 2, now);
-                    DemoCompList[0].Status = "Finished";
+                    CompetitorsList[0].Status = "Finished";
                     break;
                 case 3:
                     s.CreatePunch(102, 0, now);
-                    DemoCompList[1].Status = "Started";
+                    CompetitorsList[1].Status = "Started";
                     break;
                 case 4:
                     s.CreatePunch(102, 1, now);
                     break;
                 case 5:
                     s.CreatePunch(102, 2, now);
-                    DemoCompList[1].Status = "Finished";
+                    CompetitorsList[1].Status = "Finished";
                     break;
             }
             CompetitorsTable.ItemsSource = new ObservableCollection<Runner>();
-            CompetitorsTable.ItemsSource = DemoCompList;
+            CompetitorsTable.ItemsSource = CompetitorsList;
             ((App)Application.Current).socketServer.LeaderboardSocket.SendUpdates();
         }
     }

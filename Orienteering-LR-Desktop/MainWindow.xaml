@@ -108,6 +108,7 @@
                 </DataGrid>
             </Grid>
             <Grid x:Name="ClassGrid" Background="CadetBlue" Visibility="Hidden">
+                
             </Grid>
             <Grid x:Name="SettingsGrid" Background="AntiqueWhite" Visibility="Visible">
                 <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="542,53,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="30"/>
