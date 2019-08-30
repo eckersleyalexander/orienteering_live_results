@@ -1,68 +1,59 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
-using Unosquare.Labs.EmbedIO;
-using Unosquare.Labs.EmbedIO.Constants;
-using Unosquare.Labs.EmbedIO.Modules;
-using RoutingStrategy = Unosquare.Labs.EmbedIO.Constants.RoutingStrategy;
+using System.Collections.Generic;
+using EmbedIO;
+using EmbedIO.Routing;
+using EmbedIO.WebApi;
+using Orienteering_LR_Desktop.API;
+using Swan;
+
+
 namespace Orienteering_LR_Desktop
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
-    public partial class App : Application
+	/// <summary>
+	/// Interaction logic for App.xaml
+	/// </summary>
+	public partial class App : Application
     {
+        public WebServer server;
+        public SocketServer socketServer;
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            
-            var server =  new WebServer("http://localhost:9696/", RoutingStrategy.Regex);
-
-            server.RegisterModule(new WebApiModule());
-            server.Module<WebApiModule>().RegisterController<ApiController>();
+            socketServer = new SocketServer("/socket");
+            server = new WebServer(o => o
+                    .WithUrlPrefix("http://localhost:9696/")
+                    .WithMode(HttpListenerMode.EmbedIO)
+                )
+                .WithCors()
+                .WithWebApi("/api", api => api.WithController<LeaderboardAPI>())
+                .WithModule(socketServer);
+			//server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
+			//server.Module<StaticFilesModule>().UseRamCache = true;
+			//server.Module<StaticFilesModule>().DefaultExtension = ".html"
             server.RunAsync();
         }
-    }
+	}
 
-    public class ApiController: WebApiController 
+   
+    public class BoardDemoClass : IComparable<BoardDemoClass>
     {
-        public ApiController(IHttpContext context) : base(context)
-        {
-        }
-        [WebApiHandler(HttpVerbs.Get, "/api/hello/")]
-        public async Task<bool> SayHello(int id)
-        {
-            try
-            {
-                var text = "";
-                var text2 = "";
-                var text3 = "";
-                // 
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-               {
-                   text = ((MainWindow)Application.Current.MainWindow).runners[0].id;
-                   text2 = ((MainWindow)Application.Current.MainWindow).runners[0].firstName;
-                   text3 = ((MainWindow)Application.Current.MainWindow).runners[0].lastName;
+        public String FirstName { get; set; }
+        public String LastName { get; set; }
+        public List<int> Times { get; set; }
 
-               }));
-                // This is fake call to a Repository
-                // var person = await PeopleRepository.GetById(id);
-                return await this.JsonResponseAsync("{\"ID\": \"" + text + "\", \"firstName\": \"" + text2 + "\", \"lastName\": \"" + text3 + "\"}");
-            }
-            catch (Exception ex)
+        public int CompareTo(BoardDemoClass obj)
+        {
+            if (Times.Count == obj.Times.Count && Times.Count > 0)
             {
-                return await this.JsonExceptionResponseAsync(ex);
+                return Times[Times.Count - 1] - obj.Times[obj.Times.Count - 1];
+            }
+            else
+            {
+                return obj.Times.Count - Times.Count;
             }
         }
-    
-        // You can override the default headers and add custom headers to each API Response.
-        public override void SetDefaultHeaders() => this.NoCache();
     }
 }
