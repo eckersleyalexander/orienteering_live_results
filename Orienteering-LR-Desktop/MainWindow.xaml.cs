@@ -289,7 +289,7 @@ namespace Orienteering_LR_Desktop
                 });
                 foreach (Runner r in CompetitorsList)
                 {
-                    dbstore.CreateCompetitor(new Competitor()
+                    Competitor c = new Competitor()
                     {
                         CompetitorId = r.ChipId ?? default(int),
                         FirstName = r.FirstName,
@@ -297,6 +297,16 @@ namespace Orienteering_LR_Desktop
                         Gender = "Male",
                         ClubId = 1,
                         RaceClassId = 1
+                    };
+                    dbstore.CreateCompetitor(c);
+                    dbstore.CreateCompTimes(new CompTime()
+                    {
+                        CompetitorId = c.CompetitorId,
+                        Competitor = c,
+                        Stage = 1,
+                        ChipId = r.ChipId ?? 0,
+                        Status = 0,
+                        Times = "[]"
                     });
                 }
             }
@@ -306,7 +316,7 @@ namespace Orienteering_LR_Desktop
         {
             int index = int.Parse(((Button)e.Source).Uid);
             var s = new Database.Store();
-            int now = (Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            int now = (int)DateTime.Now.TimeOfDay.TotalMilliseconds;
             switch (index)
             {
                 case 0:
