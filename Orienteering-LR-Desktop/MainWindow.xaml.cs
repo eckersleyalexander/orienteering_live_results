@@ -242,6 +242,7 @@ namespace Orienteering_LR_Desktop
                     db.GetService<IMigrator>().Migrate();
                 }
                 var dbstore = new Database.Store();
+                dbstore.SetCurrentStage(1);
                 DemoGrid.Visibility = Visibility.Visible;
                 CompetitorsList.Add(new Runner() {
                     ChipId = 101,
