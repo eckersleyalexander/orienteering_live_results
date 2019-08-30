@@ -301,14 +301,31 @@ namespace Orienteering_LR_Desktop
                     dbstore.CreateCompetitor(c);
                     dbstore.CreateCompTimes(new CompTime()
                     {
-                        CompetitorId = c.CompetitorId,
-                        Competitor = c,
+                        CompetitorId = r.ChipId ?? default(int),
                         Stage = 1,
                         ChipId = r.ChipId ?? 0,
                         Status = 0,
                         Times = "[]"
                     });
                 }
+
+                dbstore.CreateCourse(new Course()
+                {
+                    CourseId = 1,
+                    Distance = (float)3.0,
+                    Climb = (float)0.0,
+                    Description = "Course 1",
+                    CourseData = "[0,1,2]",
+                    DistanceData = null
+                });
+
+                dbstore.CreateClassCourse(new ClassCourse()
+                {
+                    CompetitionPos = 1,
+                    Stage = 1,
+                    RaceClassId = 1,
+                    CourseId = 1
+                });
             }
         }
 
