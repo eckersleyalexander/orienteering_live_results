@@ -72,12 +72,19 @@ namespace Orienteering_LR_Desktop.API
         {
             Debug.WriteLine(uuid + " (" + nameSpace + ") registered " + context.Id);
             await UpdateSocketClient(uuid, context.Id, nameSpace, true);
+            if (nameSpace == "leaderboard")
+            {
+                await SendLeaderboardUpdates(); // update immediately when a new leaderboard is registered
+            }
         }
 
         public async Task SendLeaderboardUpdates()
         {
+            Query q = new Query();
+            var compData = q.GetCompData();
+            
             await SendToLeaderboards(MakeActionResponse("leaderboard", "leaderboardUpdate", null,
-                GetLeaderboard.GetAllClassesJson()));
+                JsonConvert.SerializeObject(compData)));
         }
 
         public string MakeActionResponse(string nameSpace, string action, string uuid, string payload)

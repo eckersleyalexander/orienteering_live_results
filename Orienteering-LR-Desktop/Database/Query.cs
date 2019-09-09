@@ -18,6 +18,7 @@ namespace Orienteering_LR_Desktop.Database
         public Club Club;
         private RaceClassInfo RaceClass;
 
+
         public RaceClassInfo GetRaceClass()
         {
             return RaceClass;
@@ -37,7 +38,6 @@ namespace Orienteering_LR_Desktop.Database
 
         public CompetitorInfo()
         {
-
         }
 
         public CompetitorInfo(Competitor competitor, int stage)
@@ -64,7 +64,7 @@ namespace Orienteering_LR_Desktop.Database
             }
             else if (competitor.RaceClassId != null)
             {
-                RaceClass = query.GetRaceClassInfo((int)competitor.RaceClassId, stage);
+                RaceClass = query.GetRaceClassInfo((int) competitor.RaceClassId, stage);
             }
             else
             {
@@ -92,7 +92,7 @@ namespace Orienteering_LR_Desktop.Database
             StartNo = competitor.StartNo;
             Gender = competitor.Gender;
             Club = competitor.Club ?? context.Clubs.SingleOrDefault(b => b.ClubId == competitor.ClubId);
-            TeamId = null;  // TODO - with relay support
+            TeamId = null; // TODO - with relay support
         }
 
         public void GetTimes(int stage)
@@ -110,7 +110,8 @@ namespace Orienteering_LR_Desktop.Database
             Status = "Error";
             Times = new List<int?>();
 
-            CompTime compTime = context.CompTimes.SingleOrDefault(a => a.CompetitorId == CompetitorId && a.Stage == stage);
+            CompTime compTime =
+                context.CompTimes.SingleOrDefault(a => a.CompetitorId == CompetitorId && a.Stage == stage);
             if (compTime == null)
             {
                 ChipId = null;
@@ -143,8 +144,9 @@ namespace Orienteering_LR_Desktop.Database
                                 // scan Punches for times instead
                                 foreach (int checkpoint in RaceClass.Course.CourseData)
                                 {
-                                    Punch punch = context.Punches.SingleOrDefault(a => a.ChipId == ChipId && a.Stage == stage && a.CheckpointId == checkpoint);
-                                    Times.Add(punch != null ? (Nullable<int>)punch.Timestamp : null);
+                                    Punch punch = context.Punches.SingleOrDefault(a =>
+                                        a.ChipId == ChipId && a.Stage == stage && a.CheckpointId == checkpoint);
+                                    Times.Add(punch != null ? (Nullable<int>) punch.Timestamp : null);
                                 }
 
                                 // if no times
@@ -170,11 +172,11 @@ namespace Orienteering_LR_Desktop.Database
                                     int start = 0;
                                     if (Times[0] != null)
                                     {
-                                        start = (int)Times[0];
+                                        start = (int) Times[0];
                                     }
                                     else if (RaceClass.StartTime != null)
                                     {
-                                        start = (int)RaceClass.StartTime;
+                                        start = (int) RaceClass.StartTime;
                                     }
                                     else
                                     {
@@ -200,6 +202,7 @@ namespace Orienteering_LR_Desktop.Database
                         {
                             Status = "Finished";
                         }
+
                         break;
                     case 1:
                         Status = "DNS";
@@ -225,6 +228,7 @@ namespace Orienteering_LR_Desktop.Database
             {
                 return -1;
             }
+
             // if this is empty
             if (Times.Count(s => s != null) == 0)
             {
@@ -261,8 +265,8 @@ namespace Orienteering_LR_Desktop.Database
             else
             {
                 // the times at the last scanned checkpoints for this and o
-                int LastTime = (int)Times.Last(a => a != null);
-                int LastTimeo = (int)o.Times.Last(a => a != null);
+                int LastTime = (int) Times.Last(a => a != null);
+                int LastTimeo = (int) o.Times.Last(a => a != null);
                 // if they are both at the same checkpoint
                 if (Times.LastIndexOf(LastTime) == o.Times.LastIndexOf(LastTimeo))
                 {
@@ -308,12 +312,14 @@ namespace Orienteering_LR_Desktop.Database
                 ClassCourse cc = null;
                 try
                 {
-                    cc = context.ClassCourses.Include(a => a.Course).Single(b => b.RaceClassId == raceClass.RaceClassId && b.Stage == stage && b.CompetitionPos == 1);
+                    cc = context.ClassCourses.Include(a => a.Course).Single(b =>
+                        b.RaceClassId == raceClass.RaceClassId && b.Stage == stage && b.CompetitionPos == 1);
                 }
                 catch (InvalidOperationException)
                 {
                     // if cant retrieve the course leave it as null
                 }
+
                 StartTime = cc?.StartTime;
                 Course = cc?.Course != null ? new CourseInfo(cc.Course) : null;
             }
@@ -350,7 +356,9 @@ namespace Orienteering_LR_Desktop.Database
 
             try
             {
-                CourseData = course.CourseData != null ? JsonConvert.DeserializeObject<List<int>>(course.CourseData) : null;
+                CourseData = course.CourseData != null
+                    ? JsonConvert.DeserializeObject<List<int>>(course.CourseData)
+                    : null;
             }
             catch (Newtonsoft.Json.JsonReaderException)
             {
@@ -359,7 +367,9 @@ namespace Orienteering_LR_Desktop.Database
 
             try
             {
-                DistanceData = course.DistanceData != null ? JsonConvert.DeserializeObject<List<int?>>(course.DistanceData) : null;
+                DistanceData = course.DistanceData != null
+                    ? JsonConvert.DeserializeObject<List<int?>>(course.DistanceData)
+                    : null;
             }
             catch (Newtonsoft.Json.JsonReaderException)
             {
@@ -378,7 +388,8 @@ namespace Orienteering_LR_Desktop.Database
             Classes = new List<RaceClassInfo>();
             using (var context = new CompetitorContext())
             {
-                foreach (ClassCourse cc in context.ClassCourses.Include(a => a.RaceClass).Where(b => b.CourseId == course.CourseId && b.Stage == stage))
+                foreach (ClassCourse cc in context.ClassCourses.Include(a => a.RaceClass)
+                    .Where(b => b.CourseId == course.CourseId && b.Stage == stage))
                 {
                     RaceClassInfo rc = new RaceClassInfo(cc.RaceClass);
                     rc.StartTime = cc.StartTime;
@@ -391,6 +402,46 @@ namespace Orienteering_LR_Desktop.Database
 
     public class Query
     {
+        public CompData GetCompData()
+        {
+            CompData data = new CompData("<Comp name>", "<comp-date>",
+                new CompData.Marquee(1, "Marquee text", "60")
+            );
+            using (var context = new CompetitorContext())
+            {
+                var classes = context.RaceClasses;
+                foreach (var raceClass in classes)
+                {
+                    var compTimes = context.Competitors
+                        .Where(competitor => competitor.RaceClassId == raceClass.RaceClassId)
+                        .Join(context.Clubs,
+                            competitor => competitor.ClubId,
+                            club => club.ClubId,
+                            (competitor, club) => new
+                            {
+                                competitor, club
+                            }
+                        )
+                        .Join(context.CompTimes,
+                            compclub => compclub.competitor.CompetitorId,
+                            compTime => compTime.CompetitorId,
+                            (compclub, compTime) => new
+                            {
+                                id = compclub.competitor.CompetitorId,
+                                competitor = compclub.competitor.FirstName + " " + compclub.competitor.LastName,
+                                club = compclub.competitor.Club.Name,
+                                status = compTime.Status,
+                                times = compTime.Times
+                            }).ToList();
+
+                    var classCourse = context.ClassCourses.FirstOrDefault(cc => cc.RaceClassId == raceClass.RaceClassId);
+                    var course = context.Courses.FirstOrDefault(c => c.CourseId == classCourse.CourseId);
+                    data.AddToCompResults(raceClass, course, compTimes);
+                }
+            }
+
+            return data;
+        }
 
         public Boolean StageExists(int stageId)
         {
@@ -430,7 +481,8 @@ namespace Orienteering_LR_Desktop.Database
         {
             using (var context = new CompetitorContext())
             {
-                return context.CompTimes.SingleOrDefault(b => b.CompetitorId == competitorId && b.Stage == stage)?.Competitor;
+                return context.CompTimes.SingleOrDefault(b => b.CompetitorId == competitorId && b.Stage == stage)
+                    ?.Competitor;
             }
         }
 
@@ -445,7 +497,9 @@ namespace Orienteering_LR_Desktop.Database
             {
                 try
                 {
-                    return new CompetitorInfo(context.CompTimes.Single(b => b.CompetitorId == competitorId && b.Stage == stage).Competitor, stage, this, context);
+                    return new CompetitorInfo(
+                        context.CompTimes.Single(b => b.CompetitorId == competitorId && b.Stage == stage).Competitor,
+                        stage, this, context);
                 }
                 catch (InvalidOperationException)
                 {
@@ -477,7 +531,8 @@ namespace Orienteering_LR_Desktop.Database
         {
             using (var context = new CompetitorContext())
             {
-                return context.CompTimes.SingleOrDefault(b => b.CompetitorId == competitorId && b.Stage == stage)?.ChipId;
+                return context.CompTimes.SingleOrDefault(b => b.CompetitorId == competitorId && b.Stage == stage)
+                    ?.ChipId;
             }
         }
 
@@ -504,6 +559,7 @@ namespace Orienteering_LR_Desktop.Database
                 {
                     classes.Add(new RaceClassInfo(raceClass, stage));
                 }
+
                 return classes;
             }
         }
@@ -549,7 +605,7 @@ namespace Orienteering_LR_Desktop.Database
                 return courses;
             }
         }
-        
+
         public List<Club> GetClubs()
         {
             using (var context = new CompetitorContext())
@@ -558,7 +614,7 @@ namespace Orienteering_LR_Desktop.Database
                 return clubs;
             }
         }
-        
+
         public List<Competitor> GetCompetitors()
         {
             using (var context = new CompetitorContext())
@@ -612,14 +668,19 @@ namespace Orienteering_LR_Desktop.Database
                 List<CompetitorPunches> things = new List<CompetitorPunches>();
                 foreach (var competitor in competitors)
                 {
-                    CompetitorPunches compPunches = new CompetitorPunches(){
+                    CompetitorPunches compPunches = new CompetitorPunches()
+                    {
                         FirstName = competitor.FirstName,
                         LastName = competitor.LastName
                     };
-                    List<Punch> punches = context.Punches.Where(p => p.ChipId == context.CompTimes.Single(a => a.CompetitorId == competitor.CompetitorId && a.Stage == CurrentStage()).ChipId && p.Stage == CurrentStage()).ToList();
+                    List<Punch> punches = context.Punches.Where(p =>
+                        p.ChipId == context.CompTimes.Single(a =>
+                            a.CompetitorId == competitor.CompetitorId && a.Stage == CurrentStage()).ChipId &&
+                        p.Stage == CurrentStage()).ToList();
                     compPunches.Punches = punches;
                     things.Add(compPunches);
                 }
+
                 return things;
             }
         }
@@ -632,9 +693,166 @@ namespace Orienteering_LR_Desktop.Database
             }
         }
     }
-    
+
     public class CompetitorPunches : Competitor
     {
         public List<Punch> Punches { get; set; }
+    }
+
+    public class CompData
+    {
+        public string cmpName;
+        public string cmpDate;
+        public Marquee marquee;
+        public List<CompResults> cmpResults;
+
+        public CompData(string cmpName, string cmpDate, Marquee marquee)
+        {
+            this.cmpName = cmpName;
+            this.cmpDate = cmpDate;
+            this.marquee = marquee;
+            this.cmpResults = new List<CompResults>();
+        }
+
+        public void AddToCompResults(RaceClass raceClass, Course course, IEnumerable<dynamic> compTimes)
+        {
+            CompResults compResults;
+            if (course != null)
+            {
+                compResults = new CompResults(raceClass.RaceClassId, raceClass.Abbreviation,
+                    course.Description, course.Distance.ToString(), 0);
+            }
+            else
+            {
+                compResults = new CompResults(raceClass.RaceClassId, raceClass.Abbreviation, "<no course>", "0", 0);
+            }
+
+            // process comp times (find ranks etc)
+            Func<List<string>, dynamic> getStartMidFin = times => new
+            {
+                startTime = times[0] ?? "null",
+                finishTime = times[times.Count - 1] ?? "null",
+                radioTimes = times.Skip(1).Take(times.Count - 2).ToList()
+            };
+            var withParsedTimes = compTimes.Select(compTime => new
+                {
+                    compTime, parsedTimes = getStartMidFin(JsonConvert.DeserializeObject<List<string>>(compTime.times))
+                })
+                .ToList();
+
+            foreach (var compTime in withParsedTimes)
+            {
+                compResults.AddToClassResults(compTime);
+            }
+
+
+            this.cmpResults.Add(compResults);
+        }
+
+
+        public class Marquee
+        {
+            public int show; // 1 or 0
+            public string text;
+            public string duration; //seconds
+
+            public Marquee(int show, string text, string duration)
+            {
+                this.show = show;
+                this.text = text;
+                this.duration = duration;
+            }
+        }
+
+        public class CompResults
+        {
+            public int clsId;
+            public string clsName;
+            public string course;
+            public string length;
+            public int radioCount;
+            public List<RadioInfo> radioInfo;
+            public List<ClassResults> clsResults;
+
+            public CompResults(int clsId, string clsName, string course, string length, int radioCount)
+            {
+                this.clsId = clsId;
+                this.clsName = clsName;
+                this.course = course;
+                this.length = length;
+                this.radioCount = radioCount;
+                this.clsResults = new List<ClassResults>();
+            }
+
+            public void AddToClassResults(dynamic timeEntry)
+            {
+
+                var classResults = new ClassResults(timeEntry.compTime.id.ToString(), timeEntry.compTime.competitor,
+                    timeEntry.compTime.club,
+                    timeEntry.compTime.status.ToString(), timeEntry.parsedTimes.startTime.ToString(),
+                    timeEntry.parsedTimes.finishTime.ToString(), "2", "+5:00");
+                foreach (var radioTime in timeEntry.parsedTimes.radioTimes)
+                {
+                    classResults.AddRadioTime(new ClassResults.Radio(1,radioTime, "2","+1:00"));
+                }
+
+                this.clsResults.Add(classResults);
+            }
+
+            public class RadioInfo
+            {
+                public int code;
+                public int distance;
+                public int percentage;
+            }
+
+            public class ClassResults
+            {
+                public string id;
+                public string competitor; // name
+                public string club;
+                public string status;
+                public string startTime;
+                public string finishTime;
+                public string finishRank;
+                public string finishDiff;
+                public List<Radio> radios;
+
+                public ClassResults(string id, string competitor, string club, string status, string startTime,
+                    string finishTime, string finishRank, string finishDiff)
+                {
+                    this.id = id;
+                    this.competitor = competitor;
+                    this.club = club;
+                    this.status = status;
+                    this.startTime = startTime;
+                    this.finishTime = finishTime;
+                    this.finishRank = finishRank;
+                    this.finishDiff = finishDiff;
+                    this.radios = new List<Radio>();
+                }
+
+                public void AddRadioTime(Radio radioTime)
+                {
+                    radios.Add(radioTime);
+                }
+
+                public class Radio
+                {
+                    public int code;
+                    public string time;
+                    public string rank;
+                    public string diff;
+
+                    public Radio(int code, string time, string rank, string diff)
+                    {
+                        this.code = code;
+                        this.time = time;
+                        this.rank = rank;
+                        this.diff = diff;
+                    }
+                }
+            }
+        }
     }
 }
