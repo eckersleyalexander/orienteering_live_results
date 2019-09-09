@@ -20,6 +20,7 @@ using System.Net.Sockets;
 using EmbedIO;
 using Orienteering_LR_Desktop.API;
 using EmbedIO.WebApi;
+using System.Windows.Media;
 
 namespace Orienteering_LR_Desktop
 {
@@ -244,6 +245,9 @@ namespace Orienteering_LR_Desktop
 
         private void StartWebServerClick(object sender, RoutedEventArgs e)
         {
+            Button btn = (Button) sender;
+            btn.Background = (Brush) new BrushConverter().ConvertFromString("Red");
+            btn.Content = "Restart Web Server";
             StartWebServer("http://" + IPChoiceBox.SelectedValue + ":9696/");
         }
     }

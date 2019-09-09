@@ -184,8 +184,8 @@
                 <Label x:Name="IOPathLabel" Content="\bin\debug\" HorizontalAlignment="Left" Margin="193,96,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
                 <Label Content="Live Results Database Path:" HorizontalAlignment="Left" Margin="25,100,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
                 <ComboBox x:Name="IPChoiceBox" SelectedIndex="0" HorizontalAlignment="Left" Height="26" Margin="193,143,0,0" VerticalAlignment="Top" Width="193" Foreground="Black"/>
-                <Label Content="Host Machine IP Address:" HorizontalAlignment="Left" Margin="25,143,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
-                <Button Content="Start Web Sever" HorizontalAlignment="Left" Margin="391,139,0,0" VerticalAlignment="Top" Width="146" RenderTransformOrigin="0.477,0.781" Height="32" Click="StartWebServerClick"/>
+                <Label Content="Local Network IP Address:" HorizontalAlignment="Left" Margin="25,143,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
+                <Button x:Name="ServerBtn" Content="Start Web Server" HorizontalAlignment="Left" Margin="472,139,0,0" VerticalAlignment="Top" Width="177" RenderTransformOrigin="0.477,0.781" Height="32" Click="StartWebServerClick" Background="Green"/>
             </Grid>
         </Grid>
 
