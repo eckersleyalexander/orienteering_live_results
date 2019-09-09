@@ -90,7 +90,7 @@ namespace Orienteering_LR_Desktop
                 info.PartialInitialize(c, context);
                 info.SetRaceClass(raceClass);
                 info.GetTimes(stage, context);
-
+               
                 if (info.ChipId != null)
                 {
                     leaderboard.Competitors.Add(info);
