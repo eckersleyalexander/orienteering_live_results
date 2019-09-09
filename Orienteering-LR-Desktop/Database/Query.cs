@@ -391,6 +391,15 @@ namespace Orienteering_LR_Desktop.Database
 
     public class Query
     {
+
+        public Boolean StageExists(int stageId)
+        {
+            using (var context = new CompetitorContext())
+            {
+                return context.Stages.Any(q => q.StageId == stageId);
+            }
+        }
+
         public RaceClassInfo GetRaceClassInfo(int raceClassId)
         {
             return GetRaceClassInfo(raceClassId, CurrentStage());

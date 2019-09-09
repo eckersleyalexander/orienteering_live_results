@@ -6,7 +6,7 @@ namespace Orienteering_LR_Desktop.Database
 {
     public class Store
     {
-        public void SetCurrentStage(int stageId)
+        public void CreateStage(int stageId)
         {
             using (var context = new CompetitorContext())
             {
@@ -14,6 +14,26 @@ namespace Orienteering_LR_Desktop.Database
                 context.Stages.Add(stage);
                 context.SaveChanges();
             }
+        }
+
+        public void SetCurrentStage(int stageId)
+        {
+            using (var context = new CompetitorContext())
+            {
+                var stage = context.Stages.Find(stageId);
+                if (stage != null)
+                {
+                    stage.Current = true;
+                    context.Update(stage);
+                    context.SaveChanges();
+                } else
+                {
+                    context.Stages.Add(new Stage { StageId = stageId, Current = true });
+                    context.SaveChanges();
+                }
+                
+            }
+           
         }
 
         public void CreatePunch(int chipId, int controlId, int timestamp)
