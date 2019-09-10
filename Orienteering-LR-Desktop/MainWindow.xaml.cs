@@ -184,27 +184,7 @@ namespace Orienteering_LR_Desktop
 
         private void ConnectRadio(object sender, RoutedEventArgs e)
         {
-            List<DeviceInfo> devList = DeviceInfo.GetAvailableDeviceList(true, (int)DeviceType.Serial);
-            if (devList.Count != 1)
-            {
-                MessageBox.Show("No devices detected (or more than 1)");
-            }
-            else
-            {
-                ReaderDeviceInfo device = new ReaderDeviceInfo(devList[0], ReaderDeviceType.SiDevice);
-                try
-                {
-                    if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
-                    _reader.InputDevice = device;
-                    _reader.OpenInputDevice();
-                    MessageBox.Show("radio connected");
-                }
-                catch (Exception ex)
-                {
-                    if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
-                    MessageBox.Show(ex.Message);
-                }
-            }
+            ConnectRadio();
         }
 
         private void Tab_Click(object sender, RoutedEventArgs e)
