@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Orienteering_LR_Desktop"
         mc:Ignorable="d"
-        Title="Orienteering Live Results Suite" Height="500" Width="700" MinHeight="500" MinWidth="700" ResizeMode="CanResizeWithGrip">
+        Title="Orienteering Live Results Suite" Height="500" Width="700" MinHeight="500" MinWidth="700" ResizeMode="NoResize">
     <Window.Resources>
         <DataTemplate x:Key="DataTemplate_Level2">
             <Button Content="{Binding}" Height="40" Width="50" Margin="4,4,4,4"/>
@@ -24,12 +24,12 @@
     <DockPanel>
         <Grid Height="50" DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="10 0">
-                <Button Uid="0" Width="150" Content="COMPETITORS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
-                <Button Uid="1" Width="150" Content="CONTROLS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
-                <Button Uid="2" Width="150" Content="COURSES" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
-                <Button Uid="3" Width="150" Content="SETTINGS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
+                <Button Uid="0" Width="165" Content="COMPETITORS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
+                <Button Uid="1" Width="165" Content="CONTROLS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
+                <Button Uid="2" Width="165" Content="COURSES" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
+                <Button Uid="3" Width="165" Content="SETTINGS" Height="50" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="#FF2196F3" Click="Tab_Click"/>
             </StackPanel>
-            <Grid x:Name="GridCursor" Width="150" Height="5" Background="#FF2196F3" HorizontalAlignment="Left" Margin="460,45,0,0"/>
+            <Grid x:Name="GridCursor" Width="150" Height="5" Background="#FF2196F3" HorizontalAlignment="Left" Margin="512,45,0,0"/>
         </Grid>
         <Grid x:Name="MainGrid" HorizontalAlignment="Stretch" Background="White" VerticalAlignment="Stretch">
             <Grid x:Name="CompGrid" Background="White" Visibility="Hidden">
@@ -177,15 +177,20 @@
                 </DataGrid>
             </Grid>
             <Grid x:Name="SettingsGrid" Background="White" Visibility="Visible">
-                <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="542,53,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="30"/>
-                <Label x:Name="OEPathLabel" Content="! PATH NOT SET !" HorizontalAlignment="Left" Margin="193,53,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
-                <Label Content="OE Database Folder Path:" HorizontalAlignment="Left" Margin="25,55,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
-                <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="542,96,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="32"/>
-                <Label x:Name="IOPathLabel" Content="\bin\debug\" HorizontalAlignment="Left" Margin="193,96,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
-                <Label Content="Live Results Database Path:" HorizontalAlignment="Left" Margin="25,100,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
-                <ComboBox x:Name="IPChoiceBox" SelectedIndex="0" HorizontalAlignment="Left" Height="26" Margin="193,143,0,0" VerticalAlignment="Top" Width="193" Foreground="Black"/>
-                <Label Content="Local Network IP Address:" HorizontalAlignment="Left" Margin="25,143,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
-                <Button x:Name="ServerBtn" Content="Start Web Server" HorizontalAlignment="Left" Margin="472,139,0,0" VerticalAlignment="Top" Width="177" RenderTransformOrigin="0.477,0.781" Height="32" Click="StartWebServerClick" Background="Green"/>
+                <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="552,11,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="30"/>
+                <Label x:Name="OEPathLabel" Content="! PATH NOT SET !" HorizontalAlignment="Left" Margin="203,11,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
+                <Label Content="OE Database Folder Path:" HorizontalAlignment="Left" Margin="35,13,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
+                <Button Content="Pick Folder" HorizontalAlignment="Left" Margin="552,54,0,0" VerticalAlignment="Top" Width="107" Click="SetOEPathButton" RenderTransformOrigin="0.477,0.781" Height="32"/>
+                <Label x:Name="IOPathLabel" Content="\bin\debug\" HorizontalAlignment="Left" Margin="203,54,0,0" VerticalAlignment="Top" Foreground="Black" BorderBrush="Gray" BorderThickness="3" Width="344" FontWeight="Bold"/>
+                <Label Content="Live Results Database Path:" HorizontalAlignment="Left" Margin="35,58,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
+                <ComboBox x:Name="IPChoiceBox" SelectedIndex="0" HorizontalAlignment="Left" Height="26" Margin="203,101,0,0" VerticalAlignment="Top" Width="193" Foreground="Black"/>
+                <Label Content="Local Network IP Address:" HorizontalAlignment="Left" Margin="35,101,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
+                <Button x:Name="ServerBtn" Content="Start Web Server" HorizontalAlignment="Left" Margin="35,142,0,0" VerticalAlignment="Top" Width="180" RenderTransformOrigin="0.477,0.781" Height="32" Click="StartWebServerClick" Background="Green"/>
+                <Button Content="Show Debugging" HorizontalAlignment="Left" Margin="479,142,0,0" VerticalAlignment="Top" Width="180" Click="Debug_Btn_Click"/>
+                <Grid x:Name="DebugGrid" Visibility="Visible">
+                    <ListBox x:Name="DebuggerList" HorizontalAlignment="Left" Height="209" Margin="25,188,0,0" VerticalAlignment="Top" Width="644" Foreground="Black" BorderBrush="Black" BorderThickness="2"/>
+                </Grid>
+                <Button Content="Import Course Data" HorizontalAlignment="Left" Margin="258,142,0,0" VerticalAlignment="Top" Width="180" RenderTransformOrigin="0.966,0.719"/>
             </Grid>
         </Grid>
 
