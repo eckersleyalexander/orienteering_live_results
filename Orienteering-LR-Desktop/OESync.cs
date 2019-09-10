@@ -128,10 +128,9 @@ namespace Orienteering_LR_Desktop
                     };
 
                     List<int> distData = new List<int>();
-                    distData.AddRange(Enumerable.Repeat(1, checkpoints.Count));
-                    if (checkpoints.Count > 0)
+                    for (int i = 0; i < checkpoints.Count; i++)
                     {
-                        distData[0] = 0;
+                        distData.Add(i);
                     }
 
                     // try to preserve distance data if it already exists
