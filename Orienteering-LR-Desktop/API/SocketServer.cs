@@ -80,11 +80,10 @@ namespace Orienteering_LR_Desktop.API
 
         public async Task SendLeaderboardUpdates()
         {
-            Query q = new Query();
-            var compData = q.GetCompData();
-            
-            await SendToLeaderboards(MakeActionResponse("leaderboard", "leaderboardUpdate", null,
-                JsonConvert.SerializeObject(compData)));
+//            Query q = new Query();
+//            var compData = q.GetCompData();
+
+            await SendToLeaderboards(MakeActionResponse("leaderboard", "leaderboardUpdate", null,""));
         }
 
         public string MakeActionResponse(string nameSpace, string action, string uuid, string payload)
@@ -138,8 +137,8 @@ namespace Orienteering_LR_Desktop.API
             }
             catch (Exception e)
             {
-                await SendAsync(context, MakeErrorResponse("control", e.Message));
-                Debug.WriteLine(e);
+//                await SendAsync(context, MakeErrorResponse("control", e.Message));
+                throw;
                 return;
             }
 
@@ -207,6 +206,7 @@ namespace Orienteering_LR_Desktop.API
         {
             var controlClients = Clients
                 .Where(c => c.ClientType == "control").Select(c => c.SocketId);
+            Debug.WriteLine("Sending message to all control panels: " + message);
             await BroadcastAsync(message, c => controlClients.Contains(c.Id));
         }
     }

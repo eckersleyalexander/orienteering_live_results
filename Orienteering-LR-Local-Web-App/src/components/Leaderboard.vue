@@ -4,7 +4,6 @@
 	class="columns resultsScreen"
 	:style="{ paddingLeft: pageSidePadding + 'px', paddingRight: pageSidePadding + 'px', paddingTop: pageTopPadding + 'px', paddingBottom: pageBottomPadding + 'px' }"
 	>
-
 		<table
 			v-for="(column, columnI) of pages[pageNum]"
 			:key="columnI"
@@ -23,10 +22,10 @@
 				>
 					<th class="className" colspan="3"><span class="pillIcon" :style="{ backgroundColor: classColor(results.cls.clsName) }">{{ results.cls.clsName }} <span class="contText">{{ results.continued ? '(Cont...)' : '' }}</span><div class="classMetadata"><span class="classLength">{{ results.cls.length != null ? formatDistance(results.cls.length) + ' km' : '' }}</span> &#8226; <span class="classCourse">{{ results.cls.course }}</span></div></span></th>
 					<th class="elapsedHeading" colspan="2">Total</th>
-					<th class="splitHeading" colspan="3" v-for="(n, i) in results.cls.radioCount" :key="n">Split {{ n }} - {{ results.cls.radioInfo[i].distance != null ? formatDistance(results.cls.radioInfo[i].distance) + ' km' : '' }}</th>
+					<th class="splitHeading" colspan="3" v-for="(n, i) in results.cls.radiosCount" :key="n">Split {{ n }} count {{ results.cls.radiosCount }} -</th>
 					<th
-						v-if="results.cls.radioCount < column.maxRadioCount"
-						:colspan="(column.maxRadioCount - results.cls.radioCount) * 3"
+						v-if="results.cls.radiosCount < column.maxRadioCount"
+						:colspan="(column.maxRadioCount - results.cls.radiosCount) * 3"
 					/>
 				</tr>
 
@@ -60,7 +59,7 @@
 					</td>
 
 					<!-- we need to use i (index) rather than n (value) so we start at zero-->
-					<template v-for="(n, i) in results.cls.radioCount">
+					<template v-for="(n, i) in results.cls.radiosCount">
 
 						<flash-cell :display-value="result.radios[i].time" :watch-value="result.radios[i].time" :key="result.id + '-' + result.radios[i].code + '-time'" class="col-radioTime" :style="{ width: colRadioTime + 'px' }"></flash-cell>
 
@@ -73,8 +72,8 @@
 					</template>
 
 					<td
-						v-if="results.cls.radioCount < column.maxRadioCount"
-						:colspan="(column.maxRadioCount - results.cls.radioCount) * 3"
+						v-if="results.cls.radiosCount < column.maxRadioCount"
+						:colspan="(column.maxRadioCount - results.cls.radiosCount) * 3"
 					/>
 
 				</tr>
@@ -93,114 +92,7 @@
 
 <style scoped>
 
-/* roboto-100 - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 100;
-  src: local('Roboto Thin'), local('Roboto-Thin'),
-       url('/fonts/roboto-v20-latin-100.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-100.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-100italic - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: italic;
-  font-weight: 100;
-  src: local('Roboto Thin Italic'), local('Roboto-ThinItalic'),
-       url('/fonts/roboto-v20-latin-100italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-100italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-300 - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 300;
-  src: local('Roboto Light'), local('Roboto-Light'),
-       url('/fonts/roboto-v20-latin-300.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-300.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-300italic - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: italic;
-  font-weight: 300;
-  src: local('Roboto Light Italic'), local('Roboto-LightItalic'),
-       url('/fonts/roboto-v20-latin-300italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-300italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-regular - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Roboto'), local('Roboto-Regular'),
-       url('/fonts/roboto-v20-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-italic - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: italic;
-  font-weight: 400;
-  src: local('Roboto Italic'), local('Roboto-Italic'),
-       url('/fonts/roboto-v20-latin-italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-500 - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 500;
-  src: local('Roboto Medium'), local('Roboto-Medium'),
-       url('/fonts/roboto-v20-latin-500.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-500.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-500italic - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: italic;
-  font-weight: 500;
-  src: local('Roboto Medium Italic'), local('Roboto-MediumItalic'),
-       url('/fonts/roboto-v20-latin-500italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-500italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-700 - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 700;
-  src: local('Roboto Bold'), local('Roboto-Bold'),
-       url('/fonts/roboto-v20-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-700italic - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: italic;
-  font-weight: 700;
-  src: local('Roboto Bold Italic'), local('Roboto-BoldItalic'),
-       url('/fonts/roboto-v20-latin-700italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-700italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-900 - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 900;
-  src: local('Roboto Black'), local('Roboto-Black'),
-       url('/fonts/roboto-v20-latin-900.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-900.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-/* roboto-900italic - latin */
-@font-face {
-  font-family: 'Roboto';
-  font-style: italic;
-  font-weight: 900;
-  src: local('Roboto Black Italic'), local('Roboto-BlackItalic'),
-       url('/fonts/roboto-v20-latin-900italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/roboto-v20-latin-900italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
+
 
 div.resultsScreen {
 	background-color: #333;
@@ -495,13 +387,15 @@ td.col-radioDiff {
 <script>
 
 	import FlashCell from '@/components/FlashCell.vue';
+	import cmpData from "./response.json";
 
 	export default {
 
 		data() {
 			return {
 				now: new Date(),
-                pageNum: 0, //parseInt(this.$route.params.page) || 0,
+				pageNum: 0, //parseInt(this.$route.params.page) || 0,
+				resultsResponse: [],
 
 				windowWidth: 0,
 				windowHeight: 0,
@@ -536,11 +430,10 @@ td.col-radioDiff {
 
 		computed: {
 			// Splits the data into "pages" such that all of the data within each page
-            // will fit as efficiently as possible onto the page
-            resultsResponse() {return this.$store.state.leaderboard.leaderboard.data || []},
+			// will fit as efficiently as possible onto the page
 			pages() {
 				const {
-                    resultsResponse,
+					resultsResponse,
 					windowHeight,
 					rowHeight,
 					headerRowHeight,
@@ -554,10 +447,11 @@ td.col-radioDiff {
 					colRadioRank,
 					colRadioDiff,
 				} = this
+				
 				const windowWidth = this.windowWidth - this.pageSidePadding * 2
-                
+
 				if (!resultsResponse) {
-                    return []
+					return []
 				}
 
 				const pages = []
@@ -575,7 +469,7 @@ td.col-radioDiff {
 				const tableRadioWidth = colRadioTime + colRadioRank + colRadioDiff
 
 				const save = () => {
-                    // This is all the data we need in order to restore the state
+					// This is all the data we need in order to restore the state
 					return {
 						pagesLength: pages.length,
 						pageLength: page && page.length,
@@ -589,8 +483,8 @@ td.col-radioDiff {
 				}
 
 				const rollback = state => {
-                    ({
-                        lastCls,
+					({
+						lastCls,
 						tableWidth,
 						columnWidth,
 						columnHeight,
@@ -601,24 +495,24 @@ td.col-radioDiff {
 					page = pages[pages.length - 1]
 
 					if (page) {
-                        page.splice(state.pageLength)
+						page.splice(state.pageLength)
 						column = page[page.length - 1]
 
 						if (column) {
-                            column.classes.splice(state.columnLength)
+							column.classes.splice(state.columnLength)
 							results = column.classes[column.classes.length - 1]
 						}
 					}
 				}
 
 				const fit = height => {
-                    const additionalWidth = Math.max(0, tableWidth - columnWidth)
+					const additionalWidth = Math.max(0, tableWidth - columnWidth)
 					const overflowH = overallWidth + additionalWidth > windowWidth
 					const overflowV = columnHeight + height + this.pageTopPadding + this.pageBottomPadding > windowHeight
 
 					// Do we need another page?
 					if (!page || (overflowH && page.length > 1)) {
-                        page = []
+						page = []
 						pages.push(page)
 						column = null
 						results = null
@@ -631,8 +525,8 @@ td.col-radioDiff {
 
 					// Do we need another column?
 					if (!column || overflowV) {
-                        column = {
-                            maxRadioCount: 0,
+						column = {
+							maxRadioCount: 0,
 							classes: [],
 						}
 						page.push(column)
@@ -646,10 +540,10 @@ td.col-radioDiff {
 
 					// Do we need another results section?
 					if (!results) {
-                        results = []
+						results = []
 						column.maxRadioCount = Math.max(column.maxRadioCount, cls.radioCount)
 						column.classes.push({
-                            cls,
+							cls,
 							results,
 							continued: lastCls === cls,
 						})
@@ -664,7 +558,7 @@ td.col-radioDiff {
 				}
 
 				for (cls of resultsResponse.cmpResults) {
-                    tableWidth = tableBaseWidth + tableRadioWidth * cls.radioCount
+					tableWidth = tableBaseWidth + tableRadioWidth * cls.radioCount
 					results = null
 					
 					// Save the current state in case we need to rollback
@@ -676,7 +570,7 @@ td.col-radioDiff {
 
 					// Fit the class
 					for (const result of cls.clsResults) {
-                        fit(rowHeight)
+						fit(rowHeight)
 						results.push(result)
 					}
 					
@@ -684,7 +578,7 @@ td.col-radioDiff {
 					const classSpansMultiplePages = pages.length > pagesLengthBefore
 
 					if (classSpansMultiplePages && !atStartOfPage) {
-                        // Rollback
+						// Rollback
 						rollback(state)
 
 						// Fit the class on a new page
@@ -693,7 +587,7 @@ td.col-radioDiff {
 						results = null
 						
 						for (const result of cls.clsResults) {
-                            fit(rowHeight)
+							fit(rowHeight)
 							results.push(result)
 						}
 					}
@@ -701,39 +595,39 @@ td.col-radioDiff {
 				
 				// Trim away empty columns/sections/etc
 				for (let i = pages.length - 1; i >= 0; i--) {
-                    const page = pages[i]
+					const page = pages[i]
 
 					for (let j = page.length - 1; j >= 0; j--) {
-                        const column = page[j]
+						const column = page[j]
 
 						for (let k = column.classes.length - 1; k >= 0; k--) {
-                            const section = column.classes[k]
+							const section = column.classes[k]
 
 							if (!section.results.length) {
-                                column.classes.splice(k, 1)
+								column.classes.splice(k, 1)
 							}
 						}
 
 						if (!column.classes.length) {
-                            page.splice(j, 1)
+							page.splice(j, 1)
 						}
 					}
 
 					if (!page.length) {
-                        pages.splice(i, 1)
+						pages.splice(i, 1)
 					}
 				}
-
+				console.warn("pages:", pages.length)
 				return pages
 			},
 		},
 
 		filters: {
-            formatAbsoluteTime: function(t) {
-                
-                if (t) {
-                    
-                    // This code does hh:mm:ss for > 1 hour and mm:ss for < 1 hour
+			formatAbsoluteTime: function(t) {
+				
+				if (t) {
+
+					// This code does hh:mm:ss for > 1 hour and mm:ss for < 1 hour
 
 					/*
 					var h, m, s;
@@ -786,14 +680,25 @@ td.col-radioDiff {
 		},
 
 		created () {
-			window.addEventListener('resize', () => this.updateWindowSize());
-            this.updateWindowSize();
-            this.$store.watch((state, getters) => state.leaderboard.leaderboard.data, (newValue, oldValue) => {
-                console.log("subscribed leadergboard update");
-                this.$forceUpdate();
+			window.addEventListener('resize', () => this.updateWindowSize())
+			this.updateWindowSize()
+			this.refreshResults()
 
-            });
+			setInterval(() => this.now = new Date(), 1000)
 
+			const updateLoop = () => {
+				const nowMs = +new Date()
+				const updateIntervalMs = 5000;
+				const delay = Math.floor(nowMs / 1000) * 1000 - nowMs + updateIntervalMs
+
+				setTimeout(() => {
+					this.refreshResults()
+					updateLoop()
+
+				}, delay)
+			}
+
+			updateLoop()
 		},
 
 		components: {
@@ -807,6 +712,16 @@ td.col-radioDiff {
 				this.windowHeight = window.innerHeight
 			},
 
+			async refreshResults () {
+                const result =  await fetch("http://10.0.0.3:9696/api/leaderboard");
+				this.resultsResponse = await result.json();
+				for (var cmp of this.resultsResponse.cmpResults) {
+					for (var cls of cmp.clsResults) {
+						console.log(cmp.radioInfo.length, cls.radios.length, cmp.radioCount);
+					}
+				}
+                this.$forceUpdate();
+			},
 
 			// Calculates the current elapsed time for a competitor, based on their startTime
 			calculateElapsedTime(startTime) {

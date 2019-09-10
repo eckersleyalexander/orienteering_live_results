@@ -81,7 +81,7 @@ export const leaderboard = {
     },
     handleLeaderboardUpdate(state,message) {
       console.log("leaderboard update");
-      state.leaderboard.data = JSON.parse(message.payload);
+      // state.leaderboard.data = JSON.parse(message.payload);
     }
   },
   actions: {
@@ -114,7 +114,7 @@ const socketEvents = {
   },
   // mutations for reconnect methods
   [SOCKET_RECONNECT](state, count) {
-    console.info(state, count)
+    // console.info(state, count)
   },
   [SOCKET_RECONNECT_ERROR](state) {
     state.socket.reconnectError = true;
