@@ -54,8 +54,6 @@ namespace Orienteering_LR_Desktop
                 {
                     OEPathLabel.Content = Properties.Settings.Default.OEPath;
                     oeSync = testSync;
-                    testSync.StopSync();
-                    GetInitData();
                 } 
             }
             String strHostName = string.Empty;
@@ -231,8 +229,6 @@ namespace Orienteering_LR_Desktop
                 {
                     OEPathLabel.Content = dialog.FileName;
                     oeSync = testSync;
-                    testSync.StopSync();
-                    GetInitData();
                     Properties.Settings.Default.OEPath = dialog.FileName;
                     Properties.Settings.Default.Save();
                 }
