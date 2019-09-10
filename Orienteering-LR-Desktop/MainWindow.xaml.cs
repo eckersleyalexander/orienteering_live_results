@@ -21,6 +21,8 @@ using EmbedIO;
 using Orienteering_LR_Desktop.API;
 using EmbedIO.WebApi;
 using System.Windows.Media;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Orienteering_LR_Desktop
 {
@@ -36,10 +38,12 @@ namespace Orienteering_LR_Desktop
         private OESync oeSync;
         public WebServer server;
         public SocketServer socketServer;
+        public Debugger debugger;
 
         public MainWindow()
         {
             InitializeComponent();
+            debugger = new Debugger(DebuggerList);
 
             using (var db = new CompetitorContext())
             {
@@ -187,7 +191,7 @@ namespace Orienteering_LR_Desktop
         {
             int index = int.Parse(((Button)e.Source).Uid);
 
-            GridCursor.Margin = new Thickness(10 + (150 * index), 45, 0, 0);
+            GridCursor.Margin = new Thickness(12 + (165 * index), 45, 0, 0);
 
             switch (index)
             {
@@ -250,6 +254,26 @@ namespace Orienteering_LR_Desktop
             btn.Content = "Restart Web Server";
             StartWebServer("http://" + IPChoiceBox.SelectedValue + ":9696/");
         }
+
+        private void Debug_Btn_Click(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)sender;
+            if (DebugGrid.Visibility == Visibility.Visible)
+            {
+                btn.Content = "Show Debugging";
+                DebugGrid.Visibility = Visibility.Hidden;
+            } else
+            {
+                btn.Content = "Hide Debugging";
+                DebugGrid.Visibility = Visibility.Visible;
+            }
+
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 
     public class Runner
@@ -272,6 +296,41 @@ namespace Orienteering_LR_Desktop
         public List<int> Controls { get; set; }
     }
 
+    public class Debugger
+    {
+        ListBox lstbox;
 
+        public Debugger(ListBox lstbox)
+        {
+            this.lstbox = lstbox;
+        }
+
+        [MethodImplAttribute(MethodImplOptions.NoInlining)] public void Write (String msg)
+        {
+            string str = "[" + DateTime.Now.ToString("hh:mm:ss tt") + "] " + new StackFrame(1).GetMethod().Name + "() says: " + msg;
+            lstbox.Items.Add(str);
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter("Debug.txt", true))
+            {
+                file.WriteLine(str);
+            }
+        }
+
+        public void DeleteLog() {
+            if (File.Exists("Debug.txt"))
+            {
+                File.Delete("Debug.txt");
+            }
+        }
+
+        public void ArchiveLog()
+        {
+            if (File.Exists("Debug.txt"))
+            {
+                File.Copy("Debug.txt", "Log:" + DateTime.Now.ToString("dd-MM-yyyy") + "/" + DateTime.Now.ToString("hh:mm:ss tt"));
+                File.Delete("Debug.txt");
+            }
+
+        }   
+    }
 
 }
