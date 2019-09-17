@@ -2,7 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Windows;
+using System.Windows.Threading;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Orienteering_LR_Desktop.Database
 {
@@ -405,12 +409,11 @@ namespace Orienteering_LR_Desktop.Database
         public CompData GetCompData()
         {
             CompData data = new CompData("<Comp name>", "<comp-date>",
-                new CompData.Marquee(1, "Marquee text", "60")
+                new CompData.Marquee(1, "Marquee text", 60)
             );
             using (var context = new CompetitorContext())
             {
-                var classes = context.RaceClasses;
-                foreach (var raceClass in classes)
+                foreach (var raceClass in context.RaceClasses)
                 {
                     var compTimes = context.Competitors
                         .Where(competitor => competitor.RaceClassId == raceClass.RaceClassId)
@@ -431,12 +434,17 @@ namespace Orienteering_LR_Desktop.Database
                                 competitor = compclub.competitor.FirstName + " " + compclub.competitor.LastName,
                                 club = compclub.competitor.Club.Name,
                                 status = compTime.Status,
-                                times = compTime.Times
+                                times = compTime.Times,
+                                punches = context.Punches.Where(punch => punch.ChipId == compTime.ChipId).ToList()
                             }).ToList();
 
-                    var classCourse = context.ClassCourses.FirstOrDefault(cc => cc.RaceClassId == raceClass.RaceClassId);
+                    var classCourse =
+                        context.ClassCourses.FirstOrDefault(cc => cc.RaceClassId == raceClass.RaceClassId);
                     var course = context.Courses.FirstOrDefault(c => c.CourseId == classCourse.CourseId);
-                    data.AddToCompResults(raceClass, course, compTimes);
+                    if (compTimes.Count > 0)
+                    {
+                        data.AddToCompResults(raceClass, course, compTimes);
+                    }
                 }
             }
 
@@ -714,38 +722,61 @@ namespace Orienteering_LR_Desktop.Database
             this.cmpResults = new List<CompResults>();
         }
 
-        public void AddToCompResults(RaceClass raceClass, Course course, IEnumerable<dynamic> compTimes)
+        private dynamic processTimes(List<string> times, List<int> courseData, List<int> radioControls)
         {
-            CompResults compResults;
-            if (course != null)
+            List<string> filteredTimes = new List<string>();
+            for (int i = 1; i < times.Count - 1; i++)
             {
-                compResults = new CompResults(raceClass.RaceClassId, raceClass.Abbreviation,
-                    course.Description, course.Distance.ToString(), 0);
+                if (radioControls.Contains(courseData[i]))
+                {
+                    filteredTimes.Add((times[i]));
+                }
             }
-            else
-            {
-                compResults = new CompResults(raceClass.RaceClassId, raceClass.Abbreviation, "<no course>", "0", 0);
-            }
+
+
+            string startTime = times.ElementAt(0) ?? "null";
+            string finishTime = times.ElementAt(times.Count - 1) ?? "null";
+
 
             // process comp times (find ranks etc)
-            Func<List<string>, dynamic> getStartMidFin = times => new
+            return new
             {
-                startTime = times[0] ?? "null",
-                finishTime = times[times.Count - 1] ?? "null",
-                radioTimes = times.Skip(1).Take(times.Count - 2).ToList()
+                startTime = startTime,
+                finishTime = finishTime,
+                radioTimes = filteredTimes
             };
-            var withParsedTimes = compTimes.Select(compTime => new
-                {
-                    compTime, parsedTimes = getStartMidFin(JsonConvert.DeserializeObject<List<string>>(compTime.times))
-                })
-                .ToList();
+        }
 
-            foreach (var compTime in withParsedTimes)
+        public void AddToCompResults(RaceClass raceClass, Course course, IEnumerable<dynamic> compTimes)
+        {
+            List<int> courseData = new List<int>();
+            List<int> radioControls = new List<int>();
+            Application.Current.Dispatcher.Invoke((Action) (() =>
             {
-                compResults.AddToClassResults(compTime);
+                var mainWindow = (MainWindow) Application.Current.MainWindow;
+                courseData = JsonConvert.DeserializeObject<List<int>>(course.CourseData);
+                radioControls = courseData.Where(courseId =>
+                        mainWindow.ControlsList.Any(c => c.Id == courseId && c.RadioBool))
+                    .ToList();
+            }));
+
+
+            // radio info
+            List<CompResults.RadioInfo> radioInfos = new List<CompResults.RadioInfo>();
+            for (int i = 1; i < radioControls.Count - 1; i++) // skipping start and end
+            {
+                CompResults.RadioInfo radioInfo =
+                    new CompResults.RadioInfo(radioControls[i], 1000, (int) ((i + 1f) / radioControls.Count) * 100);
+                radioInfos.Add(radioInfo);
             }
 
+            CompResults compResults = new CompResults(raceClass.RaceClassId, raceClass.Abbreviation,
+                course.Description, course.Distance.ToString(), radioInfos);
 
+            // class results
+            compResults.AddClassResults(compTimes, radioControls);
+
+            // save comp results
             this.cmpResults.Add(compResults);
         }
 
@@ -754,9 +785,9 @@ namespace Orienteering_LR_Desktop.Database
         {
             public int show; // 1 or 0
             public string text;
-            public string duration; //seconds
+            public int duration; //seconds
 
-            public Marquee(int show, string text, string duration)
+            public Marquee(int show, string text, int duration)
             {
                 this.show = show;
                 this.text = text;
@@ -774,36 +805,136 @@ namespace Orienteering_LR_Desktop.Database
             public List<RadioInfo> radioInfo;
             public List<ClassResults> clsResults;
 
-            public CompResults(int clsId, string clsName, string course, string length, int radioCount)
+            public CompResults(int clsId, string clsName, string course, string length, List<RadioInfo> radioInfos)
             {
                 this.clsId = clsId;
                 this.clsName = clsName;
                 this.course = course;
                 this.length = length;
-                this.radioCount = radioCount;
+                this.radioCount = radioInfos.Count;
                 this.clsResults = new List<ClassResults>();
+                this.radioInfo = radioInfos;
             }
 
-            public void AddToClassResults(dynamic timeEntry)
+            private string _formatTime(int seconds)
             {
+                var span = TimeSpan.FromSeconds(seconds);
+                return $"{(int)Math.Floor(span.TotalMinutes)}:{span.Seconds:D2}";
+            }
 
-                var classResults = new ClassResults(timeEntry.compTime.id.ToString(), timeEntry.compTime.competitor,
-                    timeEntry.compTime.club,
-                    timeEntry.compTime.status.ToString(), timeEntry.parsedTimes.startTime.ToString(),
-                    timeEntry.parsedTimes.finishTime.ToString(), "2", "+5:00");
-                foreach (var radioTime in timeEntry.parsedTimes.radioTimes)
+
+            public void AddClassResults(IEnumerable<dynamic> compTimes, List<int> radioControls)
+            {
+                if (radioControls.Count == 0)
                 {
-                    classResults.AddRadioTime(new ClassResults.Radio(1,radioTime, "2","+1:00"));
+                    foreach (var compTime in compTimes)
+                    {
+                        this.clsResults.Add(new ClassResults(compTime.id.ToString(), compTime.competitor,
+                            compTime.club,
+                            compTime.status.ToString(), "0" /* or global start time */,
+                            null, "", "", new List<ClassResults.Radio>()));
+                    }
+
+                    return;
                 }
 
-                this.clsResults.Add(classResults);
+                int startControl = radioControls[0];
+                int finishControl = radioControls[radioControls.Count - 1];
+                List<ClassResults> clsResults = new List<ClassResults>();
+                foreach (var compTime in compTimes)
+                {
+                    // start time (from either global start or first punch)
+                    int startTime = 0; // replace default with actual global start
+                    // finish time (from punch or null)
+                    int? finishTime = null;
+                    List<Punch> punches = compTime.punches;
+                    Punch startPunch = punches.Find(p => p.CheckpointId == startControl);
+                    Punch finishPunch = punches.Find(p => p.CheckpointId == finishControl);
+                    if (startPunch != null)
+                    {
+                        startTime = startPunch.Timestamp;
+                    }
+
+                    if (finishPunch != null)
+                    {
+                        finishTime = finishPunch.Timestamp;
+                    }
+
+                    List<ClassResults.Radio> radioTimes = punches
+                        .Where(p => p.CheckpointId != startControl && p.CheckpointId != finishControl)
+                        .Select(c => new ClassResults.Radio(c.CheckpointId, c.Timestamp.ToString(), "", "")).ToList();
+                    clsResults.Add(new ClassResults(compTime.id.ToString(), compTime.competitor,
+                        compTime.club,
+                        compTime.status.ToString(), this._formatTime(startTime),
+                        finishTime == null ? null : finishTime.ToString(), "", "", radioTimes));
+                }
+
+                this.clsResults = clsResults;
+
+                // add ranks to radio times 
+                HashSet<int> radioInfoUsed = new HashSet<int>();
+                foreach (var radioInfo in this.radioInfo)
+                {
+                    // filter clsResults for competitors with a punch on this control
+                    List<ClassResults> sortedPunches = clsResults
+                        .Where(cr => cr.radios.Exists(r => r.code == radioInfo.code))
+                        .OrderBy(cr => cr.radios.Find(r => r.code == radioInfo.code).time).ToList();
+                    if (sortedPunches.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    int rank = 1;
+                    int firstTime = Int32.Parse(sortedPunches.First().radios.Find(r => r.code == radioInfo.code).time);
+                    foreach (var punch in sortedPunches)
+                    {
+                        ClassResults.Radio thePunch = punch.radios.Find(r => r.code == radioInfo.code);
+                        thePunch.rank = rank.ToString();
+                        string diff = "+" + this._formatTime(int.Parse(thePunch.time) - firstTime);
+                        thePunch.diff = rank == 1 ? "" : diff;
+                        rank += 1;
+                        radioInfoUsed.Add(thePunch.code);
+                    }
+                }
+
+                // filter radio info and set radioCount based on above
+                this.radioCount = clsResults.Max(cr => cr.radios.Count);
+//                this.radioInfo = this.radioInfo.Where(ri => radioInfoUsed.Contains(ri.code)).ToList();
+
+
+                // add ranks based on finish time
+                List<ClassResults> sortedResults = clsResults.Where(cr => !string.IsNullOrEmpty(cr.finishTime))
+                    .OrderBy(cr => Int32.Parse(cr.finishTime)).ToList();
+                if (sortedResults.Count == 0)
+                {
+                    return;
+                }
+
+                int finRank = 1;
+                int firstFinTime = Int32.Parse(sortedResults.First().finishTime);
+                foreach (var classResult in sortedResults)
+                {
+                    classResult.finishRank = finRank.ToString();
+                    string diff = "+" + this._formatTime(int.Parse(classResult.finishTime) - firstFinTime);
+                    classResult.finishDiff = finRank == 1 ? "" : diff;
+                    finRank += 1;
+                    classResult.finishTime = _formatTime(int.Parse(classResult.finishTime));
+                }
             }
+
 
             public class RadioInfo
             {
                 public int code;
                 public int distance;
                 public int percentage;
+
+                public RadioInfo(int code, int distance, int percentage)
+                {
+                    this.code = code;
+                    this.distance = distance;
+                    this.percentage = percentage;
+                }
             }
 
             public class ClassResults
@@ -819,7 +950,7 @@ namespace Orienteering_LR_Desktop.Database
                 public List<Radio> radios;
 
                 public ClassResults(string id, string competitor, string club, string status, string startTime,
-                    string finishTime, string finishRank, string finishDiff)
+                    string finishTime, string finishRank, string finishDiff, List<Radio> radioTimes)
                 {
                     this.id = id;
                     this.competitor = competitor;
@@ -829,12 +960,7 @@ namespace Orienteering_LR_Desktop.Database
                     this.finishTime = finishTime;
                     this.finishRank = finishRank;
                     this.finishDiff = finishDiff;
-                    this.radios = new List<Radio>();
-                }
-
-                public void AddRadioTime(Radio radioTime)
-                {
-                    radios.Add(radioTime);
+                    this.radios = radioTimes;
                 }
 
                 public class Radio
