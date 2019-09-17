@@ -84,7 +84,7 @@
 		</table>
 
 		<div id="marquee" v-bind:class="{ 'marqueeHidden': resultsResponse.marquee.show == 0, 'marqueeShow': resultsResponse.marquee.show != 0 }">
-			<marquee-text :repeat="10" :duration="resultsResponse.marquee.duration">{{ resultsResponse.marquee.text }}</marquee-text>
+			<marquee-text :repeat="10" :duration="parseInt(resultsResponse.marquee.duration)">{{ resultsResponse.marquee.text }}</marquee-text>
 		</div>
 
 	</div>
@@ -494,14 +494,15 @@ td.col-radioDiff {
 
 <script>
 
-	import FlashCell from '@/components/FlashCell.vue';
+	import FlashCell from '@/components/FlashCell.vue'
 
 	export default {
 
 		data() {
 			return {
 				now: new Date(),
-                pageNum: 0, //parseInt(this.$route.params.page) || 0,
+				pageNum: parseInt(this.$route.params.page) || 0,
+				resultsResponse: null,
 
 				windowWidth: 0,
 				windowHeight: 0,
@@ -512,12 +513,15 @@ td.col-radioDiff {
 				pageTopPadding: 0,
 				pageBottomPadding: 60,
 
+				// Store the zoom level of the browser window
+				zoomChrome: 1,
+
 				// Column widths
-				colOverallRank: 40,
+				colOverallRank: 50,
 				colCompetitor: 180,
 				colClub: 50,
 				colElapsedTime: 65,
-				colElapsedDiff: 45,
+				colElapsedDiff: 55,
 				colRadioTime: 65,
 				colRadioRank: 30,
 				colRadioDiff: 47,
@@ -536,11 +540,10 @@ td.col-radioDiff {
 
 		computed: {
 			// Splits the data into "pages" such that all of the data within each page
-            // will fit as efficiently as possible onto the page
-            resultsResponse() {return this.$store.state.leaderboard.leaderboard.data || []},
+			// will fit as efficiently as possible onto the page
 			pages() {
 				const {
-                    resultsResponse,
+					resultsResponse,
 					windowHeight,
 					rowHeight,
 					headerRowHeight,
@@ -554,10 +557,11 @@ td.col-radioDiff {
 					colRadioRank,
 					colRadioDiff,
 				} = this
+				
 				const windowWidth = this.windowWidth - this.pageSidePadding * 2
-                
+
 				if (!resultsResponse) {
-                    return []
+					return []
 				}
 
 				const pages = []
@@ -575,7 +579,7 @@ td.col-radioDiff {
 				const tableRadioWidth = colRadioTime + colRadioRank + colRadioDiff
 
 				const save = () => {
-                    // This is all the data we need in order to restore the state
+					// This is all the data we need in order to restore the state
 					return {
 						pagesLength: pages.length,
 						pageLength: page && page.length,
@@ -589,8 +593,8 @@ td.col-radioDiff {
 				}
 
 				const rollback = state => {
-                    ({
-                        lastCls,
+					({
+						lastCls,
 						tableWidth,
 						columnWidth,
 						columnHeight,
@@ -601,24 +605,24 @@ td.col-radioDiff {
 					page = pages[pages.length - 1]
 
 					if (page) {
-                        page.splice(state.pageLength)
+						page.splice(state.pageLength)
 						column = page[page.length - 1]
 
 						if (column) {
-                            column.classes.splice(state.columnLength)
+							column.classes.splice(state.columnLength)
 							results = column.classes[column.classes.length - 1]
 						}
 					}
 				}
 
 				const fit = height => {
-                    const additionalWidth = Math.max(0, tableWidth - columnWidth)
+					const additionalWidth = Math.max(0, tableWidth - columnWidth)
 					const overflowH = overallWidth + additionalWidth > windowWidth
 					const overflowV = columnHeight + height + this.pageTopPadding + this.pageBottomPadding > windowHeight
 
 					// Do we need another page?
 					if (!page || (overflowH && page.length > 1)) {
-                        page = []
+						page = []
 						pages.push(page)
 						column = null
 						results = null
@@ -631,8 +635,8 @@ td.col-radioDiff {
 
 					// Do we need another column?
 					if (!column || overflowV) {
-                        column = {
-                            maxRadioCount: 0,
+						column = {
+							maxRadioCount: 0,
 							classes: [],
 						}
 						page.push(column)
@@ -646,10 +650,10 @@ td.col-radioDiff {
 
 					// Do we need another results section?
 					if (!results) {
-                        results = []
+						results = []
 						column.maxRadioCount = Math.max(column.maxRadioCount, cls.radioCount)
 						column.classes.push({
-                            cls,
+							cls,
 							results,
 							continued: lastCls === cls,
 						})
@@ -664,7 +668,7 @@ td.col-radioDiff {
 				}
 
 				for (cls of resultsResponse.cmpResults) {
-                    tableWidth = tableBaseWidth + tableRadioWidth * cls.radioCount
+					tableWidth = tableBaseWidth + tableRadioWidth * cls.radioCount
 					results = null
 					
 					// Save the current state in case we need to rollback
@@ -676,7 +680,7 @@ td.col-radioDiff {
 
 					// Fit the class
 					for (const result of cls.clsResults) {
-                        fit(rowHeight)
+						fit(rowHeight)
 						results.push(result)
 					}
 					
@@ -684,7 +688,7 @@ td.col-radioDiff {
 					const classSpansMultiplePages = pages.length > pagesLengthBefore
 
 					if (classSpansMultiplePages && !atStartOfPage) {
-                        // Rollback
+						// Rollback
 						rollback(state)
 
 						// Fit the class on a new page
@@ -693,7 +697,7 @@ td.col-radioDiff {
 						results = null
 						
 						for (const result of cls.clsResults) {
-                            fit(rowHeight)
+							fit(rowHeight)
 							results.push(result)
 						}
 					}
@@ -701,26 +705,26 @@ td.col-radioDiff {
 				
 				// Trim away empty columns/sections/etc
 				for (let i = pages.length - 1; i >= 0; i--) {
-                    const page = pages[i]
+					const page = pages[i]
 
 					for (let j = page.length - 1; j >= 0; j--) {
-                        const column = page[j]
+						const column = page[j]
 
 						for (let k = column.classes.length - 1; k >= 0; k--) {
-                            const section = column.classes[k]
+							const section = column.classes[k]
 
 							if (!section.results.length) {
-                                column.classes.splice(k, 1)
+								column.classes.splice(k, 1)
 							}
 						}
 
 						if (!column.classes.length) {
-                            page.splice(j, 1)
+							page.splice(j, 1)
 						}
 					}
 
 					if (!page.length) {
-                        pages.splice(i, 1)
+						pages.splice(i, 1)
 					}
 				}
 
@@ -729,11 +733,11 @@ td.col-radioDiff {
 		},
 
 		filters: {
-            formatAbsoluteTime: function(t) {
-                
-                if (t) {
-                    
-                    // This code does hh:mm:ss for > 1 hour and mm:ss for < 1 hour
+			formatAbsoluteTime: function(t) {
+				
+				if (t) {
+
+					// This code does hh:mm:ss for > 1 hour and mm:ss for < 1 hour
 
 					/*
 					var h, m, s;
@@ -786,14 +790,25 @@ td.col-radioDiff {
 		},
 
 		created () {
-			window.addEventListener('resize', () => this.updateWindowSize());
-            this.updateWindowSize();
-            this.$store.watch((state, getters) => state.leaderboard.leaderboard.data, (newValue, oldValue) => {
-                console.log("subscribed leadergboard update");
-                this.$forceUpdate();
+			window.addEventListener('resize', () => this.updateWindowSize())
+			this.updateWindowSize()
+			this.refreshResults()
 
-            });
+			setInterval(() => this.now = new Date(), 1000)
 
+			const updateLoop = () => {
+				const nowMs = +new Date()
+				const updateIntervalMs = 5000;
+				const delay = Math.floor(nowMs / 1000) * 1000 - nowMs + updateIntervalMs
+
+				setTimeout(() => {
+					this.refreshResults()
+					updateLoop()
+
+				}, delay)
+			}
+
+			updateLoop()
 		},
 
 		components: {
@@ -805,8 +820,28 @@ td.col-radioDiff {
 			updateWindowSize() {
 				this.windowWidth = window.innerWidth
 				this.windowHeight = window.innerHeight
+
+				// Update the browser window zoom level
+				this.zoomChrome = Math.round(((window.outerWidth) / window.innerWidth) * 100) / 100;
+				// console.log(this.zoomChrome);
+
+				this.columnGap = 20 * this.zoomChrome
+				this.colOverallRank = 50 * this.zoomChrome
+				this.colCompetitor = 180 * this.zoomChrome
+				this.colClub = 50 * this.zoomChrome
+				this.colElapsedTime = 65 * this.zoomChrome
+				this.colElapsedDiff = 55 * this.zoomChrome
+				this.colRadioTime = 65 * this.zoomChrome
+				this.colRadioRank = 30 * this.zoomChrome
+				this.colRadioDiff = 47 * this.zoomChrome
+
 			},
 
+			async refreshResults () {
+				const result = await fetch("http://localhost:9696/api/leaderboard")
+				this.resultsResponse = await result.json() 
+				console.log(JSON.stringify(this.resultsResponse))
+			},
 
 			// Calculates the current elapsed time for a competitor, based on their startTime
 			calculateElapsedTime(startTime) {
