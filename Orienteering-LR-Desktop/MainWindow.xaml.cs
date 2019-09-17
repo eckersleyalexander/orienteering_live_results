@@ -86,7 +86,7 @@ namespace Orienteering_LR_Desktop
         {
             socketServer = new SocketServer("/socket");
             server = new WebServer(o => o
-                    .WithUrlPrefix(WebAddr)
+                    .WithUrlPrefix("http://+:9696")
                     .WithMode(HttpListenerMode.EmbedIO)
                 )
                 .WithCors()
