@@ -3,30 +3,37 @@
     class="resultsScreen"
     :style="{ paddingLeft: pageSidePadding + 'px', paddingRight: pageSidePadding + 'px', paddingTop: pageTopPadding + 'px', paddingBottom: pageBottomPadding + 'px' }"
   >
-    <b-dropdown id="class-select" v-bind:text="classSelectText" class="m-2">
-      <b-dropdown-item-button
-        v-for="(cls) in resultsResponse.cmpResults"
-        :key="cls.clsId"
-        @click="setClass(cls.clsId)"
-      >{{cls.clsName}}</b-dropdown-item-button>
-    </b-dropdown>
-
-    <b-input-group>
-      <vue-autosuggest
-        :suggestions="filteredSuggestions"
-        @selected="onSelected"
-        :limit="10"
-        :input-props="searchProps"
-        @input="searchInputChange"
-        :render-suggestion="renderSuggestion"
-        :get-suggestion-value="getSuggestionValue"
-      ></vue-autosuggest>
-      <b-input-group-append>
-        <b-button @click="searchCompetitors">
-          <font-awesome-icon icon="search"></font-awesome-icon>
-        </b-button>
-      </b-input-group-append>
-    </b-input-group>
+    <b-container>
+      <b-row>
+        <b-col>
+          <b-dropdown id="class-select" v-bind:text="classSelectText" class="m-2">
+            <b-dropdown-item-button
+              v-for="(cls) in resultsResponse.cmpResults"
+              :key="cls.clsId"
+              @click="setClass(cls.clsId)"
+            >{{cls.clsName}}</b-dropdown-item-button>
+          </b-dropdown>
+        </b-col>
+        <b-col>
+          <!-- <b-input-group> -->
+          <vue-autosuggest
+            :suggestions="filteredSuggestions"
+            @selected="onSelected"
+            :limit="10"
+            :input-props="searchProps"
+            @input="searchInputChange"
+            :render-suggestion="renderSuggestion"
+            :get-suggestion-value="getSuggestionValue"
+          ></vue-autosuggest>
+          <!-- <b-input-group-append>
+              <b-button @click="onClickSearch">
+                <font-awesome-icon icon="search"></font-awesome-icon>
+              </b-button>
+            </b-input-group-append>
+          </b-input-group>-->
+        </b-col>
+      </b-row>
+    </b-container>
 
     <table v-if="classSelected && results">
       <tr class="headingRow" :style="{ height: headerRowHeight + 'px' }">
@@ -592,7 +599,9 @@ export default {
       const { resultsResponse } = this;
       if (resultsResponse) {
         let names = resultsResponse.cmpResults.map(a =>
-          a.clsResults.map(b => [b.competitor, a.clsId])
+          a.clsResults.map(b => {
+            return { name: b.competitor, clsId: a.clsId };
+          })
         );
         return [].concat.apply([], names).sort();
       }
@@ -780,12 +789,11 @@ export default {
 
       return `hsl(${h}, ${s}%, ${l}%)`;
     },
+    // expects a raw number
     getClassById(clsId) {
-      return {
-        cls: this.resultsResponse.cmpResults.find(function(cmpResults) {
-          return cmpResults.clsId == clsId;
-        })
-      };
+      return this.resultsResponse.cmpResults.find(function(cmpResults) {
+        return cmpResults.clsId == clsId;
+      });
     },
     // sets the displayed class to the one chosen in the dropdown
     setClass(clsId) {
@@ -794,15 +802,17 @@ export default {
       this.selectedClassId = clsId;
       this.classSelected = true;
     },
-
-    // TODO: this will need swap the class to the one the searched competitor is in
-    searchCompetitors() {
-      this.queryResult = this.nameQuery;
-    },
-
+    // sets the class to that of the person searched for
     onSelected(option) {
-      this.selectedCompetitor = option.item[0];
-      this.setClass(option.item[1]);
+      if (option) {
+        this.selectedCompetitor = option.item.name;
+        this.setClass(option.item.clsId);
+      } else {
+        this.$bvToast.toast(`Please start typing a name`, {
+          title: "Invalid competitor",
+          autoHideDelay: 2000
+        });
+      }
     },
     searchInputChange(text) {
       if (text === "" || text === undefined) {
@@ -811,7 +821,7 @@ export default {
 
       const filteredData = this.searchSuggestions
         .filter(item => {
-          return item[0].toLowerCase().indexOf(text.toLowerCase()) > -1;
+          return item.name.toLowerCase().indexOf(text.toLowerCase()) > -1;
         })
         .slice(0, this.limit);
 
@@ -822,10 +832,10 @@ export default {
       ];
     },
     renderSuggestion(suggestion) {
-      return suggestion.item[0];
+      return suggestion.item.name;
     },
     getSuggestionValue(suggestion) {
-      return suggestion.item[0];
+      return suggestion.item.name;
     }
   }
 };
