@@ -6,16 +6,28 @@
     <b-dropdown id="class-select" v-bind:text="classSelectText" class="m-2">
       <b-dropdown-item-button
         v-for="(cls) in resultsResponse.cmpResults"
-        :key="cls.classId"
-        @click="setClass(cls)"
+        :key="cls.clsId"
+        @click="setClass(cls.clsId)"
       >{{cls.clsName}}</b-dropdown-item-button>
     </b-dropdown>
-    <b-form-input
-      id="name-searchbar"
-      v-model="nameQuery"
-      placeholder="Search for a competitor"
-      @keydown.enter.native="searchCompetitors"
-    ></b-form-input>
+
+    <b-input-group>
+      <vue-autosuggest
+        :suggestions="filteredSuggestions"
+        @selected="onSelected"
+        :limit="10"
+        :input-props="searchProps"
+        @input="searchInputChange"
+        :render-suggestion="renderSuggestion"
+        :get-suggestion-value="getSuggestionValue"
+      ></vue-autosuggest>
+      <b-input-group-append>
+        <b-button @click="searchCompetitors">
+          <font-awesome-icon icon="search"></font-awesome-icon>
+        </b-button>
+      </b-input-group-append>
+    </b-input-group>
+
     <table v-if="classSelected && results">
       <tr class="headingRow" :style="{ height: headerRowHeight + 'px' }">
         <th class="className" colspan="3">
@@ -507,59 +519,6 @@ td.col-radioDiff {
 .column {
   flex: 0 0 auto;
 }
-
-#marquee {
-  background-color: black;
-  height: 46px;
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  padding-top: 8px;
-  text-transform: uppercase;
-  font-size: 32px;
-}
-
-#marquee .marquee-text-text {
-  padding-right: 150px;
-  white-space: pre-wrap;
-}
-
-@keyframes hideMarquee {
-  0% {
-    bottom: 0;
-  }
-
-  100% {
-    bottom: -54px;
-  }
-}
-
-#marquee.marqueeHidden {
-  /*display: none;*/
-  animation-duration: 1000ms;
-  animation-name: hideMarquee;
-  animation-iteration-count: 1;
-  bottom: -54px;
-}
-
-@keyframes showMarquee {
-  0% {
-    bottom: -54px;
-  }
-
-  100% {
-    bottom: 0px;
-  }
-}
-
-#marquee.marqueeShow {
-  /*display: none;*/
-  animation-duration: 1000ms;
-  animation-name: showMarquee;
-  animation-iteration-count: 1;
-  bottom: 0px;
-}
 </style>
 
 <script>
@@ -597,6 +556,12 @@ export default {
       selectedClassId: null,
       nameQuery: null,
       queryResult: null,
+      searchProps: {
+        id: "autosuggest__input",
+        placeholder: "Search for competitor by name"
+      },
+      filteredSuggestions: [],
+      selectedCompetitor: null,
 
       statusToRank: {
         3: "MP",
@@ -619,6 +584,17 @@ export default {
             return cmpResults.clsId == selectedClassId;
           })
         };
+      }
+      return null;
+    },
+    // used for providing suggestions when searching for someone
+    searchSuggestions() {
+      const { resultsResponse } = this;
+      if (resultsResponse) {
+        let names = resultsResponse.cmpResults.map(a =>
+          a.clsResults.map(b => [b.competitor, a.clsId])
+        );
+        return [].concat.apply([], names).sort();
       }
       return null;
     }
@@ -804,18 +780,52 @@ export default {
 
       return `hsl(${h}, ${s}%, ${l}%)`;
     },
-
+    getClassById(clsId) {
+      return {
+        cls: this.resultsResponse.cmpResults.find(function(cmpResults) {
+          return cmpResults.clsId == clsId;
+        })
+      };
+    },
     // sets the displayed class to the one chosen in the dropdown
-    setClass(cls) {
+    setClass(clsId) {
       this.classSelected = false;
-      this.classSelectText = cls.clsName;
-      this.selectedClassId = cls.clsId;
+      this.classSelectText = this.getClassById(clsId).clsName;
+      this.selectedClassId = clsId;
       this.classSelected = true;
     },
 
     // TODO: this will need swap the class to the one the searched competitor is in
     searchCompetitors() {
       this.queryResult = this.nameQuery;
+    },
+
+    onSelected(option) {
+      this.selectedCompetitor = option.item[0];
+      this.setClass(option.item[1]);
+    },
+    searchInputChange(text) {
+      if (text === "" || text === undefined) {
+        return;
+      }
+
+      const filteredData = this.searchSuggestions
+        .filter(item => {
+          return item[0].toLowerCase().indexOf(text.toLowerCase()) > -1;
+        })
+        .slice(0, this.limit);
+
+      this.filteredSuggestions = [
+        {
+          data: filteredData
+        }
+      ];
+    },
+    renderSuggestion(suggestion) {
+      return suggestion.item[0];
+    },
+    getSuggestionValue(suggestion) {
+      return suggestion.item[0];
     }
   }
 };

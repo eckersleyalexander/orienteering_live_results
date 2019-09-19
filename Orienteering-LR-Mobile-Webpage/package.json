@@ -15,7 +15,8 @@
     "bootstrap-vue": "^2.0.1",
     "core-js": "^2.6.5",
     "velocity-animate": "^1.5.2",
-    "vue": "^2.6.10"
+    "vue": "^2.6.10",
+    "vue-autosuggest": "^2.0.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.11.0",

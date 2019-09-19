@@ -9,13 +9,18 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faBroadcastTower,
   faRunning,
-  faEllipsisH
+  faEllipsisH,
+  faSearch
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
+import VueAutosuggest from "vue-autosuggest";
+
+Vue.use(VueAutosuggest);
+
 Vue.use(BootstrapVue);
 
-library.add(faBroadcastTower, faRunning, faEllipsisH);
+library.add(faBroadcastTower, faRunning, faEllipsisH, faSearch);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
