@@ -16,10 +16,6 @@
       placeholder="Search for a competitor"
       @keydown.enter.native="searchCompetitors"
     ></b-form-input>
-    <!-- {{ nameQuery }}
-    {{ queryResult }}
-    {{ results }}-->
-
     <table v-if="classSelected && results">
       <tr class="headingRow" :style="{ height: headerRowHeight + 'px' }">
         <th class="className" colspan="3">
@@ -43,6 +39,114 @@
           v-for="(n, i) in results.cls.radioCount"
           :key="n"
         >Split {{ n }} - {{ results.cls.radioInfo[i].distance != null ? formatDistance(results.cls.radioInfo[i].distance) + ' km' : '' }}</th>
+      </tr>
+      <tr
+        v-for="result of results.cls.clsResults"
+        :key="result.id"
+        :style="{ height: rowHeight + 'px' }"
+        v-bind:class="{ 'proceedToDownload':(result.status == 100) }"
+      >
+        <td
+          class="col-overallRank"
+          :style="{ width: colOverallRank + 'px',
+                        maxWidth: colOverallRank + 'px' }"
+        >
+          <font-awesome-icon
+            v-if="result.startTime > 0 && result.status == 0 && statusZero(result) == 'running'"
+            icon="running"
+            class="pillIcon running"
+          />
+          <font-awesome-icon
+            v-else-if="(result.status == 0 && statusZero(result) == 'pending') || (result.startTime <= 0 && result.status == 0)"
+            icon="ellipsis-h"
+          />
+          <template v-else-if="result.status == 1">
+            <span class="pillIcon finisher">{{ result.finishRank }}</span>
+          </template>
+          <template v-else-if="result.status == 100">
+            <span class="pillIcon finisher">{{ result.finishRank }}</span>
+          </template>
+          <template v-else>
+            <span class="pillIcon nonfinisher">{{ statusToRank[result.status] }}</span>
+          </template>
+        </td>
+
+        <td
+          class="col-competitor"
+          :style="{ width: colCompetitor + 'px',
+                        maxWidth: colCompetitor + 'px' }"
+        >{{ result.competitor }}</td>
+        <td
+          class="col-club"
+          :style="{ width: colClub + 'px', maxWidth: colClub + 'px' }"
+        >{{ result.club }}</td>
+
+        <td
+          class="col-elapsedTime"
+          :style="{ width: colElapsedTime + 'px',
+                        maxWidth: colElapsedTime + 'px' }"
+        >
+          <template v-if="result.startTime > 0 && competitorStarted(result.startTime) == false">
+            <span class="startTimeDisplay">{{ (result.startTime / 10) | formatStartTime }}</span>
+          </template>
+          <template
+            v-else-if="result.startTime > 0 && result.finishTime == null && result.status == 0"
+          >{{ (calculateElapsedTime(result.startTime) / 10) | formatAbsoluteTime }}</template>
+          <template v-else>{{ result.finishTime }}</template>
+        </td>
+
+        <td
+          class="col-elapsedDiff"
+          :style="{ width: colElapsedDiff + 'px',
+                        maxWidth: colElapsedDiff + 'px' }"
+        >
+          <template v-if="competitorStarted(result.startTime) == false">
+            <span class="startTimeDisplay">Start</span>
+          </template>
+          <template v-else>{{ result.finishDiff }}</template>
+        </td>
+
+        <!-- we need to use i (index) rather than n (value) so we start at zero-->
+        <template v-for="(n, i) in results.cls.radioCount">
+          <flash-cell
+            :display-value="result.radios[i].time"
+            :watch-value="result.radios[i].time"
+            :key="result.id + '-' + result.radios[i].code + '-time'"
+            class="col-radioTime"
+            :style="{ width: colRadioTime + 'px',
+                        maxWidth: colRadioTime + 'px' }"
+          ></flash-cell>
+
+          <!-- if no radio punch then print no brackets -->
+          <flash-cell
+            v-if="result.radios[i].time == null"
+            :display-value="null"
+            :watch-value="result.radios[i].time"
+            :key="result.id + '-' + result.radios[i].code + '-rank'"
+            class="col-radioRank"
+            :style="{ width: colRadioRank + 'px',
+                        maxWidth: colRadioRank + 'px' }"
+          ></flash-cell>
+          <flash-cell
+            v-else
+            :display-value="'(' + result.radios[i].rank + ')'"
+            :watch-value="result.radios[i].time"
+            :key="result.id + '-' + result.radios[i].code + '-rank'"
+            class="col-radioRank"
+            :style="{ width: colRadioRank + 'px',
+                        maxWidth: colRadioRank + 'px' }"
+          ></flash-cell>
+
+          <flash-cell
+            :display-value="result.radios[i].diff"
+            :watch-value="result.radios[i].time"
+            :key="result.id + '-' + result.radios[i].code + '-diff'"
+            class="col-radioDiff"
+            :style="{ width: colRadioDiff + 'px',
+                        maxWidth: colRadioDiff + 'px' }"
+          ></flash-cell>
+        </template>
+        <td />
       </tr>
     </table>
   </div>
@@ -703,9 +807,10 @@ export default {
 
     // sets the displayed class to the one chosen in the dropdown
     setClass(cls) {
+      this.classSelected = false;
       this.classSelectText = cls.clsName;
-      this.classSelected = true;
       this.selectedClassId = cls.clsId;
+      this.classSelected = true;
     },
 
     // TODO: this will need swap the class to the one the searched competitor is in
