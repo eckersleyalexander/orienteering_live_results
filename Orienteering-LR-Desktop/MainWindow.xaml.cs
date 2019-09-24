@@ -56,11 +56,17 @@ namespace Orienteering_LR_Desktop
                 testSync.StartSync();
                 if (testSync.SyncSuccess)
                 {
+                    if (oeSync != null)
+                    {
+                        oeSync.StopSync();
+                    }
                     OEPathLabel.Content = Properties.Settings.Default.OEPath;
                     oeSync = testSync;
-                    testSync.StopSync();
                     GetInitData();
-                } 
+                }  else
+                {
+                    testSync.StopSync();
+                }
             }
             String strHostName = string.Empty;
             strHostName = Dns.GetHostName();
@@ -80,12 +86,13 @@ namespace Orienteering_LR_Desktop
             _reader.OnlineStampRead += _reader_OnlineStampRead;
             _reader.OutputDevice = new ReaderDeviceInfo(ReaderDeviceType.None);
             _reader.OpenOutputDevice();
+            ConnectRadio();
 
             // this should be in the setup process -> need to choose the oe directory
             // currently using pwd\test
 
         }
-        
+
         private void StartWebServer(String WebAddr)
         {
             socketServer = new SocketServer("/socket");
@@ -112,18 +119,25 @@ namespace Orienteering_LR_Desktop
             // PunchDateTime = punch time w/ date as 1/1/2000
             int punchTime = (int)((e.PunchData[0].PunchDateTime - new DateTime(2000, 1, 1)).TotalSeconds * 1000.0);
             //MessageBox.Show("ChipId: " + chipId.ToString() + ", CheckpointId: " + chipId.ToString() + ", Punch: " + punchTime.ToString());
-
+            
             // save to db
             var s = new Database.Store();
             s.CreatePunch(chipId, checkpointId, punchTime);
+
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                var mainWindow = (MainWindow)Application.Current.MainWindow;
+                mainWindow.debugger.Write(chipId + "," + checkpointId + "," + punchTime);
+            }));
 
             // push to front end
             await socketServer.SendLeaderboardUpdates();
         }
        
-        private void GetInitData()
+        public void GetInitData()
         {
             var db = new Database.Query();
+            CompetitorsList.Clear();
             List<Database.CompetitorInfo> Competitors = db.GetAllCompetitorInfo(1);
             List<Database.CourseInfo> Courses = db.GetAllCourseInfo();
             
@@ -137,9 +151,11 @@ namespace Orienteering_LR_Desktop
                     Status = c.Status
                 });
             }
-
+            CoursesList.Clear();
+            ControlsList.Clear();
             foreach (Database.CourseInfo c in Courses)
             {
+                
                 CourseDesktop cd = new CourseDesktop();
                 cd.Name = c.Description;
                 cd.Controls = c.CourseData;
@@ -162,7 +178,7 @@ namespace Orienteering_LR_Desktop
 
         }
 
-        private void ConnectRadio(object sender, RoutedEventArgs e)
+        private void ConnectRadio()
         {
             List<DeviceInfo> devList = DeviceInfo.GetAvailableDeviceList(true, (int)DeviceType.Serial);
             if (devList.Count != 1)
@@ -177,12 +193,12 @@ namespace Orienteering_LR_Desktop
                     if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
                     _reader.InputDevice = device;
                     _reader.OpenInputDevice();
-                    MessageBox.Show("radio connected");
+                    debugger.Write("radio connected");
                 }
                 catch (Exception ex)
                 {
                     if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
-                    MessageBox.Show(ex.Message);
+                    debugger.Write(ex.Message);
                 }
             }
         }
@@ -234,14 +250,18 @@ namespace Orienteering_LR_Desktop
                 if (testSync.SyncSuccess)
                 {
                     OEPathLabel.Content = dialog.FileName;
+                    if (oeSync != null)
+                    {
+                        oeSync.StopSync();
+                    }
                     oeSync = testSync;
-                    testSync.StopSync();
                     GetInitData();
                     Properties.Settings.Default.OEPath = dialog.FileName;
                     Properties.Settings.Default.Save();
                 }
                 else
                 {
+                    testSync.StopSync();
                     MessageBox.Show("No/Incomplete OE Data at specified location. Please try a different folder.");
                 }
             }

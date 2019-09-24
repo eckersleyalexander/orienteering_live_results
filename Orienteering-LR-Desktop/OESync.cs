@@ -7,6 +7,7 @@ using System.Data;
 using System.IO;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
+using System.Windows;
 
 namespace Orienteering_LR_Desktop
 {
@@ -461,6 +462,13 @@ namespace Orienteering_LR_Desktop
             }
 
             SyncSuccess = true;
+
+            //GetInitData()
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                var mainWindow = (MainWindow)Application.Current.MainWindow;
+                mainWindow.GetInitData();
+            }));
             return true;
         }
 
