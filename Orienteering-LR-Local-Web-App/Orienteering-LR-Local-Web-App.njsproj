@@ -34,6 +34,28 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="public\favicon.ico" />
+    <Content Include="public\fonts\roboto-v20-latin-100italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-100italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-300.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-300.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-300italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-300italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-500.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-500.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-500italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-500italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-700.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-700.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-700italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-700italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-900.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-900.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-900italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-900italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-regular.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-regular.woff2" />
     <Content Include="public\index.html" />
     <Content Include="src\App.vue" />
     <Content Include="src\components\ApiTest.vue" />
@@ -43,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
+    <Folder Include="public\fonts\" />
     <Folder Include="src\" />
     <Folder Include="src\assets\" />
     <Folder Include="src\components\" />
