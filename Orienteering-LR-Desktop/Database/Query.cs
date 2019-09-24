@@ -148,9 +148,8 @@ namespace Orienteering_LR_Desktop.Database
                                 // scan Punches for times instead
                                 foreach (int checkpoint in RaceClass.Course.CourseData)
                                 {
-                                    Punch punch = context.Punches.SingleOrDefault(a =>
-                                        a.ChipId == ChipId && a.Stage == stage && a.CheckpointId == checkpoint);
-                                    Times.Add(punch != null ? (Nullable<int>) punch.Timestamp : null);
+                                    Punch punch = context.Punches.FirstOrDefault(a => a.ChipId == ChipId && a.Stage == stage && a.CheckpointId == checkpoint);
+                                    Times.Add(punch != null ? (Nullable<int>)punch.Timestamp : null);
                                 }
 
                                 // if no times
