@@ -88,16 +88,42 @@ namespace Orienteering_LR_Desktop
             _reader.OpenOutputDevice();
             ConnectRadio();
 
+            ConnectRadio();
+
             // this should be in the setup process -> need to choose the oe directory
             // currently using pwd\test
+        }
 
+        private void ConnectRadio()
+        {
+            List<DeviceInfo> devList = DeviceInfo.GetAvailableDeviceList(true, (int)DeviceType.Serial);
+            if (devList.Count != 1)
+            {
+                MessageBox.Show("Unable to connect radio: No devices detected (or more than 1)");
+            }
+            else
+            {
+                ReaderDeviceInfo device = new ReaderDeviceInfo(devList[0], ReaderDeviceType.SiDevice);
+                try
+                {
+                    if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
+                    _reader.InputDevice = device;
+                    _reader.OpenInputDevice();
+                    MessageBox.Show("radio connected");
+                }
+                catch (Exception ex)
+                {
+                    if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
+                    MessageBox.Show(ex.Message);
+                }
+            }
         }
 
         private void StartWebServer(String WebAddr)
         {
             socketServer = new SocketServer("/socket");
             server = new WebServer(o => o
-                    .WithUrlPrefix(WebAddr)
+                    .WithUrlPrefix("http://+:9696")
                     .WithMode(HttpListenerMode.EmbedIO)
                 )
                 .WithCors()

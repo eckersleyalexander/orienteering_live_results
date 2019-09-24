@@ -128,6 +128,12 @@ namespace Orienteering_LR_Desktop
                         DistanceData = null
                     };
 
+                    List<int> distData = new List<int>();
+                    for (int i = 0; i < checkpoints.Count; i++)
+                    {
+                        distData.Add(i);
+                    }
+
                     // try to preserve distance data if it already exists
                     try
                     {
@@ -139,9 +145,9 @@ namespace Orienteering_LR_Desktop
                     }
 
                     // ensure distance data agrees with checkpoints
-                    if (newCourse.DistanceData != null && JsonConvert.DeserializeObject<List<float>>(newCourse.DistanceData).Count != checkpoints.Count - 1)
+                    if (newCourse.DistanceData == null || JsonConvert.DeserializeObject<List<float>>(newCourse.DistanceData).Count != checkpoints.Count)
                     {
-                        newCourse.DistanceData = null;
+                        newCourse.DistanceData = JsonConvert.SerializeObject(distData);
                     }
 
                     context.Courses.Add(newCourse);
