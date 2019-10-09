@@ -432,7 +432,7 @@ namespace Orienteering_LR_Desktop.Database
                                 id = compclub.competitor.CompetitorId,
                                 competitor = compclub.competitor.FirstName + " " + compclub.competitor.LastName,
                                 club = compclub.competitor.Club.Name,
-                                status = 1,//compTime.Status,
+                                status = compTime.Status,
                                 times = compTime.Times,
                                 starttime = compTime.StartTime,
                                 punches = context.Punches.Where(punch => punch.ChipId == compTime.ChipId).ToList()
@@ -767,7 +767,7 @@ namespace Orienteering_LR_Desktop.Database
             for (int i = 1; i < radioControls.Count -1; i++)
             {
                 CompResults.RadioInfo radioInfo =
-                    new CompResults.RadioInfo(radioControls[i], i*1000, (int) (100 * (i + 1.0) / radioControls.Count));
+                    new CompResults.RadioInfo(radioControls[i], (int)(i*course.Distance/radioControls.Count), (int) (100 * (i + 1.0) / radioControls.Count));
                 radioInfos.Add(radioInfo);
             }
 
@@ -883,7 +883,7 @@ namespace Orienteering_LR_Desktop.Database
 
                     clsResults.Add(new ClassResults(compTime.id.ToString(), compTime.competitor,
                         compTime.club,
-                        compTime.status.ToString(), Times[0]?.ToString(),
+                        compTime.status.ToString(), (compTime.starttime/1000).ToString(),
                         (Times[Times.Count - 1] == null ? 0 : (int)(Times[Times.Count - 1]/1000)).ToString(), "", "", radioTimes));
                 }
 
@@ -908,8 +908,8 @@ namespace Orienteering_LR_Desktop.Database
                     {
                         ClassResults.Radio thePunch = punch.radios.Find(r => r.code == radioInfo.code);
                         thePunch.rank = rank.ToString();
-                        string diff = "+" + this._formatTime(0);//int.Parse(thePunch.time) - firstTime);
-                        thePunch.diff = rank == 1 ? "" : diff;
+                        string diff = "+" + this._formatTime(int.Parse(thePunch.time) - firstTime);
+                        thePunch.diff = rank == 1 ? null : diff;
                         rank += 1;
                         radioInfoUsed.Add(thePunch.code);
                         thePunch.time = _formatTime(int.Parse(thePunch.time));
@@ -935,7 +935,7 @@ namespace Orienteering_LR_Desktop.Database
                 {
                     classResult.finishRank = finRank.ToString();
                     string diff = "+" + this._formatTime(int.Parse(classResult.finishTime) - firstFinTime);
-                    classResult.finishDiff = finRank == 1 ? "" : diff;
+                    classResult.finishDiff = finRank == 1 ? null : diff;
                     finRank += 1;
                     classResult.finishTime = _formatTime(int.Parse(classResult.finishTime));
                 }
