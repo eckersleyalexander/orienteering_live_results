@@ -50,7 +50,7 @@ namespace Orienteering_LR_Desktop
                 db.GetService<IMigrator>().Migrate();
             }
 
-            if (Properties.Settings.Default.OEPath != "")
+            if (false)//Properties.Settings.Default.OEPath != "")
             {
                 OESync testSync = new OESync(Properties.Settings.Default.OEPath);
                 testSync.StartSync();
@@ -130,7 +130,7 @@ namespace Orienteering_LR_Desktop
             }));
 
             // push to front end
-            await socketServer.SendLeaderboardUpdates();
+            //await socketServer.SendLeaderboardUpdates();
         }
        
         public void GetInitData()
@@ -165,7 +165,7 @@ namespace Orienteering_LR_Desktop
                         ControlsList.Add(new Control()
                         {
                             Id = controlID,
-                            RadioBool = false
+                            RadioBool = controlID == OESync.FINISH_CHECKPOINT ? true : false
                         });
                     }  
                 }
