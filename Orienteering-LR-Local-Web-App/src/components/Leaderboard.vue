@@ -1,7 +1,7 @@
 <template>
 
 	<div v-if="pages[pageNum]" 
-	class="columns resultsScreen"
+	class="columns resultsScreen vh-100"
 	:style="{ paddingLeft: pageSidePadding + 'px', paddingRight: pageSidePadding + 'px', paddingTop: pageTopPadding + 'px', paddingBottom: pageBottomPadding + 'px' }"
 	>
 
@@ -490,6 +490,9 @@ td.col-radioDiff {
 	bottom: 0px;
 }
 
+body {
+    background-color: #000 !important;
+}
 </style>
 
 <script>
@@ -727,7 +730,7 @@ td.col-radioDiff {
 				}
 				
 				// Calculate max radio count for each column
-				debugger;
+				//debugger;
 				for (const page of pages) {
 					for (const column of page) {
 						column.maxRadioCount = Math.max(0, ...column.classes.map(c => c.cls.radioCount))
@@ -800,10 +803,6 @@ td.col-radioDiff {
 			'$route' (to, from) {
 				this.pageNum = parseInt(this.$route.params.page) || 0;
 			}
-		},
-
-		beforeCreate: function() {
-			document.body.className = 'grey';
 		},
 
 		created () {

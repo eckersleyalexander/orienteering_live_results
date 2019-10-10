@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="bg-dark text-white vh-100">
+  <div id="app" class="bg-black text-white vh-100">
     <!-- <Home /> -->
     <!-- <ApiTest query="hello" /> -->
     <Leaderboard />

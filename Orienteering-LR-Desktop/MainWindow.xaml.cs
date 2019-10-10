@@ -18,6 +18,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using EmbedIO;
+using EmbedIO.Files;
 using Orienteering_LR_Desktop.API;
 using EmbedIO.WebApi;
 using System.Windows.Media;
@@ -95,17 +96,19 @@ namespace Orienteering_LR_Desktop
         private void StartWebServer(String WebAddr)
         {
             socketServer = new SocketServer("/socket");
+            FileModule leaderboardserver = new FileModule("/", new FileSystemProvider(Directory.GetCurrentDirectory() + "/vue_app/", true));
+            // leaderboardserver.DefaultExtension = ".html";
+            
             server = new WebServer(o => o
                     .WithUrlPrefix("http://+:9696")
                     .WithMode(HttpListenerMode.EmbedIO)
                 )
                 .WithCors()
                 .WithWebApi("/api", api => api.WithController<LeaderboardAPI>())
-                .WithModule(socketServer);
-            //server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
-            //server.Module<StaticFilesModule>().UseRamCache = true;
-            //server.Module<StaticFilesModule>().DefaultExtension = ".html"
+                .WithModule(socketServer)
+                .WithModule(leaderboardserver);
             server.RunAsync();
+            Process.Start("http://localhost:9696/");
         }
 
         private async void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
