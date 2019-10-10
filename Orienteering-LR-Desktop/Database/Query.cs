@@ -408,7 +408,7 @@ namespace Orienteering_LR_Desktop.Database
         public CompData GetCompData()
         {
             CompData data = new CompData("<Comp name>", "<comp-date>",
-                new CompData.Marquee(0, "TechLauncher Showcase - Orienteering Live Results", 60)
+                new CompData.Marquee(1, "TechLauncher Showcase - Orienteering Live Results", 60)
             );
             using (var context = new CompetitorContext())
             {
@@ -432,7 +432,7 @@ namespace Orienteering_LR_Desktop.Database
                                 id = compclub.competitor.CompetitorId,
                                 competitor = compclub.competitor.FirstName + " " + compclub.competitor.LastName,
                                 club = compclub.competitor.Club.Name,
-                                status = compTime.Status,
+                                status = "1",//compTime.Status,
                                 times = compTime.Times,
                                 starttime = compTime.StartTime,
                                 punches = context.Punches.Where(punch => punch.ChipId == compTime.ChipId).ToList()
@@ -447,7 +447,6 @@ namespace Orienteering_LR_Desktop.Database
                     }
                 }
             }
-
             return data;
         }
 
@@ -937,8 +936,11 @@ namespace Orienteering_LR_Desktop.Database
                     string diff = "+" + this._formatTime(int.Parse(classResult.finishTime) - firstFinTime);
                     classResult.finishDiff = finRank == 1 ? null : diff;
                     finRank += 1;
-                    classResult.finishTime = _formatTime(int.Parse(classResult.finishTime));
+                    classResult.finishTime = _formatTime(int.Parse(classResult.finishTime ?? "999"));
                 }
+
+                this.clsResults = this.clsResults.OrderBy(x => int.Parse(x.finishRank)).ToList();
+
             }
 
 

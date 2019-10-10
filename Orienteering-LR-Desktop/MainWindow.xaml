@@ -190,7 +190,7 @@
                 <Grid x:Name="DebugGrid" Visibility="Hidden">
                     <ListBox x:Name="DebuggerList" HorizontalAlignment="Left" Height="209" Margin="25,188,0,0" VerticalAlignment="Top" Width="644" Foreground="Black" BorderBrush="Black" BorderThickness="2"/>
                 </Grid>
-                <Button Content="Import Course Data" HorizontalAlignment="Left" Margin="258,142,0,0" VerticalAlignment="Top" Width="180" RenderTransformOrigin="0.966,0.719"/>
+                <Button Content="Import Course Data" HorizontalAlignment="Left" Margin="258,142,0,0" VerticalAlignment="Top" Width="180" RenderTransformOrigin="0.966,0.719" Click="Demobtn"/>
             </Grid>
         </Grid>
 

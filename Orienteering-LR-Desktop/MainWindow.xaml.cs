@@ -293,6 +293,16 @@ namespace Orienteering_LR_Desktop
         {
 
         }
+
+        private void Demobtn(object sender, RoutedEventArgs e)
+        {
+            using (var context = new Database.CompetitorContext())
+            {
+                context.Punches.RemoveRange(context.Punches);
+                context.SaveChanges();
+            }
+
+        }
     }
 
     public class Runner
