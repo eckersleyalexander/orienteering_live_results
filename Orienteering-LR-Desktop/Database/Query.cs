@@ -895,7 +895,7 @@ namespace Orienteering_LR_Desktop.Database
                     // filter clsResults for competitors with a punch on this control
                     List<ClassResults> sortedPunches = clsResults
                         .Where(cr => cr.radios.Exists(r => r.code == radioInfo.code))
-                        .OrderBy(cr => cr.radios.Find(r => r.code == radioInfo.code).time).ToList();
+                        .OrderBy(cr => int.Parse(cr.radios.Find(r => r.code == radioInfo.code).time == "0" ? "9999999" : cr.radios.Find(r => r.code == radioInfo.code).time)).ToList();
                     if (sortedPunches.Count == 0)
                     {
                         continue;
@@ -907,7 +907,7 @@ namespace Orienteering_LR_Desktop.Database
                     {
                         ClassResults.Radio thePunch = punch.radios.Find(r => r.code == radioInfo.code);
                         thePunch.rank = rank.ToString();
-                        string diff = "+" + this._formatTime(int.Parse(thePunch.time) - firstTime);
+                        string diff = int.Parse(thePunch.time) == 0 ? null : "+" + this._formatTime(int.Parse(thePunch.time) - firstTime);
                         thePunch.diff = rank == 1 ? null : diff;
                         rank += 1;
                         radioInfoUsed.Add(thePunch.code);
@@ -922,7 +922,7 @@ namespace Orienteering_LR_Desktop.Database
 
                 // add ranks based on finish time
                 List<ClassResults> sortedResults = clsResults.Where(cr => !string.IsNullOrEmpty(cr.finishTime))
-                    .OrderBy(cr => Int32.Parse(cr.finishTime)).ToList();
+                    .OrderBy(cr => (Int32.Parse(cr.finishTime) != 0 ? Int32.Parse(cr.finishTime) : 9999999) - cr.radios.Where(rt => rt.time != "0:00").ToList().Count).ToList();
                 if (sortedResults.Count == 0)
                 {
                     return;
@@ -934,7 +934,7 @@ namespace Orienteering_LR_Desktop.Database
                 {
                     classResult.finishRank = finRank.ToString();
                     string diff = "+" + this._formatTime(int.Parse(classResult.finishTime) - firstFinTime);
-                    classResult.finishDiff = finRank == 1 ? null : diff;
+                    classResult.finishDiff = finRank == 1 || Int32.Parse(classResult.finishTime) == 0 ? null : diff;
                     finRank += 1;
                     classResult.finishTime = _formatTime(int.Parse(classResult.finishTime ?? "999"));
                 }
