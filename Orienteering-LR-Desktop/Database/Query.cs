@@ -769,12 +769,12 @@ namespace Orienteering_LR_Desktop.Database
             for (int i = 0; i < radioControls.Count; i++)
             {
                 CompResults.RadioInfo radioInfo =
-                    new CompResults.RadioInfo(radioControls[i], (int)(i*course.Distance/radioControls.Count), (int) (100 * (i + 1.0) / radioControls.Count));
+                    new CompResults.RadioInfo(radioControls[i], (int)(1000*(i+1)*course.Distance/(radioControls.Count+1)), (int) (100 * (i + 2.0) / (radioControls.Count+1)));
                 radioInfos.Add(radioInfo);
             }
 
             CompResults compResults = new CompResults(raceClass.RaceClassId, raceClass.Abbreviation,
-                course.Description, course.Distance.ToString(), radioInfos, course.CourseData);
+                course.Description, (1000*course.Distance).ToString(), radioInfos, course.CourseData);
 
             // class results
             compResults.AddClassResults(compTimes, radioControls);
