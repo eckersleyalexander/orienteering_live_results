@@ -59,6 +59,7 @@ namespace Orienteering_LR_Desktop
         public bool OESyncDataNow()
         {
             DataSet OEdb = ReadOEDb();
+            SyncSuccess = false;
 
             // for each of our tables: read the appropriate data from the DataSet
             // drop the current tables
@@ -69,7 +70,6 @@ namespace Orienteering_LR_Desktop
                 if(OEdb.Tables[tableName] == null)
                 {
                     // throw error or otherwise notify main window?
-                    SyncSuccess = false;
                     return false;
                 }
             }
@@ -468,7 +468,7 @@ namespace Orienteering_LR_Desktop
                     //string leaderboardJson = GetLeaderboard.ByClassJson(c.RaceClassId);
                 //}
             }
-
+            
             SyncSuccess = true;
             return true;
         }
