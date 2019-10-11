@@ -8,7 +8,7 @@ Vue.use(Router)
 export default new Router({
     routes: [
         {
-            path: "/",
+            path: "/:page",
             name: "Leaderboard",
             component: Leaderboard
         },
