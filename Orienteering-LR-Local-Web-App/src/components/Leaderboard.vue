@@ -1,7 +1,7 @@
 <template>
 
 	<div v-if="pages[pageNum]" 
-	class="columns resultsScreen"
+	class="columns resultsScreen vh-100"
 	:style="{ paddingLeft: pageSidePadding + 'px', paddingRight: pageSidePadding + 'px', paddingTop: pageTopPadding + 'px', paddingBottom: pageBottomPadding + 'px' }"
 	>
 
