@@ -4,10 +4,11 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>Orienteering-LR-Local-Web-App</Name>
     <RootNamespace>Orienteering-LR-Local-Web-App</RootNamespace>
-    <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
+    <LastActiveSolutionConfig>Release|Any CPU</LastActiveSolutionConfig>
     <LaunchUrl>
     </LaunchUrl>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
+    <NameOfLastUsedPublishProfile>custom</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -33,7 +34,30 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="custom.pubxml" />
     <Content Include="public\favicon.ico" />
+    <Content Include="public\fonts\roboto-v20-latin-100italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-100italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-300.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-300.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-300italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-300italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-500.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-500.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-500italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-500italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-700.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-700.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-700italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-700italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-900.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-900.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-900italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-900italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-italic.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-italic.woff2" />
+    <Content Include="public\fonts\roboto-v20-latin-regular.woff" />
+    <Content Include="public\fonts\roboto-v20-latin-regular.woff2" />
     <Content Include="public\index.html" />
     <Content Include="src\App.vue" />
     <Content Include="src\components\ApiTest.vue" />
@@ -43,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\" />
+    <Folder Include="public\fonts\" />
     <Folder Include="src\" />
     <Folder Include="src\assets\" />
     <Folder Include="src\components\" />

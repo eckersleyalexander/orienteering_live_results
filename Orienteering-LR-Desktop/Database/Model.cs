@@ -70,6 +70,7 @@ namespace Orienteering_LR_Desktop.Database
         public int ChipId { get; set; }
         public int? Status { get; set; }
         public string Times { get; set; }
+        public int? StartTime { get; set; }
     }
 
 

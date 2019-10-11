@@ -103,6 +103,7 @@
                             </Style.Triggers>
                         </Style>
                         <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="{x:Type DataGridCell}">
+                            <EventSetter Event="MouseUp" Handler="ControlsTable_CellMouseUp"/>
                             <Setter Property="BorderBrush" Value="{x:Null}" />
                             <Setter Property="TextBlock.TextAlignment" Value="Center"/>
                             <Style.Triggers>
@@ -166,13 +167,14 @@
                     </DataGrid.Resources>
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Course Name" Width="*" Binding="{Binding Name}" Foreground="Black" IsReadOnly="True"/>
-                        <DataGridTemplateColumn Header="Control IDs" Width="*" IsReadOnly="True">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <ItemsControl ItemsSource="{Binding Controls}" Foreground="Black"/>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Control IDs" Width="*" Binding="{Binding Controls}" Foreground="Black" IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style>
+                                    <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+                                    <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
@@ -187,10 +189,10 @@
                 <Label Content="Local Network IP Address:" HorizontalAlignment="Left" Margin="35,101,0,0" VerticalAlignment="Top" Foreground="Black" FontWeight="Bold"/>
                 <Button x:Name="ServerBtn" Content="Start Web Server" HorizontalAlignment="Left" Margin="35,142,0,0" VerticalAlignment="Top" Width="180" RenderTransformOrigin="0.477,0.781" Height="32" Click="StartWebServerClick" Background="Green"/>
                 <Button Content="Show Debugging" HorizontalAlignment="Left" Margin="479,142,0,0" VerticalAlignment="Top" Width="180" Click="Debug_Btn_Click"/>
-                <Grid x:Name="DebugGrid" Visibility="Visible">
+                <Grid x:Name="DebugGrid" Visibility="Hidden">
                     <ListBox x:Name="DebuggerList" HorizontalAlignment="Left" Height="209" Margin="25,188,0,0" VerticalAlignment="Top" Width="644" Foreground="Black" BorderBrush="Black" BorderThickness="2"/>
                 </Grid>
-                <Button Content="Import Course Data" HorizontalAlignment="Left" Margin="258,142,0,0" VerticalAlignment="Top" Width="180" RenderTransformOrigin="0.966,0.719"/>
+                <Button Content="Clear Punch Data" Background="Red" HorizontalAlignment="Left" Margin="258,142,0,0" VerticalAlignment="Top" Width="180" RenderTransformOrigin="0.966,0.719" Click="Demobtn"/>
             </Grid>
         </Grid>
 

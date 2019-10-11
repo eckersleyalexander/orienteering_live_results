@@ -149,7 +149,8 @@ namespace Orienteering_LR_Desktop.Migrations
                     Stage = table.Column<int>(nullable: false),
                     Status = table.Column<int>(nullable: true),
                     ChipId = table.Column<int>(nullable: false),
-                    Times = table.Column<string>(nullable: true)
+                    Times = table.Column<string>(nullable: true),
+                    StartTime = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
