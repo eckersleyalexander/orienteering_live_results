@@ -26,6 +26,9 @@ namespace Orienteering_LR_Desktop
         private Timer SyncFunc;
         private static readonly string[] ExpectedTables = { "Teiln.dat", "Kat.dat", "Club.dat", "Chip1.dat", "Bahnen1.dat" };
 
+        public const int START_CHECKPOINT = 12;
+        public const int FINISH_CHECKPOINT = 13;
+
         public OESync(string path)
         {
             OEEventPath = path;
@@ -56,6 +59,7 @@ namespace Orienteering_LR_Desktop
         public bool OESyncDataNow()
         {
             DataSet OEdb = ReadOEDb();
+            SyncSuccess = false;
 
             // for each of our tables: read the appropriate data from the DataSet
             // drop the current tables
@@ -66,7 +70,6 @@ namespace Orienteering_LR_Desktop
                 if(OEdb.Tables[tableName] == null)
                 {
                     // throw error or otherwise notify main window?
-                    SyncSuccess = false;
                     return false;
                 }
             }
@@ -93,10 +96,7 @@ namespace Orienteering_LR_Desktop
                     List<int> checkpoints = new List<int>();
                     
                     // start checkpoint
-                    if (row.Field<Nullable<int>>("StartCodeNr") != null)
-                    {
-                        checkpoints.Add(row.Field<int>("StartCodeNr"));
-                    }
+                    checkpoints.Add(START_CHECKPOINT);
 
                     // course checkpoints
                     for (int i = 1; i <= 64; i++)
@@ -113,10 +113,7 @@ namespace Orienteering_LR_Desktop
                     }
 
                     // finish checkpoint
-                    if (row.Field<Nullable<int>>("ZielStr") != null)
-                    {
-                        checkpoints.Add(row.Field<int>("ZielStr"));
-                    }
+                    checkpoints.Add(FINISH_CHECKPOINT);
 
                     Database.Course newCourse = new Database.Course
                     {
@@ -300,8 +297,12 @@ namespace Orienteering_LR_Desktop
                             CompetitorId = comp.CompetitorId,
                             Competitor = comp,
                             Stage = 1,
-                            Status = row.Field<int?>("NCKen1")
+                            Status = row.Field<int?>("NCKen1"),
+                            StartTime = row.Field<int?>("Start1")
                         };
+
+                        compTime.StartTime = compTime.StartTime > 0 && compTime.StartTime < 360000000 ? compTime.StartTime : null;
+                        compTime.StartTime *= 10;
 
                         List<int?> times = new List<int?>();
 
@@ -406,9 +407,9 @@ namespace Orienteering_LR_Desktop
                                     }
 
                                     // if there is no start time, then check if this was a non-punch start
-                                    if (times[0] == null && cc?.StartTime != null)
+                                    if (times[0] == null && compTime.StartTime != null)
                                     {
-                                        times[0] = cc?.StartTime / 10;
+                                        times[0] = compTime.StartTime / 10;
                                     }
 
                                     // if there is a start time
@@ -449,6 +450,7 @@ namespace Orienteering_LR_Desktop
                             if (times.Count == 0)
                             {
                                 times.AddRange(Enumerable.Repeat<int?>(null, checkpoints.Count));
+                                //times[0] = compTime.StartTime;
                             }
                         }
 
@@ -460,21 +462,14 @@ namespace Orienteering_LR_Desktop
                 context.SaveChanges();
 
                 // tests
-                foreach (Database.RaceClass c in context.RaceClasses.ToList())
-                {
+                //foreach (Database.RaceClass c in context.RaceClasses.ToList())
+                //{
                     //List<GetLeaderboard.LeaderboardCompetitor> leaderboard = GetLeaderboard.ByClass(c.RaceClassId);
-                    string leaderboardJson = GetLeaderboard.ByClassJson(c.RaceClassId);
-                }
+                    //string leaderboardJson = GetLeaderboard.ByClassJson(c.RaceClassId);
+                //}
             }
-
+            
             SyncSuccess = true;
-
-            //GetInitData()
-            Application.Current.Dispatcher.Invoke((Action)(() =>
-            {
-                var mainWindow = (MainWindow)Application.Current.MainWindow;
-                mainWindow.GetInitData();
-            }));
             return true;
         }
 
@@ -508,6 +503,13 @@ namespace Orienteering_LR_Desktop
             {
                 SyncFunc = new Timer(e => OESyncDataNow(), null, TimeSpan.FromSeconds(SyncTime), TimeSpan.FromSeconds(SyncTime));
             }
+
+            //GetInitData()
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                var mainWindow = (MainWindow)Application.Current.MainWindow;
+                mainWindow.GetInitData();
+            }));
         }
 
         public void StopSync()

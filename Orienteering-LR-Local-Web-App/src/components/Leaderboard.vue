@@ -1,9 +1,10 @@
 <template>
 
 	<div v-if="pages[pageNum]" 
-	class="columns resultsScreen"
+	class="columns resultsScreen vh-100"
 	:style="{ paddingLeft: pageSidePadding + 'px', paddingRight: pageSidePadding + 'px', paddingTop: pageTopPadding + 'px', paddingBottom: pageBottomPadding + 'px' }"
 	>
+
 		<table
 			v-for="(column, columnI) of pages[pageNum]"
 			:key="columnI"
@@ -22,10 +23,10 @@
 				>
 					<th class="className" colspan="3"><span class="pillIcon" :style="{ backgroundColor: classColor(results.cls.clsName) }">{{ results.cls.clsName }} <span class="contText">{{ results.continued ? '(Cont...)' : '' }}</span><div class="classMetadata"><span class="classLength">{{ results.cls.length != null ? formatDistance(results.cls.length) + ' km' : '' }}</span> &#8226; <span class="classCourse">{{ results.cls.course }}</span></div></span></th>
 					<th class="elapsedHeading" colspan="2">Total</th>
-					<th class="splitHeading" colspan="3" v-for="(n, i) in results.cls.radiosCount" :key="n">Split {{ n }} count {{ results.cls.radiosCount }} -</th>
+					<th class="splitHeading" colspan="3" v-for="(n, i) in results.cls.radioCount" :key="n">Split {{ n }} {{ results.cls.radioInfo[i].distance != null ? '- ' + formatDistance(results.cls.radioInfo[i].distance) + ' km' : '' }}</th>
 					<th
-						v-if="results.cls.radiosCount < column.maxRadioCount"
-						:colspan="(column.maxRadioCount - results.cls.radiosCount) * 3"
+						v-if="results.cls.radioCount < column.maxRadioCount"
+						:colspan="(column.maxRadioCount - results.cls.radioCount) * 3"
 					/>
 				</tr>
 
@@ -45,7 +46,7 @@
 					</td>
 
 					<td class="col-competitor" :style="{ width: colCompetitor + 'px' }">{{ result.competitor }}</td>
-					<td class="col-club" :style="{ width: colClub + 'px' }">{{ result.club }}</td>
+					<td class="col-club" :style="{ width: colClub + 'px' }">{{ clubAbbreviate(result.club) }}</td>
 
 					<td class="col-elapsedTime" :style="{ width: colElapsedTime + 'px' }">
 						<template v-if="result.startTime > 0 && competitorStarted(result.startTime) == false"><span class="startTimeDisplay">{{ (result.startTime / 10) | formatStartTime }}</span></template>
@@ -59,7 +60,7 @@
 					</td>
 
 					<!-- we need to use i (index) rather than n (value) so we start at zero-->
-					<template v-for="(n, i) in results.cls.radiosCount">
+					<template v-for="(n, i) in results.cls.radioCount">
 
 						<flash-cell :display-value="result.radios[i].time" :watch-value="result.radios[i].time" :key="result.id + '-' + result.radios[i].code + '-time'" class="col-radioTime" :style="{ width: colRadioTime + 'px' }"></flash-cell>
 
@@ -72,8 +73,8 @@
 					</template>
 
 					<td
-						v-if="results.cls.radiosCount < column.maxRadioCount"
-						:colspan="(column.maxRadioCount - results.cls.radiosCount) * 3"
+						v-if="results.cls.radioCount < column.maxRadioCount"
+						:colspan="(column.maxRadioCount - results.cls.radioCount) * 3"
 					/>
 
 				</tr>
@@ -92,111 +93,117 @@
 
 <style scoped>
 
-    html {
-        font-family: 'Futura';
-    }
-
-    /* roboto-100 - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: normal;
-        font-weight: 100;
-        src: local('Roboto Thin'), local('Roboto-Thin'), url('/fonts/roboto-v20-latin-100.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-100.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-100italic - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: italic;
-        font-weight: 100;
-        src: local('Roboto Thin Italic'), local('Roboto-ThinItalic'), url('/fonts/roboto-v20-latin-100italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-100italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-300 - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: normal;
-        font-weight: 300;
-        src: local('Roboto Light'), local('Roboto-Light'), url('/fonts/roboto-v20-latin-300.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-300.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-300italic - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: italic;
-        font-weight: 300;
-        src: local('Roboto Light Italic'), local('Roboto-LightItalic'), url('/fonts/roboto-v20-latin-300italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-300italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-regular - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: normal;
-        font-weight: 400;
-        src: local('Roboto'), local('Roboto-Regular'), url('/fonts/roboto-v20-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-italic - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: italic;
-        font-weight: 400;
-        src: local('Roboto Italic'), local('Roboto-Italic'), url('/fonts/roboto-v20-latin-italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-500 - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: normal;
-        font-weight: 500;
-        src: local('Roboto Medium'), local('Roboto-Medium'), url('/fonts/roboto-v20-latin-500.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-500.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-500italic - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: italic;
-        font-weight: 500;
-        src: local('Roboto Medium Italic'), local('Roboto-MediumItalic'), url('/fonts/roboto-v20-latin-500italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-500italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-700 - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: normal;
-        font-weight: 700;
-        src: local('Roboto Bold'), local('Roboto-Bold'), url('/fonts/roboto-v20-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-700italic - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: italic;
-        font-weight: 700;
-        src: local('Roboto Bold Italic'), local('Roboto-BoldItalic'), url('/fonts/roboto-v20-latin-700italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-700italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-900 - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: normal;
-        font-weight: 900;
-        src: local('Roboto Black'), local('Roboto-Black'), url('/fonts/roboto-v20-latin-900.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-900.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-    /* roboto-900italic - latin */
-    @font-face {
-        font-family: 'Roboto';
-        font-style: italic;
-        font-weight: 900;
-        src: local('Roboto Black Italic'), local('Roboto-BlackItalic'), url('/fonts/roboto-v20-latin-900italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-        url('/fonts/roboto-v20-latin-900italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-    }
-
-
+/* roboto-100 - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 100;
+  src: local('Roboto Thin'), local('Roboto-Thin'),
+       url('/fonts/roboto-v20-latin-100.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-100.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-100italic - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 100;
+  src: local('Roboto Thin Italic'), local('Roboto-ThinItalic'),
+       url('/fonts/roboto-v20-latin-100italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-100italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-300 - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Roboto Light'), local('Roboto-Light'),
+       url('/fonts/roboto-v20-latin-300.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-300.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-300italic - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 300;
+  src: local('Roboto Light Italic'), local('Roboto-LightItalic'),
+       url('/fonts/roboto-v20-latin-300italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-300italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-regular - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'),
+       url('/fonts/roboto-v20-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-italic - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Roboto Italic'), local('Roboto-Italic'),
+       url('/fonts/roboto-v20-latin-italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-500 - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  src: local('Roboto Medium'), local('Roboto-Medium'),
+       url('/fonts/roboto-v20-latin-500.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-500.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-500italic - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 500;
+  src: local('Roboto Medium Italic'), local('Roboto-MediumItalic'),
+       url('/fonts/roboto-v20-latin-500italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-500italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-700 - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Bold'), local('Roboto-Bold'),
+       url('/fonts/roboto-v20-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-700italic - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Roboto Bold Italic'), local('Roboto-BoldItalic'),
+       url('/fonts/roboto-v20-latin-700italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-700italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-900 - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 900;
+  src: local('Roboto Black'), local('Roboto-Black'),
+       url('/fonts/roboto-v20-latin-900.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-900.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+/* roboto-900italic - latin */
+@font-face {
+  font-family: 'Roboto';
+  font-style: italic;
+  font-weight: 900;
+  src: local('Roboto Black Italic'), local('Roboto-BlackItalic'),
+       url('/fonts/roboto-v20-latin-900italic.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+       url('/fonts/roboto-v20-latin-900italic.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
 
 div.resultsScreen {
-	background-color: #333;
+	background-color: black;
 	color: #eee;
 	font-family: Roboto;
 	margin: 0;
@@ -278,11 +285,11 @@ tr.proceedToDownload td:first-child:after {
 
 
 tr:nth-child(even){
-	background-color: #444;
+	background-color: #222;
 }
 
 tr:nth-child(odd){
-	background-color: #333;
+	background-color: black;
 }
 
 th.className {
@@ -487,7 +494,8 @@ td.col-radioDiff {
 
 <script>
 
-	import FlashCell from '@/components/FlashCell.vue'
+	import FlashCell from '@/components/FlashCell.vue';
+	// import resultData from '@/beans.json'
 
 	export default {
 
@@ -505,9 +513,6 @@ td.col-radioDiff {
 				pageSidePadding: 10,
 				pageTopPadding: 0,
 				pageBottomPadding: 60,
-
-				// Store the zoom level of the browser window
-				zoomChrome: 1,
 
 				// Column widths
 				colOverallRank: 50,
@@ -629,7 +634,7 @@ td.col-radioDiff {
 					// Do we need another column?
 					if (!column || overflowV) {
 						column = {
-							maxRadioCount: 0,
+							maxRadioCount: 0,  // Calculated all at once at the end
 							classes: [],
 						}
 						page.push(column)
@@ -644,7 +649,6 @@ td.col-radioDiff {
 					// Do we need another results section?
 					if (!results) {
 						results = []
-						column.maxRadioCount = Math.max(column.maxRadioCount, cls.radioCount)
 						column.classes.push({
 							cls,
 							results,
@@ -652,6 +656,7 @@ td.col-radioDiff {
 						})
 						lastCls = cls
 						columnHeight += headerRowHeight
+						overallWidth += additionalWidth
 						fit(height)
 						return
 					}
@@ -720,6 +725,16 @@ td.col-radioDiff {
 						pages.splice(i, 1)
 					}
 				}
+				
+				// Calculate max radio count for each column
+				debugger;
+				for (const page of pages) {
+					for (const column of page) {
+						column.maxRadioCount = Math.max(0, ...column.classes.map(c => c.cls.radioCount))
+						console.log("maxr:",column.maxRadioCount)
+					}
+				}
+
 				return pages
 			},
 		},
@@ -781,6 +796,16 @@ td.col-radioDiff {
 
 		},
 
+		watch: {
+			'$route' (to, from) {
+				this.pageNum = parseInt(this.$route.params.page) || 0;
+			}
+		},
+
+		beforeCreate: function() {
+			document.body.className = 'grey';
+		},
+
 		created () {
 			window.addEventListener('resize', () => this.updateWindowSize())
 			this.updateWindowSize()
@@ -812,26 +837,11 @@ td.col-radioDiff {
 			updateWindowSize() {
 				this.windowWidth = window.innerWidth
 				this.windowHeight = window.innerHeight
-
-				// Update the browser window zoom level
-				this.zoomChrome = Math.round(((window.outerWidth) / window.innerWidth) * 100) / 100;
-				// console.log(this.zoomChrome);
-
-				this.columnGap = 20 * this.zoomChrome
-				this.colOverallRank = 50 * this.zoomChrome
-				this.colCompetitor = 180 * this.zoomChrome
-				this.colClub = 50 * this.zoomChrome
-				this.colElapsedTime = 65 * this.zoomChrome
-				this.colElapsedDiff = 55 * this.zoomChrome
-				this.colRadioTime = 65 * this.zoomChrome
-				this.colRadioRank = 30 * this.zoomChrome
-				this.colRadioDiff = 47 * this.zoomChrome
-
 			},
 
 			async refreshResults () {
-				const result = await fetch("http://localhost:9696/api/leaderboard")
-				this.resultsResponse = await result.json() 
+				const result = await fetch("http://localhost:9696/api/leaderboard");
+				this.resultsResponse = await result.json();
 			},
 
 			// Calculates the current elapsed time for a competitor, based on their startTime
@@ -928,12 +938,19 @@ td.col-radioDiff {
 				}
 
 				const h = Math.abs(hash) % 360;
-				const s = Math.abs(hash) % 60 + 40;
-				const l = (Math.abs(hash) % 25) + 20;
+				const s = Math.abs(hash) % 40 + 60;
+				const l = (Math.abs(hash) % 25) + 13;
 
 				return `hsl(${h}, ${s}%, ${l}%)`;
 
 			},
+
+			// Returns the first four letters of the club name
+			clubAbbreviate(str) {
+				if (str != null)
+					return str.substring(0, 4);
+				return '';
+			}
 
 		}
 

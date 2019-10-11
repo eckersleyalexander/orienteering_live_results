@@ -18,11 +18,15 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using EmbedIO;
+using EmbedIO.Files;
 using Orienteering_LR_Desktop.API;
 using EmbedIO.WebApi;
 using System.Windows.Media;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
+using System.Windows.Data;
+using System.ComponentModel;
 
 namespace Orienteering_LR_Desktop
 {
@@ -32,7 +36,7 @@ namespace Orienteering_LR_Desktop
 	public partial class MainWindow : Window
     {
         public ObservableCollection<Runner> CompetitorsList = new ObservableCollection<Runner>();
-        public List<Control> ControlsList = new List<Control>();
+        public ObservableCollection<Control> ControlsList = new ObservableCollection<Control>();
         public ObservableCollection<CourseDesktop> CoursesList = new ObservableCollection<CourseDesktop>();
         private readonly Reader _reader;
         private OESync oeSync;
@@ -53,16 +57,16 @@ namespace Orienteering_LR_Desktop
             if (Properties.Settings.Default.OEPath != "")
             {
                 OESync testSync = new OESync(Properties.Settings.Default.OEPath);
+                if (oeSync != null)
+                {
+                    oeSync.StopSync();
+                }
                 testSync.StartSync();
                 if (testSync.SyncSuccess)
                 {
-                    if (oeSync != null)
-                    {
-                        oeSync.StopSync();
-                    }
                     OEPathLabel.Content = Properties.Settings.Default.OEPath;
                     oeSync = testSync;
-                    GetInitData();
+                    //GetInitData();
                 }  else
                 {
                     testSync.StopSync();
@@ -75,7 +79,9 @@ namespace Orienteering_LR_Desktop
 
             IPChoiceBox.ItemsSource = AddrList;
             CompetitorsTable.ItemsSource = CompetitorsList;
+            CoursesTable.ItemsSource = CoursesList;
             ControlsTable.ItemsSource = ControlsList;
+            CollectionViewSource.GetDefaultView(ControlsTable.ItemsSource).SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Ascending));
 
             // radio punch receiver
             _reader = new Reader
@@ -92,20 +98,29 @@ namespace Orienteering_LR_Desktop
             // currently using pwd\test
         }
 
+        private void ControlsTable_CellMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            ControlsTable.CommitEdit();
+        }
+
         private void StartWebServer(String WebAddr)
         {
             socketServer = new SocketServer("/socket");
+            FileModule ldrbrdserver = new FileModule("/", new FileSystemProvider(Directory.GetCurrentDirectory() + "/vue_app/", false));
+            FileModule ldrbrdmobserver = new FileModule("/mobile", new FileSystemProvider(Directory.GetCurrentDirectory() + "/vue_app_mobile/", false));
+
             server = new WebServer(o => o
                     .WithUrlPrefix("http://+:9696")
                     .WithMode(HttpListenerMode.EmbedIO)
                 )
                 .WithCors()
                 .WithWebApi("/api", api => api.WithController<LeaderboardAPI>())
-                .WithModule(socketServer);
-            //server.RegisterModule(new StaticFilesModule(Directory.GetCurrentDirectory() + "/vue_app"));
-            //server.Module<StaticFilesModule>().UseRamCache = true;
-            //server.Module<StaticFilesModule>().DefaultExtension = ".html"
+                .WithModule(socketServer)
+                .WithModule(ldrbrdmobserver)
+                .WithModule(ldrbrdserver);
+                
             server.RunAsync();
+            Process.Start("http://localhost:9696/");
         }
 
         private async void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
@@ -130,7 +145,7 @@ namespace Orienteering_LR_Desktop
             }));
 
             // push to front end
-            await socketServer.SendLeaderboardUpdates();
+            //await socketServer.SendLeaderboardUpdates();
         }
        
         public void GetInitData()
@@ -151,17 +166,18 @@ namespace Orienteering_LR_Desktop
                 });
             }
             CoursesList.Clear();
-            ControlsList.Clear();
+            List<int> controls = new List<int>();
             foreach (Database.CourseInfo c in Courses)
             {
-                
                 CourseDesktop cd = new CourseDesktop();
                 cd.Name = c.Description;
-                cd.Controls = c.CourseData;
+                cd.Controls = string.Join(", ", c.CourseData);
                 CoursesList.Add(cd);
                 foreach (int controlID in c.CourseData)
                 {
-                    if (!ControlsList.Any(x => x.Id == controlID)) {
+                    controls.Add(controlID);
+                    if (!ControlsList.Any(x => x.Id == controlID) && controlID != OESync.FINISH_CHECKPOINT && controlID != OESync.START_CHECKPOINT)
+                    {
                         ControlsList.Add(new Control()
                         {
                             Id = controlID,
@@ -171,10 +187,21 @@ namespace Orienteering_LR_Desktop
                 }
             }
 
-            ControlsList.Sort((x, y) => x.Id.CompareTo(y.Id));
+            List<Control> del = new List<Control>();
+            foreach (Control ctr in ControlsList)
+            {
+                if (!controls.Contains(ctr.Id))
+                {
+                    del.Add(ctr);
+                }
+            }
 
-            CoursesTable.ItemsSource = CoursesList;
+            foreach (Control ctr in del)
+            {
+                ControlsList.Remove(ctr);
+            }
 
+            ControlsList.OrderBy(x => x.Id);
         }
 
         private void ConnectRadio()
@@ -245,22 +272,26 @@ namespace Orienteering_LR_Desktop
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 OESync testSync = new OESync(dialog.FileName);
+                if (oeSync != null)
+                {
+                    oeSync.StopSync();
+                }
                 testSync.StartSync();
                 if (testSync.SyncSuccess)
                 {
                     OEPathLabel.Content = dialog.FileName;
-                    if (oeSync != null)
-                    {
-                        oeSync.StopSync();
-                    }
                     oeSync = testSync;
-                    GetInitData();
+                    //GetInitData();
                     Properties.Settings.Default.OEPath = dialog.FileName;
                     Properties.Settings.Default.Save();
                 }
                 else
                 {
                     testSync.StopSync();
+                    if (oeSync != null)
+                    {
+                        oeSync.StartSync();
+                    }
                     MessageBox.Show("No/Incomplete OE Data at specified location. Please try a different folder.");
                 }
             }
@@ -293,6 +324,16 @@ namespace Orienteering_LR_Desktop
         {
 
         }
+
+        private void Demobtn(object sender, RoutedEventArgs e)
+        {
+            using (var context = new Database.CompetitorContext())
+            {
+                context.Punches.RemoveRange(context.Punches);
+                context.SaveChanges();
+            }
+
+        }
     }
 
     public class Runner
@@ -312,7 +353,7 @@ namespace Orienteering_LR_Desktop
     public class CourseDesktop
     {
         public String Name { get; set; }
-        public List<int> Controls { get; set; }
+        public String Controls { get; set; }
     }
 
     public class Debugger
