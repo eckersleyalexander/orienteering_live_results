@@ -107,6 +107,8 @@ namespace Orienteering_LR_Desktop
         {
             socketServer = new SocketServer("/socket");
             FileModule ldrbrdserver = new FileModule("/", new FileSystemProvider(Directory.GetCurrentDirectory() + "/vue_app/", false));
+            FileModule ldrbrdmobserver = new FileModule("/mobile", new FileSystemProvider(Directory.GetCurrentDirectory() + "/vue_app_mobile/", false));
+
             server = new WebServer(o => o
                     .WithUrlPrefix("http://+:9696")
                     .WithMode(HttpListenerMode.EmbedIO)
@@ -114,7 +116,9 @@ namespace Orienteering_LR_Desktop
                 .WithCors()
                 .WithWebApi("/api", api => api.WithController<LeaderboardAPI>())
                 .WithModule(socketServer)
+                .WithModule(ldrbrdmobserver)
                 .WithModule(ldrbrdserver);
+                
             server.RunAsync();
             Process.Start("http://localhost:9696/");
         }

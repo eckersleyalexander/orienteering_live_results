@@ -1,6 +1,6 @@
 <template>
   <div
-    class="resultsScreen"
+    class="resultsScreen vh-100"
     :style="{ paddingLeft: pageSidePadding + 'px', paddingRight: pageSidePadding + 'px', paddingTop: pageTopPadding + 'px', paddingBottom: pageBottomPadding + 'px' }"
   >
     <b-container>
