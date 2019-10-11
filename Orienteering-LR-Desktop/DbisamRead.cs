@@ -170,9 +170,28 @@ namespace Orienteering_LR_Desktop
 
                 // full filename for the table file
                 string filePath = dbPath + tableName;
+                byte[] tableRaw;
+
+                using (var s = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    tableRaw = new byte[s.Length];
+                    int numBytesToRead = (int)s.Length;
+                    int numBytesRead = 0;
+                    while (numBytesToRead > 0)
+                    {
+                        // Read may return anything from 0 to numBytesToRead.
+                        int n = s.Read(tableRaw, numBytesRead, numBytesToRead);
+
+                        // Break when the end of the file is reached.
+                        if (n == 0)
+                            break;
+
+                        numBytesRead += n;
+                        numBytesToRead -= n;
+                    }
+                }
 
                 // read full file into memory
-                byte[] tableRaw = File.ReadAllBytes(filePath);
 
                 // table info
                 int nRecords = BitConverter.ToInt32(tableRaw, 41);

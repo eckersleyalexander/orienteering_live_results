@@ -60,6 +60,8 @@ namespace Orienteering_LR_Desktop.Migrations
 
                     b.Property<string>("Times");
 
+                    b.Property<int>("StartTime");
+
                     b.HasKey("CompetitorId", "Stage");
 
                     b.ToTable("CompTimes");

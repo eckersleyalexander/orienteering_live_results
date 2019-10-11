@@ -2,19 +2,11 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Orienteering_LR_Desktop.Database;
 using SPORTident;
 using SPORTident.Communication.UsbDevice;
@@ -22,6 +14,19 @@ using System.IO;
 using Microsoft.WindowsAPICodePack;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Collections.ObjectModel;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using EmbedIO;
+using EmbedIO.Files;
+using Orienteering_LR_Desktop.API;
+using EmbedIO.WebApi;
+using System.Windows.Media;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
+using System.Windows.Data;
+using System.ComponentModel;
 
 namespace Orienteering_LR_Desktop
 {
@@ -31,19 +36,19 @@ namespace Orienteering_LR_Desktop
 	public partial class MainWindow : Window
     {
         public ObservableCollection<Runner> CompetitorsList = new ObservableCollection<Runner>();
-        public List<Control> ControlsList = new List<Control>();
+        public ObservableCollection<Control> ControlsList = new ObservableCollection<Control>();
         public ObservableCollection<CourseDesktop> CoursesList = new ObservableCollection<CourseDesktop>();
         private readonly Reader _reader;
         private OESync oeSync;
+        public WebServer server;
+        public SocketServer socketServer;
+        public Debugger debugger;
 
         public MainWindow()
         {
             InitializeComponent();
+            debugger = new Debugger(DebuggerList);
 
-            if (File.Exists("LRDB.db"))
-            {
-                File.Delete("LRDB.db");
-            }
             using (var db = new CompetitorContext())
             {
                 db.GetService<IMigrator>().Migrate();
@@ -52,18 +57,31 @@ namespace Orienteering_LR_Desktop
             if (Properties.Settings.Default.OEPath != "")
             {
                 OESync testSync = new OESync(Properties.Settings.Default.OEPath);
+                if (oeSync != null)
+                {
+                    oeSync.StopSync();
+                }
                 testSync.StartSync();
                 if (testSync.SyncSuccess)
                 {
                     OEPathLabel.Content = Properties.Settings.Default.OEPath;
                     oeSync = testSync;
+                    //GetInitData();
+                }  else
+                {
                     testSync.StopSync();
-                    GetInitData();
-                } 
+                }
             }
-            
+            String strHostName = string.Empty;
+            strHostName = Dns.GetHostName();
+            IPHostEntry ipEntry = Dns.GetHostEntry(strHostName);
+            IPAddress[] AddrList = ipEntry.AddressList.Where(a => a.AddressFamily == AddressFamily.InterNetwork).ToArray();
+
+            IPChoiceBox.ItemsSource = AddrList;
             CompetitorsTable.ItemsSource = CompetitorsList;
+            CoursesTable.ItemsSource = CoursesList;
             ControlsTable.ItemsSource = ControlsList;
+            CollectionViewSource.GetDefaultView(ControlsTable.ItemsSource).SortDescriptions.Add(new SortDescription("Id", ListSortDirection.Ascending));
 
             // radio punch receiver
             _reader = new Reader
@@ -74,10 +92,35 @@ namespace Orienteering_LR_Desktop
             _reader.OnlineStampRead += _reader_OnlineStampRead;
             _reader.OutputDevice = new ReaderDeviceInfo(ReaderDeviceType.None);
             _reader.OpenOutputDevice();
+            ConnectRadio();
 
             // this should be in the setup process -> need to choose the oe directory
             // currently using pwd\test
+        }
 
+        private void ControlsTable_CellMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            ControlsTable.CommitEdit();
+        }
+
+        private void StartWebServer(String WebAddr)
+        {
+            socketServer = new SocketServer("/socket");
+            FileModule ldrbrdserver = new FileModule("/", new FileSystemProvider(Directory.GetCurrentDirectory() + "/vue_app/", false));
+            FileModule ldrbrdmobserver = new FileModule("/mobile", new FileSystemProvider(Directory.GetCurrentDirectory() + "/vue_app_mobile/", false));
+
+            server = new WebServer(o => o
+                    .WithUrlPrefix("http://+:9696")
+                    .WithMode(HttpListenerMode.EmbedIO)
+                )
+                .WithCors()
+                .WithWebApi("/api", api => api.WithController<LeaderboardAPI>())
+                .WithModule(socketServer)
+                .WithModule(ldrbrdmobserver)
+                .WithModule(ldrbrdserver);
+                
+            server.RunAsync();
+            Process.Start("http://localhost:9696/");
         }
 
         private async void _reader_OnlineStampRead(object sender, SportidentDataEventArgs e)
@@ -90,18 +133,25 @@ namespace Orienteering_LR_Desktop
             // PunchDateTime = punch time w/ date as 1/1/2000
             int punchTime = (int)((e.PunchData[0].PunchDateTime - new DateTime(2000, 1, 1)).TotalSeconds * 1000.0);
             //MessageBox.Show("ChipId: " + chipId.ToString() + ", CheckpointId: " + chipId.ToString() + ", Punch: " + punchTime.ToString());
-
+            
             // save to db
             var s = new Database.Store();
             s.CreatePunch(chipId, checkpointId, punchTime);
 
+            Application.Current.Dispatcher.Invoke((Action)(() =>
+            {
+                var mainWindow = (MainWindow)Application.Current.MainWindow;
+                mainWindow.debugger.Write(chipId + "," + checkpointId + "," + punchTime);
+            }));
+
             // push to front end
-            await ((App)Application.Current).socketServer.SendLeaderboardUpdates();
+            //await socketServer.SendLeaderboardUpdates();
         }
        
-        private void GetInitData()
+        public void GetInitData()
         {
             var db = new Database.Query();
+            CompetitorsList.Clear();
             List<Database.CompetitorInfo> Competitors = db.GetAllCompetitorInfo(1);
             List<Database.CourseInfo> Courses = db.GetAllCourseInfo();
             
@@ -115,16 +165,19 @@ namespace Orienteering_LR_Desktop
                     Status = c.Status
                 });
             }
-
+            CoursesList.Clear();
+            List<int> controls = new List<int>();
             foreach (Database.CourseInfo c in Courses)
             {
                 CourseDesktop cd = new CourseDesktop();
                 cd.Name = c.Description;
-                cd.Controls = c.CourseData;
+                cd.Controls = string.Join(", ", c.CourseData);
                 CoursesList.Add(cd);
                 foreach (int controlID in c.CourseData)
                 {
-                    if (!ControlsList.Any(x => x.Id == controlID)) {
+                    controls.Add(controlID);
+                    if (!ControlsList.Any(x => x.Id == controlID) && controlID != OESync.FINISH_CHECKPOINT && controlID != OESync.START_CHECKPOINT)
+                    {
                         ControlsList.Add(new Control()
                         {
                             Id = controlID,
@@ -134,13 +187,24 @@ namespace Orienteering_LR_Desktop
                 }
             }
 
-            ControlsList.Sort((x, y) => x.Id.CompareTo(y.Id));
+            List<Control> del = new List<Control>();
+            foreach (Control ctr in ControlsList)
+            {
+                if (!controls.Contains(ctr.Id))
+                {
+                    del.Add(ctr);
+                }
+            }
 
-            CoursesTable.ItemsSource = CoursesList;
+            foreach (Control ctr in del)
+            {
+                ControlsList.Remove(ctr);
+            }
 
+            ControlsList.OrderBy(x => x.Id);
         }
 
-        private void ConnectRadio(object sender, RoutedEventArgs e)
+        private void ConnectRadio()
         {
             List<DeviceInfo> devList = DeviceInfo.GetAvailableDeviceList(true, (int)DeviceType.Serial);
             if (devList.Count != 1)
@@ -155,12 +219,12 @@ namespace Orienteering_LR_Desktop
                     if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
                     _reader.InputDevice = device;
                     _reader.OpenInputDevice();
-                    MessageBox.Show("radio connected");
+                    debugger.Write("radio connected");
                 }
                 catch (Exception ex)
                 {
                     if (_reader.InputDeviceIsOpen) _reader.CloseInputDevice();
-                    MessageBox.Show(ex.Message);
+                    debugger.Write(ex.Message);
                 }
             }
         }
@@ -169,7 +233,7 @@ namespace Orienteering_LR_Desktop
         {
             int index = int.Parse(((Button)e.Source).Uid);
 
-            GridCursor.Margin = new Thickness(10 + (150 * index), 45, 0, 0);
+            GridCursor.Margin = new Thickness(12 + (165 * index), 45, 0, 0);
 
             switch (index)
             {
@@ -208,162 +272,68 @@ namespace Orienteering_LR_Desktop
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 OESync testSync = new OESync(dialog.FileName);
+                if (oeSync != null)
+                {
+                    oeSync.StopSync();
+                }
                 testSync.StartSync();
                 if (testSync.SyncSuccess)
                 {
                     OEPathLabel.Content = dialog.FileName;
                     oeSync = testSync;
-                    testSync.StopSync();
-                    GetInitData();
+                    //GetInitData();
                     Properties.Settings.Default.OEPath = dialog.FileName;
                     Properties.Settings.Default.Save();
                 }
                 else
                 {
+                    testSync.StopSync();
+                    if (oeSync != null)
+                    {
+                        oeSync.StartSync();
+                    }
                     MessageBox.Show("No/Incomplete OE Data at specified location. Please try a different folder.");
                 }
             }
         }
 
-        private void DemoButtonClick(object sender, RoutedEventArgs e)
+        private void StartWebServerClick(object sender, RoutedEventArgs e)
         {
-            if (DemoGrid.Visibility == Visibility.Hidden)
-            {
-                DemoModeBtn.Visibility = Visibility.Hidden;
-                oeSync.StopSync();
-                CompetitorsList = new ObservableCollection<Runner>();
-                ControlsList = new List<Control>();
-                if (File.Exists("LRDB.db"))
-                {
-                    File.Delete("LRDB.db");
-                }
-                using (var db = new CompetitorContext())
-                {
-                    db.GetService<IMigrator>().Migrate();
-                }
-                var dbstore = new Database.Store();
-                dbstore.SetCurrentStage(1);
-                DemoGrid.Visibility = Visibility.Visible;
-                CompetitorsList.Add(new Runner() {
-                    ChipId = 101,
-                    Status = "Not Started",
-                    FirstName = "John",
-                    LastName = "Smith"
-            
-                });
-                CompetitorsList.Add(new Runner()
-                {
-                    ChipId = 102,
-                    Status = "Not Started",
-                    FirstName = "Bob",
-                    LastName = "Brown"
-
-                });
-                CompetitorsTable.ItemsSource = CompetitorsList;
-                ControlsList.Add(new Control()
-                {
-                    Id = 1,
-                    RadioBool = false
-                });
-                ControlsList.Add(new Control()
-                {
-                    Id = 2,
-                    RadioBool = false
-                });
-                ControlsList.Add(new Control()
-                {
-                    Id = 3,
-                    RadioBool = false
-                });
-                ControlsTable.ItemsSource = ControlsList;
-
-                dbstore.CreateClub(new Club()
-                {
-                    ClubId = 1,
-                    Name = "Club One"
-                });
-                dbstore.CreateRaceClass(new RaceClass()
-                {
-                    RaceClassId = 1,
-                    Name = "Test Class"
-                });
-                foreach (Runner r in CompetitorsList)
-                {
-                    Competitor c = new Competitor()
-                    {
-                        CompetitorId = r.ChipId ?? default(int),
-                        FirstName = r.FirstName,
-                        LastName = r.LastName,
-                        Gender = "Male",
-                        ClubId = 1,
-                        RaceClassId = 1
-                    };
-                    dbstore.CreateCompetitor(c);
-                    dbstore.CreateCompTimes(new CompTime()
-                    {
-                        CompetitorId = r.ChipId ?? default(int),
-                        Stage = 1,
-                        ChipId = r.ChipId ?? 0,
-                        Status = 0,
-                        Times = "[]"
-                    });
-                }
-
-                dbstore.CreateCourse(new Course()
-                {
-                    CourseId = 1,
-                    Distance = (float)3.0,
-                    Climb = (float)0.0,
-                    Description = "Course 1",
-                    CourseData = "[0,1,2]",
-                    DistanceData = null
-                });
-
-                dbstore.CreateClassCourse(new ClassCourse()
-                {
-                    CompetitionPos = 1,
-                    Stage = 1,
-                    RaceClassId = 1,
-                    CourseId = 1
-                });
-            }
+            Button btn = (Button) sender;
+            btn.Background = (Brush) new BrushConverter().ConvertFromString("Red");
+            btn.Content = "Restart Web Server";
+            StartWebServer("http://" + IPChoiceBox.SelectedValue + ":9696/");
         }
 
-        private void DemoPunchClick(object sender, RoutedEventArgs e)
+        private void Debug_Btn_Click(object sender, RoutedEventArgs e)
         {
-            int index = int.Parse(((Button)e.Source).Uid);
-            var s = new Database.Store();
-            int now = (int)DateTime.Now.TimeOfDay.TotalMilliseconds;
-            switch (index)
+            Button btn = (Button)sender;
+            if (DebugGrid.Visibility == Visibility.Visible)
             {
-                case 0:
-                    s.CreatePunch(101, 0, now);
-                    CompetitorsList[0].Status = "Started";  
-                    break;
-                case 1:
-                    s.CreatePunch(101, 1, now);
-                    break;
-                case 2:
-                    s.CreatePunch(101, 2, now);
-                    CompetitorsList[0].Status = "Finished";
-                    break;
-                case 3:
-                    s.CreatePunch(102, 0, now);
-                    CompetitorsList[1].Status = "Started";
-                    break;
-                case 4:
-                    s.CreatePunch(102, 1, now);
-                    break;
-                case 5:
-                    s.CreatePunch(102, 2, now);
-                    CompetitorsList[1].Status = "Finished";
-                    break;
+                btn.Content = "Show Debugging";
+                DebugGrid.Visibility = Visibility.Hidden;
+            } else
+            {
+                btn.Content = "Hide Debugging";
+                DebugGrid.Visibility = Visibility.Visible;
             }
-            CompetitorsTable.ItemsSource = new ObservableCollection<Runner>();
-            CompetitorsTable.ItemsSource = CompetitorsList;
-            ((App)Application.Current).socketServer.SendLeaderboardUpdates();
+
         }
 
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Demobtn(object sender, RoutedEventArgs e)
+        {
+            using (var context = new Database.CompetitorContext())
+            {
+                context.Punches.RemoveRange(context.Punches);
+                context.SaveChanges();
+            }
+
+        }
     }
 
     public class Runner
@@ -383,9 +353,44 @@ namespace Orienteering_LR_Desktop
     public class CourseDesktop
     {
         public String Name { get; set; }
-        public List<int> Controls { get; set; }
+        public String Controls { get; set; }
     }
 
+    public class Debugger
+    {
+        ListBox lstbox;
 
+        public Debugger(ListBox lstbox)
+        {
+            this.lstbox = lstbox;
+        }
+
+        [MethodImplAttribute(MethodImplOptions.NoInlining)] public void Write (String msg)
+        {
+            string str = "[" + DateTime.Now.ToString("hh:mm:ss tt") + "] " + new StackFrame(1).GetMethod().Name + "() says: " + msg;
+            lstbox.Items.Add(str);
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter("Debug.txt", true))
+            {
+                file.WriteLine(str);
+            }
+        }
+
+        public void DeleteLog() {
+            if (File.Exists("Debug.txt"))
+            {
+                File.Delete("Debug.txt");
+            }
+        }
+
+        public void ArchiveLog()
+        {
+            if (File.Exists("Debug.txt"))
+            {
+                File.Copy("Debug.txt", "Log:" + DateTime.Now.ToString("dd-MM-yyyy") + "/" + DateTime.Now.ToString("hh:mm:ss tt"));
+                File.Delete("Debug.txt");
+            }
+
+        }   
+    }
 
 }
