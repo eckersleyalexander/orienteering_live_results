@@ -529,9 +529,7 @@ td.col-radioDiff {
 </style>
 
 <script>
-// import meosResultsApi from '@/meos-results-api'
 import FlashCell from "@/components/FlashCell.vue";
-import resultsApiData from "@/leaderboard-data.json";
 
 export default {
   data() {
@@ -612,30 +610,6 @@ export default {
   filters: {
     formatAbsoluteTime: function(t) {
       if (t) {
-        // This code does hh:mm:ss for > 1 hour and mm:ss for < 1 hour
-
-        /*
-                    var h, m, s;
-
-                    if (t > 3600) {
-                        h = Math.floor(t/3600).toString();
-                        m = Math.floor((t/60)%60).toString().padStart(2, '0');
-                        s = Math.floor(t%60).toString().padStart(2, '0');
-                        return `${h}:${m}:${s}`;
-                    }
-
-                    else {
-                        if (t >= 600 ) {
-                            m = Math.floor((t/60)%60).toString().padStart(2, '0');
-                        }
-                        else {
-                            m = Math.floor((t/60)%60).toString().padStart(1, '0');
-                        }
-                        s = Math.floor(t%60).toString().padStart(2, '0');
-                        return `${m}:${s}`;
-                    }
-                    */
-
         // This code does mmm:ss for everyone
         var m, s;
 
@@ -697,8 +671,8 @@ export default {
     },
 
     async refreshResults() {
-      // this.resultsResponse = await meosResultsApi.getResultsScreen()
-      this.resultsResponse = resultsApiData;
+      const result = await fetch("http://localhost:9696/api/leaderboard");
+      this.resultsResponse = await result.json();
     },
 
     // Calculates the current elapsed time for a competitor, based on their startTime
